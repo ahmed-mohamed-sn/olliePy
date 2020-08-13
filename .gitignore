@@ -1,2 +1,5 @@
 .idea
 poetry.lock
+notebooks
+.DS_Store
+__pycache__
