@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.8.4" />
+<title>olliepy API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.1/highlight.min.js" integrity="sha256-eOgo0OtLL4cdq7RdwRUiGKLX9XsIJ7nGhWEKbohmVAQ=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Package <code>olliepy</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">from .RegressionErrorAnalysisReport import RegressionErrorAnalysisReport
+
+__version__ = &#39;0.1.0&#39;
+__all__ = [&#34;RegressionErrorAnalysisReport&#34;]</code></pre>
+</details>
+</section>
+<section>
+<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+<dl>
+<dt><code class="name"><a title="olliepy.Report" href="Report.html">olliepy.Report</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt><code class="name"><a title="olliepy.utils" href="utils/index.html">olliepy.utils</a></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="olliepy.RegressionErrorAnalysisReport"><code class="flex name class">
+<span>class <span class="ident">RegressionErrorAnalysisReport</span></span>
+<span>(</span><span>title: str, output_directory: str, train_df: pandas.core.frame.DataFrame, test_df: pandas.core.frame.DataFrame, target_feature_name: str, error_column_name: str, error_classes: Dict[str, Tuple[float, float]], acceptable_error_class: str, numerical_features: List[str] = None, categorical_features: List[str] = None, subtitle: str = None, report_folder_name: str = None, encryption_secret: str = None, generate_encryption_secret: bool = False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>RegressionErrorAnalysisReport creates a report that analyzes the error in regression problems.</p>
+<h2 id="attributes">Attributes</h2>
+<dl>
+<dt><strong><code>title</code></strong> :&ensp;<code>str</code></dt>
+<dd>the title of the report</dd>
+<dt><strong><code>output_directory</code></strong> :&ensp;<code>str</code></dt>
+<dd>the directory where the report folder will be created</dd>
+<dt><strong><code>train_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>the training pandas dataframe of the regression problem which should include the target feature</dd>
+<dt><strong><code>test_df</code></strong> :&ensp;<code>pd.DataFrame</code></dt>
+<dd>the testing pandas dataframe of the regression problem which should include the target feature
+and the error column in order to calculate the error class</dd>
+<dt><strong><code>target_feature_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the regression target feature</dd>
+<dt><strong><code>error_column_name</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the calculated error column 'Prediction - Target' (see example on github for more information)</dd>
+<dt><strong><code>error_classes</code></strong> :&ensp;<code>Dict[str, Tuple]</code></dt>
+<dd>a dictionary containing the definition of the error classes that will be created. The key is the error_class name
+and the value is the minimum (inclusive) and maximum (exclusive) which will be used to calculate the error_class
+of the test observations. For example:
+error_classes = {
+'EXTREME_UNDER_ESTIMATION': (-8.0, -4.0), # return 'EXTREME_UNDER_ESTIMATION' if -8.0 &lt;= error &lt; -4.0
+'HIGH_UNDER_ESTIMATION': (-4.0, -3.0), # return 'HIGH_UNDER_ESTIMATION' if -4.0 &lt;= error &lt; -3.0
+'MEDIUM_UNDER_ESTIMATION': (-3.0, -1.0), # return 'MEDIUM_UNDER_ESTIMATION' if -3.0 &lt;= error &lt; -1.0
+'LOW_UNDER_ESTIMATION': (-1.0, -0.5), # return 'LOW_UNDER_ESTIMATION' if -1.0 &lt;= error &lt; -0.5
+'ACCEPTABLE': (-0.5, 0.5), # return 'ACCEPTABLE' if -0.5 &lt;= error &lt; 0.5
+'OVER_ESTIMATING': (0.5, 3.0) # return 'OVER_ESTIMATING' if -0.5 &lt;= error &lt; 3.0
+}</dd>
+<dt><strong><code>acceptable_error_class</code></strong> :&ensp;<code>str</code></dt>
+<dd>the name of the acceptable error class that was defined in error_classes</dd>
+<dt><strong><code>numerical_features</code></strong> :&ensp;<code>List[str] default=None</code></dt>
+<dd>a list of the numerical features to be included in the report</dd>
+<dt><strong><code>categorical_features</code></strong> :&ensp;<code>List[str] default=None</code></dt>
+<dd>a list of the categorical features to be included in the report</dd>
+<dt><strong><code>subtitle</code></strong> :&ensp;<code>str default=None</code></dt>
+<dd>an optional subtitle to describe your report</dd>
+<dt><strong><code>report_folder_name</code></strong> :&ensp;<code>str default=None</code></dt>
+<dd>the name of the folder that will contain all the generated report files.
+If not set, the title of the report will be used.</dd>
+<dt><strong><code>encryption_secret</code></strong> :&ensp;<code>str default=None</code></dt>
+<dd>the secret that will be used to encrypt the generated report data.
+If it is not set, the generated data won't be encrypted.</dd>
+<dt><strong><code>generate_encryption_secret</code></strong> :&ensp;<code>bool default=False</code></dt>
+<dd>the encryption_secret will be generated and its value returned as output.
+you can also view encryption_secret to get the generated secret.</dd>
+</dl>
+<h2 id="methods">Methods</h2>
+<p>create_report()
+creates the error analysis report</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class RegressionErrorAnalysisReport(Report):
+    &#34;&#34;&#34;
+    RegressionErrorAnalysisReport creates a report that analyzes the error in regression problems.
+
+    Attributes
+    ----------
+    title : str
+        the title of the report
+    output_directory : str
+        the directory where the report folder will be created
+    train_df : pd.DataFrame
+        the training pandas dataframe of the regression problem which should include the target feature
+    test_df : pd.DataFrame
+        the testing pandas dataframe of the regression problem which should include the target feature
+        and the error column in order to calculate the error class
+    target_feature_name : str
+        the name of the regression target feature
+    error_column_name : str
+        the name of the calculated error column &#39;Prediction - Target&#39; (see example on github for more information)
+    error_classes : Dict[str, Tuple]
+        a dictionary containing the definition of the error classes that will be created. The key is the error_class name
+        and the value is the minimum (inclusive) and maximum (exclusive) which will be used to calculate the error_class
+        of the test observations. For example:
+        error_classes = {
+        &#39;EXTREME_UNDER_ESTIMATION&#39;: (-8.0, -4.0), # return &#39;EXTREME_UNDER_ESTIMATION&#39; if -8.0 &lt;= error &lt; -4.0
+        &#39;HIGH_UNDER_ESTIMATION&#39;: (-4.0, -3.0), # return &#39;HIGH_UNDER_ESTIMATION&#39; if -4.0 &lt;= error &lt; -3.0
+        &#39;MEDIUM_UNDER_ESTIMATION&#39;: (-3.0, -1.0), # return &#39;MEDIUM_UNDER_ESTIMATION&#39; if -3.0 &lt;= error &lt; -1.0
+        &#39;LOW_UNDER_ESTIMATION&#39;: (-1.0, -0.5), # return &#39;LOW_UNDER_ESTIMATION&#39; if -1.0 &lt;= error &lt; -0.5
+        &#39;ACCEPTABLE&#39;: (-0.5, 0.5), # return &#39;ACCEPTABLE&#39; if -0.5 &lt;= error &lt; 0.5
+        &#39;OVER_ESTIMATING&#39;: (0.5, 3.0) # return &#39;OVER_ESTIMATING&#39; if -0.5 &lt;= error &lt; 3.0
+        }
+    acceptable_error_class: str
+        the name of the acceptable error class that was defined in error_classes
+    numerical_features : List[str] default=None
+        a list of the numerical features to be included in the report
+    categorical_features : List[str] default=None
+        a list of the categorical features to be included in the report
+    subtitle : str default=None
+        an optional subtitle to describe your report
+    report_folder_name : str default=None
+        the name of the folder that will contain all the generated report files.
+        If not set, the title of the report will be used.
+    encryption_secret : str default=None
+        the secret that will be used to encrypt the generated report data.
+        If it is not set, the generated data won&#39;t be encrypted.
+    generate_encryption_secret : bool default=False
+        the encryption_secret will be generated and its value returned as output.
+        you can also view encryption_secret to get the generated secret.
+
+    Methods
+    -------
+    create_report()
+        creates the error analysis report
+
+    &#34;&#34;&#34;
+
+    def __init__(self,
+                 title: str,
+                 output_directory: str,
+                 train_df: pd.DataFrame,
+                 test_df: pd.DataFrame,
+                 target_feature_name: str,
+                 error_column_name: str,
+                 error_classes: Dict[str, Tuple[float, float]],
+                 acceptable_error_class: str,
+                 numerical_features: List[str] = None,
+                 categorical_features: List[str] = None,
+                 subtitle: str = None,
+                 report_folder_name: str = None,
+                 encryption_secret: str = None,
+                 generate_encryption_secret: bool = False):
+        super().__init__(title,
+                         output_directory,
+                         subtitle,
+                         report_folder_name,
+                         encryption_secret,
+                         generate_encryption_secret)
+
+        validate_attributes(train_df,
+                            test_df,
+                            target_feature_name,
+                            error_column_name,
+                            error_classes,
+                            acceptable_error_class,
+                            numerical_features,
+                            categorical_features)
+
+        self.train_df = train_df.copy()
+        self.test_df = test_df.copy()
+        self.target_feature_name = target_feature_name
+        self.error_column_name = error_column_name
+        self.error_classes = error_classes
+        self.acceptable_error_class = acceptable_error_class
+        self.numerical_features = numerical_features
+        self.categorical_features = categorical_features
+        self._training_data_name = &#39;Training data&#39;
+        self._testing_data_name = &#39;Testing data&#39;
+        self._error_class_col_name = &#39;ERROR_CLASS&#39;
+
+    def create_report(self) -&gt; None:
+        &#34;&#34;&#34;
+        Creates a report using the user defined data and the data calculated based on the error
+        :return: None
+        &#34;&#34;&#34;
+
+        self._add_user_defined_data()
+        self._add_error_class_to_test_df()
+        self._add_datasets()
+
+    def _add_user_defined_data(self) -&gt; None:
+        &#34;&#34;&#34;
+        Adds user defined data to the report
+        :return: None
+        &#34;&#34;&#34;
+
+        self._update_report({&#39;primaryDatasets&#39;: [self._training_data_name, self.acceptable_error_class]})
+
+        secondary_datasets = [self._testing_data_name]
+        secondary_datasets.extend(list(self.error_classes.keys()))
+
+        self._update_report({&#39;secondaryDatasets&#39;: secondary_datasets})
+
+        if self.numerical_features:
+            self._update_report({&#39;numericalFeatures&#39;: self.numerical_features})
+
+        if self.categorical_features:
+            self._update_report({&#39;categoricalFeatures&#39;: self.categorical_features})
+
+        self._update_report({&#39;targetFeature&#39;: self.target_feature_name})
+
+    def _add_error_class_to_test_df(self) -&gt; None:
+        &#34;&#34;&#34;
+        adds the error class to each observation in the test set (test_df) based on the
+        error classes provided by the user
+        :return: None
+        &#34;&#34;&#34;
+
+        def add_error_class(error: float) -&gt; str:
+            for error_class, min_max in self.error_classes.items():
+                minimum, maximum = min_max
+
+                if minimum &lt;= error &lt; maximum:
+                    return error_class
+
+            return &#39;UNDEFINED_ERROR_CLASS&#39;
+
+        self.test_df[self._error_class_col_name] = self.test_df[self.error_column_name].apply(add_error_class)
+
+    def _add_datasets(self) -&gt; None:
+        &#34;&#34;&#34;
+        Adds datasets to reports (info, stats, numerical data)
+        :return: None
+        &#34;&#34;&#34;
+
+        datasets_dict = {}
+
+        def add_dataset(df: pd.DataFrame, dataset_name: str) -&gt; None:
+            &#34;&#34;&#34;
+            Adds a dataset stats and data to the datasets_dict
+            :param df: pd.DataFrame, the selected dataset dataframe
+            :param dataset_name: str, the dataset name
+            :return: None
+            &#34;&#34;&#34;
+            stats = {}
+            data = {}
+
+            for feature in self.numerical_features:
+                stats[feature] = {
+                    &#39;min&#39;: df.loc[:, feature].min(),
+                    &#39;mean&#39;: df.loc[:, feature].mean(),
+                    &#39;std&#39;: df.loc[:, feature].std(),
+                    &#39;median&#39;: df.loc[:, feature].median(),
+                    &#39;max&#39;: df.loc[:, feature].max(),
+                    &#39;count&#39;: df.loc[:, feature].count(),
+                    &#39;missingCount&#39;: df.loc[:, feature].isna().sum(),
+                }
+                data[feature] = df.loc[:, feature].values.tolist()
+
+            for feature in self.categorical_features:
+                stats[feature] = {
+                    &#39;uniqueCount&#39;: df.loc[:, feature].nunique(),
+                    &#39;missingCount&#39;: df.loc[:, feature].isna().sum()
+                }
+
+            dataset_dict = {dataset_name: {
+                &#39;info&#39;: {
+                    &#39;name&#39;: dataset_name,
+                    &#39;numberOfRows&#39;: df.shape[0],
+                    &#39;minError&#39;: df.loc[:, self.error_column_name].min(),
+                    &#39;meanError&#39;: df.loc[:, self.error_column_name].mean(),
+                    &#39;stdError&#39;: df.loc[:, self.error_column_name].std(),
+                    &#39;medianError&#39;: df.loc[:, self.error_column_name].median(),
+                    &#39;maxError&#39;: df.loc[:, self.error_column_name].max(),
+                    &#39;stats&#39;: stats
+                },
+                &#39;data&#39;: data
+            }}
+
+            datasets_dict.update(dataset_dict)
+
+        add_dataset(self.train_df, self._training_data_name)
+        add_dataset(self.test_df, self._testing_data_name)
+
+        for error_class_name in self.error_classes.keys():
+            df = self.test_df.loc[self.test_df[self._error_class_col_name] == error_class_name, :]
+            add_dataset(df, error_class_name)
+
+        self._update_report({&#39;datasets&#39;: datasets_dict})</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="olliepy.Report.Report" href="Report.html#olliepy.Report.Report">Report</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="olliepy.RegressionErrorAnalysisReport.create_report"><code class="name flex">
+<span>def <span class="ident">create_report</span></span>(<span>self) ‑> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates a report using the user defined data and the data calculated based on the error
+:return: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def create_report(self) -&gt; None:
+    &#34;&#34;&#34;
+    Creates a report using the user defined data and the data calculated based on the error
+    :return: None
+    &#34;&#34;&#34;
+
+    self._add_user_defined_data()
+    self._add_error_class_to_test_df()
+    self._add_datasets()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<ul>
+<li><code><a title="olliepy.Report" href="Report.html">olliepy.Report</a></code></li>
+<li><code><a title="olliepy.utils" href="utils/index.html">olliepy.utils</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="olliepy.RegressionErrorAnalysisReport" href="#olliepy.RegressionErrorAnalysisReport">RegressionErrorAnalysisReport</a></code></h4>
+<ul class="">
+<li><code><a title="olliepy.RegressionErrorAnalysisReport.create_report" href="#olliepy.RegressionErrorAnalysisReport.create_report">create_report</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc"><cite>pdoc</cite> 0.8.4</a>.</p>
+</footer>
+</body>
+</html>
