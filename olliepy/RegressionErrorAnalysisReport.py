@@ -181,6 +181,7 @@ class RegressionErrorAnalysisReport(Report):
         self._update_report({'secondaryDatasets': secondary_datasets})
 
         if self.numerical_features:
+            self.numerical_features.append(self.target_feature_name)
             self._update_report({'numericalFeatures': self.numerical_features})
 
         if self.categorical_features:
