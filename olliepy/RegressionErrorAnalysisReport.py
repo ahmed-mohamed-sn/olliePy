@@ -173,6 +173,8 @@ class RegressionErrorAnalysisReport(Report):
         if self.categorical_features is not None and len(self.categorical_features) > 0:
             self._add_categorical_count_plot()
 
+        self._add_parallel_coordinates_plot()
+
     def _add_user_defined_data(self) -> None:
         """
         Adds user defined data to the report
@@ -236,16 +238,16 @@ class RegressionErrorAnalysisReport(Report):
                         'std': df.loc[:, feature].std(),
                         'median': df.loc[:, feature].median(),
                         'max': df.loc[:, feature].max(),
-                        'count': df.loc[:, feature].count(),
-                        'missingCount': df.loc[:, feature].isna().sum(),
+                        'count': int(df.loc[:, feature].count()),
+                        'missingCount': int(df.loc[:, feature].isna().sum()),
                     }
                     data[feature] = df.loc[:, feature].values.tolist()
 
             if self.categorical_features is not None and len(self.categorical_features) > 0:
                 for feature in self.categorical_features:
                     stats[feature] = {
-                        'uniqueCount': df.loc[:, feature].nunique(),
-                        'missingCount': df.loc[:, feature].isna().sum()
+                        'uniqueCount': int(df.loc[:, feature].nunique()),
+                        'missingCount': int(df.loc[:, feature].isna().sum())
                     }
 
             dataset_dict = {dataset_name: {
@@ -278,47 +280,52 @@ class RegressionErrorAnalysisReport(Report):
         Add the categorical count plots (stacked bar plot) data to the report
         :return: None
         """
-        def add_categorical_count_data(feature_dictionary: Dict, feature_name:str, primary_dataset_name: str, secondary_dataset_name: str) -> None:
+
+        def add_categorical_count_data(feature_dictionary: Dict, feature_name: str, primary_dataset: str,
+                                       secondary_dataset: str) -> None:
             """
             Calculate the value counts for each dataset and for that particular categorical feature.
             Then groups the value_counts() dataframes afterwards it computes the data needed for the stacked bar plot in plotly
 
             :param feature_dictionary: the feature dictionary that will be added the categorical count plot data
             :param feature_name: the feature name
-            :param primary_dataset_name: the primary dataset name
-            :param secondary_dataset_name: the secondary dataset name
+            :param primary_dataset: the primary dataset name
+            :param secondary_dataset: the secondary dataset name
             :return: None
             """
-            if primary_dataset_name == self._training_data_name:
+            if primary_dataset == self._training_data_name:
                 primary_count_df = self.train_df.loc[:, [feature_name]].value_counts()
             else:
-                primary_count_df = self.test_df.loc[self.test_df[self._error_class_col_name] == primary_dataset_name, [feature_name]].value_counts()
+                primary_count_df = self.test_df.loc[
+                    self.test_df[self._error_class_col_name] == primary_dataset, [feature_name]].value_counts()
 
-            if secondary_dataset_name == self._testing_data_name:
+            if secondary_dataset == self._testing_data_name:
                 secondary_count_df = self.test_df.loc[:, [feature_name]].value_counts()
             else:
-                secondary_count_df = self.test_df.loc[self.test_df[self._error_class_col_name] == secondary_dataset_name, [feature_name]].value_counts()
+                secondary_count_df = self.test_df.loc[
+                    self.test_df[self._error_class_col_name] == secondary_dataset, [feature_name]].value_counts()
 
-            primary_count_df = primary_count_df.reset_index().rename({0: primary_dataset_name}, axis=1)
-            secondary_count_df = secondary_count_df.reset_index().rename({0: secondary_dataset_name}, axis=1)
-            merged_cat_count = primary_count_df.merge(secondary_count_df, on=feature_name, how='outer').fillna(0).sort_values(by=feature_name)
+            primary_count_df = primary_count_df.reset_index().rename({0: primary_dataset}, axis=1)
+            secondary_count_df = secondary_count_df.reset_index().rename({0: secondary_dataset}, axis=1)
+            merged_cat_count = primary_count_df.merge(secondary_count_df, on=feature_name, how='outer').fillna(
+                0).sort_values(by=feature_name)
 
-            key = f'{primary_dataset_name}_{secondary_dataset_name}'
-            title = f'{primary_dataset_name} vs {secondary_dataset_name}'
+            key = f'{primary_dataset}_{secondary_dataset}'
+            title = f'{primary_dataset} vs {secondary_dataset}'
             categories = merged_cat_count.loc[:, feature_name].tolist()
-            primary_data = merged_cat_count.loc[:, primary_dataset_name].tolist()
-            secondary_data = merged_cat_count.loc[:, secondary_dataset_name].tolist()
+            primary_data = merged_cat_count.loc[:, primary_dataset].tolist()
+            secondary_data = merged_cat_count.loc[:, secondary_dataset].tolist()
             feature_dictionary.update({key: {
                 'title': title,
                 'categories': categories,
                 'series': [
                     {
-                        'name': primary_dataset_name,
+                        'name': primary_dataset,
                         'color': '#8180FF',
                         'data': primary_data
                     },
                     {
-                        'name': secondary_dataset_name,
+                        'name': secondary_dataset,
                         'color': '#FF938D',
                         'data': secondary_data
                     }
@@ -330,12 +337,94 @@ class RegressionErrorAnalysisReport(Report):
 
         for feature in self.categorical_features:
             feature_dict = {}
-            for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets, self._secondary_datasets):
+            for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets,
+                                                                        self._secondary_datasets):
                 if primary_dataset_name != secondary_dataset_name:
                     add_categorical_count_data(feature_dict, feature, primary_dataset_name, secondary_dataset_name)
                     categorical_count_dict.update({feature: feature_dict})
 
         self._update_report({'categorical_count_plots': categorical_count_dict})
 
+    def _add_parallel_coordinates_plot(self) -> None:
+        """
+        Check for suitable features (numerical based on quantiles(default: 0.25, 0.75)
+        and categorical based on cosine similarity). Afterwards it adds the needed data for the plotly parallel coordinates plot
+        :return: None
+        """
 
+        def add_parallel_coordinates(parallel_coordinates_dictionary: Dict, primary_dataset: str,
+                                     secondary_dataset: str):
+            from sklearn.preprocessing import LabelEncoder
 
+            selected_features = []
+            if self.categorical_features is not None and len(self.categorical_features) > 0:
+                selected_features.extend(
+                    self.categorical_features)  # will be replaced by cosine similarity based selection
+
+            q_threshold_1 = 0.25
+            q_threshold_2 = 0.75
+
+            if primary_dataset == self._training_data_name:
+                primary_df = self.train_df.copy()
+                primary_df.loc[:, self._error_class_col_name] = self._training_data_name
+            else:
+                primary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == primary_dataset, :].copy()
+
+            if secondary_dataset == self._testing_data_name:
+                secondary_df = self.test_df.copy()
+                secondary_df.loc[:, self._error_class_col_name] = self._testing_data_name
+            else:
+                secondary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == secondary_dataset, :].copy()
+
+            if self.numerical_features is not None:
+                for numerical_feature in self.numerical_features:
+                    primary_q_1 = primary_df.loc[:, numerical_feature].quantile(q_threshold_1)
+                    primary_q_2 = primary_df.loc[:, numerical_feature].quantile(q_threshold_2)
+                    secondary_q_1 = secondary_df.loc[:, numerical_feature].quantile(q_threshold_1)
+                    secondary_q_2 = secondary_df.loc[:, numerical_feature].quantile(q_threshold_2)
+                    if primary_q_1 >= secondary_q_2 or secondary_q_1 >= primary_q_2:
+                        selected_features.append(numerical_feature)
+
+            if len(selected_features) > 0:
+                key = f'{primary_dataset}_{secondary_dataset}'
+                combined_df = pd.concat([primary_df, secondary_df], axis=0).copy()
+                colors = combined_df.loc[:, self._error_class_col_name].apply(
+                    lambda error_class: 0 if error_class == primary_dataset else 1).tolist()
+                dimensions = []
+                for feature in selected_features:
+                    if self.numerical_features is not None and feature in self.numerical_features:
+                        feature_min = combined_df.loc[:, feature].min()
+                        feature_max = combined_df.loc[:, feature].max()
+                        dimensions.append({
+                            'range': [feature_min, feature_max],
+                            'label': feature,
+                            'values': combined_df.loc[:, feature].tolist()
+                        })
+                    elif self.categorical_features is not None and feature in self.categorical_features:
+                        label_encoder = LabelEncoder()
+                        values = label_encoder.fit_transform(combined_df.loc[:, feature])
+                        values_range = [int(values.min()), int(values.max())]
+                        tick_values = label_encoder.transform(label_encoder.classes_).tolist()
+                        tick_text = label_encoder.classes_.tolist()
+                        dimensions.append({
+                            'range': values_range,
+                            'label': feature,
+                            'values': values.tolist(),
+                            'tickvals': tick_values,
+                            'ticktext': tick_text
+                        })
+
+                if len(dimensions) > 1:
+                    parallel_coordinates_dictionary.update({key: {
+                        'colors': colors,
+                        'dimensions': dimensions
+                    }})
+
+        from itertools import product
+        parallel_coordinates_dict = {}
+        for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets, self._secondary_datasets):
+            if primary_dataset_name != secondary_dataset_name:
+                add_parallel_coordinates(parallel_coordinates_dict, primary_dataset_name, secondary_dataset_name)
+
+        if len(parallel_coordinates_dict) > 0:
+            self._update_report({'parallel_coordinates': parallel_coordinates_dict})
