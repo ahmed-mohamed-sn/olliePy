@@ -156,6 +156,9 @@ class RegressionErrorAnalysisReport(Report):
         self._training_data_name = 'Training data'
         self._testing_data_name = 'Testing data'
         self._error_class_col_name = 'ERROR_CLASS'
+        self._primary_datasets = [self._training_data_name, self.acceptable_error_class]
+        self._secondary_datasets = [self._testing_data_name]
+        self._secondary_datasets.extend(list(self.error_classes.keys()))
 
     def create_report(self) -> None:
         """
@@ -166,6 +169,7 @@ class RegressionErrorAnalysisReport(Report):
         self._add_user_defined_data()
         self._add_error_class_to_test_df()
         self._add_datasets()
+        self._add_categorical_count_plot()
 
     def _add_user_defined_data(self) -> None:
         """
@@ -173,12 +177,9 @@ class RegressionErrorAnalysisReport(Report):
         :return: None
         """
 
-        self._update_report({'primaryDatasets': [self._training_data_name, self.acceptable_error_class]})
+        self._update_report({'primaryDatasets': self._primary_datasets})
 
-        secondary_datasets = [self._testing_data_name]
-        secondary_datasets.extend(list(self.error_classes.keys()))
-
-        self._update_report({'secondaryDatasets': secondary_datasets})
+        self._update_report({'secondaryDatasets': self._secondary_datasets})
 
         if self.numerical_features:
             self.numerical_features.append(self.target_feature_name)
@@ -263,7 +264,74 @@ class RegressionErrorAnalysisReport(Report):
         add_dataset(self.test_df, self._testing_data_name)
 
         for error_class_name in self.error_classes.keys():
-            df = self.test_df.loc[self.test_df[self._error_class_col_name] == error_class_name, :]
-            add_dataset(df, error_class_name)
+            selected_df = self.test_df.loc[self.test_df[self._error_class_col_name] == error_class_name, :]
+            add_dataset(selected_df, error_class_name)
 
         self._update_report({'datasets': datasets_dict})
+
+    def _add_categorical_count_plot(self) -> None:
+        """
+        Add the categorical count plots (stacked bar plot) data to the report
+        :return: None
+        """
+        def add_categorical_count_data(feature_dictionary: Dict, feature_name:str, primary_dataset_name: str, secondary_dataset_name: str) -> None:
+            """
+            Calculate the value counts for each dataset and for that particular categorical feature.
+            Then groups the value_counts() dataframes afterwards it computes the data needed for the stacked bar plot in plotly
+
+            :param feature_dictionary: the feature dictionary that will be added the categorical count plot data
+            :param feature_name: the feature name
+            :param primary_dataset_name: the primary dataset name
+            :param secondary_dataset_name: the secondary dataset name
+            :return: None
+            """
+            if primary_dataset_name == self._training_data_name:
+                primary_count_df = self.train_df.loc[:, [feature_name]].value_counts()
+            else:
+                primary_count_df = self.test_df.loc[self.test_df[self._error_class_col_name] == primary_dataset_name, [feature_name]].value_counts()
+
+            if secondary_dataset_name == self._testing_data_name:
+                secondary_count_df = self.test_df.loc[:, [feature_name]].value_counts()
+            else:
+                secondary_count_df = self.test_df.loc[self.test_df[self._error_class_col_name] == secondary_dataset_name, [feature_name]].value_counts()
+
+            primary_count_df = primary_count_df.reset_index().rename({0: primary_dataset_name}, axis=1)
+            secondary_count_df = secondary_count_df.reset_index().rename({0: secondary_dataset_name}, axis=1)
+            merged_cat_count = primary_count_df.merge(secondary_count_df, on=feature_name, how='outer').fillna(0).sort_values(by=feature_name)
+
+            key = f'{primary_dataset_name}_{secondary_dataset_name}'
+            title = f'{primary_dataset_name} vs {secondary_dataset_name}'
+            categories = merged_cat_count.loc[:, feature_name].tolist()
+            primary_data = merged_cat_count.loc[:, primary_dataset_name].tolist()
+            secondary_data = merged_cat_count.loc[:, secondary_dataset_name].tolist()
+            feature_dictionary.update({key: {
+                'title': title,
+                'categories': categories,
+                'series': [
+                    {
+                        'name': primary_dataset_name,
+                        'color': '#8180FF',
+                        'data': primary_data
+                    },
+                    {
+                        'name': secondary_dataset_name,
+                        'color': '#FF938D',
+                        'data': secondary_data
+                    }
+                ]
+            }})
+
+        from itertools import product
+        categorical_count_dict = {}
+
+        for feature in self.categorical_features:
+            feature_dict = {}
+            for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets, self._secondary_datasets):
+                if primary_dataset_name != secondary_dataset_name:
+                    add_categorical_count_data(feature_dict, feature, primary_dataset_name, secondary_dataset_name)
+                    categorical_count_dict.update({feature: feature_dict})
+
+        self._update_report({'categorical_count_plots': categorical_count_dict})
+
+
+
