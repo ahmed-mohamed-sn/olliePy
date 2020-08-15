@@ -169,7 +169,9 @@ class RegressionErrorAnalysisReport(Report):
         self._add_user_defined_data()
         self._add_error_class_to_test_df()
         self._add_datasets()
-        self._add_categorical_count_plot()
+
+        if self.categorical_features is not None and len(self.categorical_features) > 0:
+            self._add_categorical_count_plot()
 
     def _add_user_defined_data(self) -> None:
         """
@@ -226,23 +228,25 @@ class RegressionErrorAnalysisReport(Report):
             stats = {}
             data = {}
 
-            for feature in self.numerical_features:
-                stats[feature] = {
-                    'min': df.loc[:, feature].min(),
-                    'mean': df.loc[:, feature].mean(),
-                    'std': df.loc[:, feature].std(),
-                    'median': df.loc[:, feature].median(),
-                    'max': df.loc[:, feature].max(),
-                    'count': df.loc[:, feature].count(),
-                    'missingCount': df.loc[:, feature].isna().sum(),
-                }
-                data[feature] = df.loc[:, feature].values.tolist()
+            if self.numerical_features is not None and len(self.numerical_features) > 0:
+                for feature in self.numerical_features:
+                    stats[feature] = {
+                        'min': df.loc[:, feature].min(),
+                        'mean': df.loc[:, feature].mean(),
+                        'std': df.loc[:, feature].std(),
+                        'median': df.loc[:, feature].median(),
+                        'max': df.loc[:, feature].max(),
+                        'count': df.loc[:, feature].count(),
+                        'missingCount': df.loc[:, feature].isna().sum(),
+                    }
+                    data[feature] = df.loc[:, feature].values.tolist()
 
-            for feature in self.categorical_features:
-                stats[feature] = {
-                    'uniqueCount': df.loc[:, feature].nunique(),
-                    'missingCount': df.loc[:, feature].isna().sum()
-                }
+            if self.categorical_features is not None and len(self.categorical_features) > 0:
+                for feature in self.categorical_features:
+                    stats[feature] = {
+                        'uniqueCount': df.loc[:, feature].nunique(),
+                        'missingCount': df.loc[:, feature].isna().sum()
+                    }
 
             dataset_dict = {dataset_name: {
                 'info': {
