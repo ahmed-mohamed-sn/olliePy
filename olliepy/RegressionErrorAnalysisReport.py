@@ -2,6 +2,7 @@ from typing import List, Dict, Tuple
 from .Report import Report
 import pandas as pd
 from .utils.TypeChecking import is_instance
+from scipy.spatial.distance import cosine
 
 
 def validate_attributes(train_df, test_df, target_feature_name, error_column_name,
@@ -56,6 +57,10 @@ def validate_attributes(train_df, test_df, target_feature_name, error_column_nam
 
     if categorical_features is not None and not is_instance(categorical_features, List[str]):
         raise TypeError(f'provided categorical_features is not valid. categorical_features has to be a List[str]')
+
+
+def _cosine_similarity(vector_a, vector_b):
+    return 1.0 - cosine(vector_a, vector_b)
 
 
 class RegressionErrorAnalysisReport(Report):
@@ -275,6 +280,39 @@ class RegressionErrorAnalysisReport(Report):
 
         self._update_report({'datasets': datasets_dict})
 
+    def _count_categories_and_merge_count_dataframes(self, feature_name: str, primary_dataset: str,
+                                                     secondary_dataset: str,
+                                                     normalize=False) -> pd.DataFrame:
+        """
+        It counts the different categories (of the provided feature) for the primary and secondary dataset then merge
+        the count dataframes into a single dataframe that contains all the categories. It also fills missing values with 0
+
+        :param feature_name: the feature name
+        :param primary_dataset: the primary dataset name
+        :param secondary_dataset: the secondary dataset name
+        :param normalize: whether to normalizr the categorical count, default:False
+        :return: the merged dataframe
+        """
+        if primary_dataset == self._training_data_name:
+            primary_count_df = self.train_df.loc[:, [feature_name]].value_counts(normalize=normalize)
+        else:
+            primary_count_df = self.test_df.loc[
+                self.test_df[self._error_class_col_name] == primary_dataset, [feature_name]].value_counts(
+                normalize=normalize)
+        if secondary_dataset == self._testing_data_name:
+            secondary_count_df = self.test_df.loc[:, [feature_name]].value_counts(normalize=normalize)
+        else:
+            secondary_count_df = self.test_df.loc[
+                self.test_df[self._error_class_col_name] == secondary_dataset, [feature_name]].value_counts(
+                normalize=normalize)
+
+        primary_count_df = primary_count_df.reset_index().rename({0: primary_dataset}, axis=1)
+        secondary_count_df = secondary_count_df.reset_index().rename({0: secondary_dataset}, axis=1)
+        merged_cat_count = primary_count_df.merge(secondary_count_df, on=feature_name, how='outer').fillna(
+            0).sort_values(by=feature_name)
+
+        return merged_cat_count
+
     def _add_categorical_count_plot(self) -> None:
         """
         Add the categorical count plots (stacked bar plot) data to the report
@@ -285,7 +323,8 @@ class RegressionErrorAnalysisReport(Report):
                                        secondary_dataset: str) -> None:
             """
             Calculate the value counts for each dataset and for that particular categorical feature.
-            Then groups the value_counts() dataframes afterwards it computes the data needed for the stacked bar plot in plotly
+            Then groups the value_counts() dataframes afterwards it computes the data needed for the stacked bar plot
+            in plotly
 
             :param feature_dictionary: the feature dictionary that will be added the categorical count plot data
             :param feature_name: the feature name
@@ -293,22 +332,10 @@ class RegressionErrorAnalysisReport(Report):
             :param secondary_dataset: the secondary dataset name
             :return: None
             """
-            if primary_dataset == self._training_data_name:
-                primary_count_df = self.train_df.loc[:, [feature_name]].value_counts()
-            else:
-                primary_count_df = self.test_df.loc[
-                    self.test_df[self._error_class_col_name] == primary_dataset, [feature_name]].value_counts()
-
-            if secondary_dataset == self._testing_data_name:
-                secondary_count_df = self.test_df.loc[:, [feature_name]].value_counts()
-            else:
-                secondary_count_df = self.test_df.loc[
-                    self.test_df[self._error_class_col_name] == secondary_dataset, [feature_name]].value_counts()
-
-            primary_count_df = primary_count_df.reset_index().rename({0: primary_dataset}, axis=1)
-            secondary_count_df = secondary_count_df.reset_index().rename({0: secondary_dataset}, axis=1)
-            merged_cat_count = primary_count_df.merge(secondary_count_df, on=feature_name, how='outer').fillna(
-                0).sort_values(by=feature_name)
+            merged_cat_count = self._count_categories_and_merge_count_dataframes(feature_name,
+                                                                                 primary_dataset,
+                                                                                 secondary_dataset,
+                                                                                 normalize=False)
 
             key = f'{primary_dataset}_{secondary_dataset}'
             title = f'{primary_dataset} vs {secondary_dataset}'
@@ -357,12 +384,10 @@ class RegressionErrorAnalysisReport(Report):
             from sklearn.preprocessing import LabelEncoder
 
             selected_features = []
-            if self.categorical_features is not None and len(self.categorical_features) > 0:
-                selected_features.extend(
-                    self.categorical_features)  # will be replaced by cosine similarity based selection
 
             first_quantile_threshold = 0.25
             second_quantile_threshold = 0.75
+            cosine_similarity_threshold = 0.8
 
             if primary_dataset == self._training_data_name:
                 primary_df = self.train_df.copy()
@@ -375,6 +400,19 @@ class RegressionErrorAnalysisReport(Report):
                 secondary_df.loc[:, self._error_class_col_name] = self._testing_data_name
             else:
                 secondary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == secondary_dataset, :].copy()
+
+            if self.categorical_features is not None:
+                for categorical_feature in self.categorical_features:
+                    merged_cat_count = self._count_categories_and_merge_count_dataframes(categorical_feature,
+                                                                                         primary_dataset,
+                                                                                         secondary_dataset,
+                                                                                         normalize=True)
+                    primary_vector = merged_cat_count.loc[:, primary_dataset].tolist()
+                    secondary_vector = merged_cat_count.loc[:, secondary_dataset].tolist()
+                    cosine_similarity = _cosine_similarity(primary_vector, secondary_vector)
+
+                    if cosine_similarity <= cosine_similarity_threshold:
+                        selected_features.append(categorical_feature)
 
             if self.numerical_features is not None:
                 for numerical_feature in self.numerical_features:
