@@ -3,6 +3,9 @@ from .Report import Report
 import pandas as pd
 from .utils.TypeChecking import is_instance
 from scipy.spatial.distance import cosine
+from scipy.stats import ks_2samp, wasserstein_distance
+from itertools import product
+from sklearn.preprocessing import LabelEncoder
 
 
 def validate_attributes(train_df, test_df, target_feature_name, error_column_name,
@@ -83,9 +86,9 @@ class RegressionErrorAnalysisReport(Report):
     error_column_name : str
         the name of the calculated error column 'Prediction - Target' (see example on github for more information)
     error_classes : Dict[str, Tuple]
-        a dictionary containing the definition of the error classes that will be created. The key is the error_class name
-        and the value is the minimum (inclusive) and maximum (exclusive) which will be used to calculate the error_class
-        of the test observations. For example:
+        a dictionary containing the definition of the error classes that will be created.
+        The key is the error_class name and the value is the minimum (inclusive) and maximum (exclusive)
+        which will be used to calculate the error_class of the test observations. For example:
         error_classes = {
         'EXTREME_UNDER_ESTIMATION': (-8.0, -4.0), # return 'EXTREME_UNDER_ESTIMATION' if -8.0 <= error < -4.0
         'HIGH_UNDER_ESTIMATION': (-4.0, -3.0), # return 'HIGH_UNDER_ESTIMATION' if -4.0 <= error < -3.0
@@ -167,22 +170,26 @@ class RegressionErrorAnalysisReport(Report):
 
     def create_report(self) -> None:
         """
-        Creates a report using the user defined data and the data calculated based on the error
+        Creates a report using the user defined data and the data calculated based on the error.
+
         :return: None
         """
+        cosine_similarity_threshold: float = 0.8
 
         self._add_user_defined_data()
         self._add_error_class_to_test_df()
         self._add_datasets()
+        self._add_statistical_tests(cosine_similarity_threshold)
 
         if self.categorical_features is not None and len(self.categorical_features) > 0:
             self._add_categorical_count_plot()
 
-        self._add_parallel_coordinates_plot()
+        self._add_parallel_coordinates_plot(cosine_similarity_threshold)
 
     def _add_user_defined_data(self) -> None:
         """
-        Adds user defined data to the report
+        Adds user defined data to the report.
+
         :return: None
         """
 
@@ -202,7 +209,8 @@ class RegressionErrorAnalysisReport(Report):
     def _add_error_class_to_test_df(self) -> None:
         """
         adds the error class to each observation in the test set (test_df) based on the
-        error classes provided by the user
+        error classes provided by the user.
+
         :return: None
         """
 
@@ -219,7 +227,8 @@ class RegressionErrorAnalysisReport(Report):
 
     def _add_datasets(self) -> None:
         """
-        Adds datasets to reports (info, stats, numerical data)
+        Adds datasets to reports (info, stats, numerical data).
+
         :return: None
         """
 
@@ -227,7 +236,8 @@ class RegressionErrorAnalysisReport(Report):
 
         def add_dataset(df: pd.DataFrame, dataset_name: str) -> None:
             """
-            Adds a dataset stats and data to the datasets_dict
+            Adds a dataset stats and data to the datasets_dict.
+
             :param df: pd.DataFrame, the selected dataset dataframe
             :param dataset_name: str, the dataset name
             :return: None
@@ -264,6 +274,7 @@ class RegressionErrorAnalysisReport(Report):
                     'stdError': df.loc[:, self.error_column_name].std(),
                     'medianError': df.loc[:, self.error_column_name].median(),
                     'maxError': df.loc[:, self.error_column_name].max(),
+                    'errors': df.loc[:, self.error_column_name].tolist(),
                     'stats': stats
                 },
                 'data': data
@@ -285,7 +296,8 @@ class RegressionErrorAnalysisReport(Report):
                                                      normalize=False) -> pd.DataFrame:
         """
         It counts the different categories (of the provided feature) for the primary and secondary dataset then merge
-        the count dataframes into a single dataframe that contains all the categories. It also fills missing values with 0
+        the count dataframes into a single dataframe that contains all the categories.
+        It also fills missing values with 0.
 
         :param feature_name: the feature name
         :param primary_dataset: the primary dataset name
@@ -324,7 +336,7 @@ class RegressionErrorAnalysisReport(Report):
             """
             Calculate the value counts for each dataset and for that particular categorical feature.
             Then groups the value_counts() dataframes afterwards it computes the data needed for the stacked bar plot
-            in plotly
+            in plotly.
 
             :param feature_dictionary: the feature dictionary that will be added the categorical count plot data
             :param feature_name: the feature name
@@ -359,9 +371,7 @@ class RegressionErrorAnalysisReport(Report):
                 ]
             }})
 
-        from itertools import product
         categorical_count_dict = {}
-
         for feature in self.categorical_features:
             feature_dict = {}
             for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets,
@@ -372,34 +382,55 @@ class RegressionErrorAnalysisReport(Report):
 
         self._update_report({'categorical_count_plots': categorical_count_dict})
 
-    def _add_parallel_coordinates_plot(self) -> None:
+    def _get_primary_secondary_datasets(self, primary_dataset: str, secondary_dataset: str) -> Tuple[
+        pd.DataFrame, pd.DataFrame]:
+        """
+        Finds the correct primary and secondary datasets and return them.
+
+        :param primary_dataset: the name of the primary dataset
+        :param secondary_dataset: the name of the secondary dataset
+        :return: primary_df, secondary_df
+        """
+        if primary_dataset == self._training_data_name:
+            primary_df = self.train_df.copy()
+            primary_df.loc[:, self._error_class_col_name] = self._training_data_name
+        else:
+            primary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == primary_dataset, :].copy()
+
+        if secondary_dataset == self._testing_data_name:
+            secondary_df = self.test_df.copy()
+            secondary_df.loc[:, self._error_class_col_name] = self._testing_data_name
+        else:
+            secondary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == secondary_dataset, :].copy()
+        return primary_df, secondary_df
+
+    def _add_parallel_coordinates_plot(self, cosine_similarity_threshold) -> None:
         """
         Check for suitable features (numerical based on quantiles(default: 0.25, 0.75)
-        and categorical based on cosine similarity). Afterwards it adds the needed data for the plotly parallel coordinates plot
+        and categorical based on cosine similarity).
+        Afterwards it adds the needed data for the plotly parallel coordinates plot.
+
+        :param cosine_similarity_threshold: the cosine similarity threshold for the categorical features
         :return: None
         """
 
         def add_parallel_coordinates(parallel_coordinates_dictionary: Dict, primary_dataset: str,
-                                     secondary_dataset: str):
-            from sklearn.preprocessing import LabelEncoder
+                                     secondary_dataset: str) -> None:
+            """
+            Decides which features will be added to the parallel coordinates plot based on predefined thresholds.
+            Then prepares the data that is expected by the plotly parallel coordinates plot.
 
+            :param parallel_coordinates_dictionary: the parallel coordinates data dictionary
+            :param primary_dataset: the name of the primary dataset
+            :param secondary_dataset: the name of the secondary dataset
+            :return: None
+            """
             selected_features = []
 
             first_quantile_threshold = 0.25
             second_quantile_threshold = 0.75
-            cosine_similarity_threshold = 0.8
 
-            if primary_dataset == self._training_data_name:
-                primary_df = self.train_df.copy()
-                primary_df.loc[:, self._error_class_col_name] = self._training_data_name
-            else:
-                primary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == primary_dataset, :].copy()
-
-            if secondary_dataset == self._testing_data_name:
-                secondary_df = self.test_df.copy()
-                secondary_df.loc[:, self._error_class_col_name] = self._testing_data_name
-            else:
-                secondary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == secondary_dataset, :].copy()
+            primary_df, secondary_df = self._get_primary_secondary_datasets(primary_dataset, secondary_dataset)
 
             if self.categorical_features is not None:
                 for categorical_feature in self.categorical_features:
@@ -411,7 +442,7 @@ class RegressionErrorAnalysisReport(Report):
                     secondary_vector = merged_cat_count.loc[:, secondary_dataset].tolist()
                     cosine_similarity = _cosine_similarity(primary_vector, secondary_vector)
 
-                    if cosine_similarity <= cosine_similarity_threshold:
+                    if cosine_similarity < cosine_similarity_threshold:
                         selected_features.append(categorical_feature)
 
             if self.numerical_features is not None:
@@ -460,7 +491,6 @@ class RegressionErrorAnalysisReport(Report):
                         'dimensions': dimensions
                     }})
 
-        from itertools import product
         parallel_coordinates_dict = {}
         for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets, self._secondary_datasets):
             if primary_dataset_name != secondary_dataset_name:
@@ -468,3 +498,74 @@ class RegressionErrorAnalysisReport(Report):
 
         if len(parallel_coordinates_dict) > 0:
             self._update_report({'parallel_coordinates': parallel_coordinates_dict})
+
+    def _add_statistical_tests(self, cosine_similarity_threshold) -> None:
+        """
+        Calculates and adds statistical tests to the report data.
+
+        :param cosine_similarity_threshold: the cosine similarity threshold for the categorical features
+        :return: None
+        """
+
+        def add_statistical_test(statistical_tests_dictionary: Dict, primary_dataset: str,
+                                 secondary_dataset: str) -> None:
+            """
+            Calculates statistical tests (ks_2samp) and metrics (wasserstein distance, cosine similarity)
+            then adds the results to the dictionary.
+
+            :param statistical_tests_dictionary: the statistical tests data dictionary
+            :param primary_dataset: the name of the primary data set
+            :param secondary_dataset: the name of the secondary data set
+            :return: None
+            """
+
+            primary_df, secondary_df = self._get_primary_secondary_datasets(primary_dataset, secondary_dataset)
+            key = f'{primary_dataset}_{secondary_dataset}'
+            tests_dictionary = {key: {}}
+            p_value_threshold = 0.01
+
+            if self.numerical_features is not None:
+                for numerical_feature in self.numerical_features:
+                    primary_values = primary_df.loc[:, numerical_feature].values
+                    secondary_values = secondary_df.loc[:, numerical_feature].values
+                    p_value = ks_2samp(primary_values, secondary_values)[1]
+                    wasser_distance = wasserstein_distance(secondary_values, primary_values)
+                    tests_dictionary[key].update({
+                        numerical_feature: {
+                            'ks_2samp': {
+                                'p_value': p_value,
+                                'p_value_threshold': p_value_threshold
+                            },
+                            'wasserstein_distance': wasser_distance
+                        }
+                    })
+
+            if self.categorical_features is not None:
+                for categorical_feature in self.categorical_features:
+                    if primary_dataset != secondary_dataset:
+                        merged_cat_count = self._count_categories_and_merge_count_dataframes(categorical_feature,
+                                                                                             primary_dataset,
+                                                                                             secondary_dataset,
+                                                                                             normalize=True)
+                        primary_vector = merged_cat_count.loc[:, primary_dataset].tolist()
+                        secondary_vector = merged_cat_count.loc[:, secondary_dataset].tolist()
+                        cosine_similarity = _cosine_similarity(primary_vector, secondary_vector)
+                    else:
+                        cosine_similarity = 1.0
+
+                    tests_dictionary[key].update({
+                        categorical_feature: {
+                            'cosine_similarity': {
+                                'cosine_similarity': cosine_similarity,
+                                'cosine_similarity_threshold': cosine_similarity_threshold
+                            }
+                        }
+                    })
+
+            statistical_tests_dictionary.update(tests_dictionary)
+
+        statistical_tests_dict = {}
+        for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets, self._secondary_datasets):
+            add_statistical_test(statistical_tests_dict, primary_dataset_name, secondary_dataset_name)
+
+        self._update_report({'statistical_tests': statistical_tests_dict})
