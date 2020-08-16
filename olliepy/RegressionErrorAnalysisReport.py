@@ -167,6 +167,7 @@ class RegressionErrorAnalysisReport(Report):
         self._primary_datasets = [self._training_data_name, self.acceptable_error_class]
         self._secondary_datasets = [self._testing_data_name]
         self._secondary_datasets.extend(list(self.error_classes.keys()))
+        self._template_name = 'regression-error-analysis-report'
 
     def create_report(self) -> None:
         """
@@ -569,3 +570,31 @@ class RegressionErrorAnalysisReport(Report):
             add_statistical_test(statistical_tests_dict, primary_dataset_name, secondary_dataset_name)
 
         self._update_report({'statistical_tests': statistical_tests_dict})
+
+    def serve_report_from_local_server(self, mode: str = 'server', port: int = 5050) -> None:
+        """
+        Serve the report to the user using a web server.
+        modes:
+        1- 'server': will open a new tab in the default browser using webbrowser
+        2- 'js': will open a new tab in the default browser using IPython
+        3- 'jupyter': will open the report in a jupyter notebook
+
+        :param report_directory: The directory created report is saved
+        :param mode: server mode ('server': will open a new tab in your default browser,
+        'js': will open a new tab in your browser using a different method, 'jupyter': will open the report application
+        in your notebook).
+        default: 'server'
+        :param port: the server port. default: 5050
+        :return: None
+        """
+        super()._serve_report_using_flask(self._template_name, mode, port)
+
+    def save_report(self, zip_report: bool = False) -> None:
+        """
+        Creates the report directory, copies the web application based on the template name,
+        saves the report data.
+        :param zip_report: enable it in order to zip the directory for downloading. default: False
+        :return: None
+        """
+
+        super()._save_the_report(self._template_name, zip_report)

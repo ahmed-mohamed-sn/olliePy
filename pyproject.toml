@@ -12,6 +12,7 @@ scipy = "^1.5.2"
 numpy = "^1.19.1"
 flask = "^1.1.2"
 pycrypto = "^2.6.1"
+ipython = "^7.17.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
