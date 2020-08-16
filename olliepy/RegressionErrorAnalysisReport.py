@@ -361,8 +361,8 @@ class RegressionErrorAnalysisReport(Report):
                 selected_features.extend(
                     self.categorical_features)  # will be replaced by cosine similarity based selection
 
-            q_threshold_1 = 0.25
-            q_threshold_2 = 0.75
+            first_quantile_threshold = 0.25
+            second_quantile_threshold = 0.75
 
             if primary_dataset == self._training_data_name:
                 primary_df = self.train_df.copy()
@@ -378,10 +378,10 @@ class RegressionErrorAnalysisReport(Report):
 
             if self.numerical_features is not None:
                 for numerical_feature in self.numerical_features:
-                    primary_q_1 = primary_df.loc[:, numerical_feature].quantile(q_threshold_1)
-                    primary_q_2 = primary_df.loc[:, numerical_feature].quantile(q_threshold_2)
-                    secondary_q_1 = secondary_df.loc[:, numerical_feature].quantile(q_threshold_1)
-                    secondary_q_2 = secondary_df.loc[:, numerical_feature].quantile(q_threshold_2)
+                    primary_q_1 = primary_df.loc[:, numerical_feature].quantile(first_quantile_threshold)
+                    primary_q_2 = primary_df.loc[:, numerical_feature].quantile(second_quantile_threshold)
+                    secondary_q_1 = secondary_df.loc[:, numerical_feature].quantile(first_quantile_threshold)
+                    secondary_q_2 = secondary_df.loc[:, numerical_feature].quantile(second_quantile_threshold)
                     if primary_q_1 >= secondary_q_2 or secondary_q_1 >= primary_q_2:
                         selected_features.append(numerical_feature)
 
@@ -416,6 +416,8 @@ class RegressionErrorAnalysisReport(Report):
 
                 if len(dimensions) > 1:
                     parallel_coordinates_dictionary.update({key: {
+                        'primaryDatasetName': primary_dataset,
+                        'secondaryDatasetName': secondary_dataset,
                         'colors': colors,
                         'dimensions': dimensions
                     }})
