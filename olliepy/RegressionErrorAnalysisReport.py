@@ -322,7 +322,7 @@ class RegressionErrorAnalysisReport(Report):
         primary_count_df = primary_count_df.reset_index().rename({0: primary_dataset}, axis=1)
         secondary_count_df = secondary_count_df.reset_index().rename({0: secondary_dataset}, axis=1)
         merged_cat_count = primary_count_df.merge(secondary_count_df, on=feature_name, how='outer').fillna(
-            0).sort_values(by=feature_name)
+            0).sort_values(by=primary_dataset, ascending=False)
 
         return merged_cat_count
 
