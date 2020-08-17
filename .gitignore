@@ -4,5 +4,4 @@ notebooks
 .DS_Store
 __pycache__
 test_report.json
-dist
 olliepy.egg-info
