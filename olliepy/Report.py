@@ -62,6 +62,7 @@ def _start_server_and_view_report(report_directory: str, mode: str, port: int) -
     """
     print('''\n\n ### \nServing the report this way, might not work on all machine.
 Try different server mode ('server', 'js' or 'jupyter') or save and download the report and open index.html \n###\n\n''')
+    print('Clear browser cache if your report was not updated')
     import multiprocessing as mp
     import time
     import importlib.util
@@ -215,10 +216,39 @@ To zip the report directory, set zip_report=True when saving.''')
         :param report_directory:
         :return: None
         """
-        with open(path.join(report_directory, 'report_data.json'), 'w') as file_path:
-            json.dump(self.report_data, file_path)
+        if self.encryption_secret:
+            data = self._encrypt_report_data()
+            with open(path.join(report_directory, 'report_data.json'), 'wb') as file:
+                file.write(data)
+                file.close()
+        else:
+            data = self.report_data
+            with open(path.join(report_directory, 'report_data.json'), 'w') as file_path:
+                json.dump(data, file_path)
 
     def _zip_report_directory(self, report_directory: str) -> None:
         import shutil
         report_folder = self.report_folder_name if self.report_folder_name else self.title
         shutil.make_archive(f'{self.output_directory}/{report_folder}', 'zip', report_directory)
+
+    def _encrypt_report_data(self):
+        from Crypto import Random
+        from Crypto.Cipher import AES
+        import base64
+        BLOCK_SIZE = 16
+
+        def pad(data):
+            length = 16 - (len(data) % 16)
+            return data.decode("utf-8") + chr(length) * length
+
+        def encrypt(message, passphrase):
+            IV = Random.new().read(BLOCK_SIZE)
+            aes = AES.new(passphrase, AES.MODE_CFB, IV, segment_size=128)
+            return base64.b64encode(IV + aes.encrypt(pad(message).encode("utf-8")))
+
+        key = self.encryption_secret.encode('utf-8')
+        encoded_data = json.dumps(self.report_data).encode('utf-8')
+
+        encrypted_data = encrypt(encoded_data, key)
+
+        return encrypted_data

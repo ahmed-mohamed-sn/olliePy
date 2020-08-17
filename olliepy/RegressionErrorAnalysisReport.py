@@ -187,6 +187,9 @@ class RegressionErrorAnalysisReport(Report):
 
         self._add_parallel_coordinates_plot(cosine_similarity_threshold)
 
+        if self.encryption_secret:
+            print(f'Your encryption secret is {self.encryption_secret}')
+
     def _add_user_defined_data(self) -> None:
         """
         Adds user defined data to the report.
