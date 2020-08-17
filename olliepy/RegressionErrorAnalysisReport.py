@@ -574,7 +574,7 @@ class RegressionErrorAnalysisReport(Report):
 
         self._update_report({'statistical_tests': statistical_tests_dict})
 
-    def serve_report_from_local_server(self, mode: str = 'server', port: int = 5050) -> None:
+    def serve_report_from_local_server(self, mode: str = 'server', port: int = None) -> None:
         """
         Serve the report to the user using a web server.
         modes:
@@ -587,9 +587,12 @@ class RegressionErrorAnalysisReport(Report):
         'js': will open a new tab in your browser using a different method, 'jupyter': will open the report application
         in your notebook).
         default: 'server'
-        :param port: the server port. default: 5050
+        :param port: the server port. default: None. a random port will be generated between (1024-49151)
         :return: None
         """
+        if not port:
+            import random
+            port = random.randint(1024, 49151)
         super()._serve_report_using_flask(self._template_name, mode, port)
 
     def save_report(self, zip_report: bool = False) -> None:
