@@ -168,6 +168,7 @@ class RegressionErrorAnalysisReport(Report):
         self._secondary_datasets = [self._testing_data_name]
         self._secondary_datasets.extend(list(self.error_classes.keys()))
         self._template_name = 'regression-error-analysis-report'
+        self._default_numerical_bins_for_grouping = 10
 
     def create_report(self) -> None:
         """
@@ -186,6 +187,7 @@ class RegressionErrorAnalysisReport(Report):
             self._add_categorical_count_plot()
 
         self._add_parallel_coordinates_plot(cosine_similarity_threshold)
+        self._find_and_add_all_secondary_datasets_patterns()
 
         if self.encryption_secret:
             print(f'Your encryption secret is {self.encryption_secret}')
@@ -578,11 +580,10 @@ class RegressionErrorAnalysisReport(Report):
         """
         Serve the report to the user using a web server.
         modes:
-        1- 'server': will open a new tab in the default browser using webbrowser
+        1- 'server': will open a new tab in the default browser using webbrowser package
         2- 'js': will open a new tab in the default browser using IPython
         3- 'jupyter': will open the report in a jupyter notebook
 
-        :param report_directory: The directory created report is saved
         :param mode: server mode ('server': will open a new tab in your default browser,
         'js': will open a new tab in your browser using a different method, 'jupyter': will open the report application
         in your notebook).
@@ -599,8 +600,141 @@ class RegressionErrorAnalysisReport(Report):
         """
         Creates the report directory, copies the web application based on the template name,
         saves the report data.
+
         :param zip_report: enable it in order to zip the directory for downloading. default: False
         :return: None
         """
 
         super()._save_the_report(self._template_name, zip_report)
+
+    def _find_and_add_all_secondary_datasets_patterns(self) -> None:
+        """
+        Find all groups in secondary datasets and check if they exist in the primary datasets.
+        Output the groups, error and target distributions and the distance between the distributions.
+
+        :return: None
+        """
+
+        def query_datasets_for_count_error_target(primary_df, secondary_df, features_values):
+            query_list = []
+            for feature, feature_value in features_values:
+                query_list.append(f'{feature} == "{feature_value}"')
+
+            query = ' and '.join(query_list)
+            filtered_primary_dataset = primary_df.query(query)
+            filtered_secondary_dataset = secondary_df.query(query)
+
+            output = {
+                'primaryCount': filtered_primary_dataset.shape[0],
+                'secondaryCount': filtered_secondary_dataset.shape[0],
+                'secondaryErrorMean': filtered_secondary_dataset.loc[:, self.error_column_name].mean(),
+                'secondaryErrorStd': filtered_secondary_dataset.loc[:, self.error_column_name].std(),
+                'secondaryTargetMean': filtered_secondary_dataset.loc[:, self.target_feature_name].mean(),
+                'secondaryTargetStd': filtered_secondary_dataset.loc[:, self.target_feature_name].std(),
+                'primaryTargetValues': filtered_primary_dataset.loc[:, self.target_feature_name].tolist(),
+                'secondaryTargetValues': filtered_secondary_dataset.loc[:, self.target_feature_name].tolist(),
+                'primaryErrorValues': filtered_primary_dataset.loc[:, self.error_column_name].tolist(),
+                'secondaryErrorValues': filtered_secondary_dataset.loc[:, self.error_column_name].tolist(),
+                'primaryErrorMean': filtered_primary_dataset.loc[:, self.error_column_name].mean(),
+                'primaryErrorStd': filtered_primary_dataset.loc[:, self.error_column_name].std(),
+                'primaryTargetMean': filtered_primary_dataset.loc[:, self.target_feature_name].mean(),
+                'primaryTargetStd': filtered_primary_dataset.loc[:, self.target_feature_name].std()
+            }
+
+            for dataset in ['primary', 'secondary']:
+                if dataset == 'primary':
+                    df = filtered_primary_dataset
+                else:
+                    df = filtered_secondary_dataset
+
+                if output[f'{dataset}Count'] == 1:
+                    output.update({
+                        f'{dataset}ErrorMean': df.loc[:, self.error_column_name].values[0],
+                        f'{dataset}ErrorStd': 'N/A',
+                        f'{dataset}TargetMean': df.loc[:, self.target_feature_name].values[0],
+                        f'{dataset}TargetStd': 'N/A',
+                    })
+                elif output[f'{dataset}Count'] == 0:
+                    output.update({
+                        f'{dataset}ErrorMean': 'N/A',
+                        f'{dataset}ErrorStd': 'N/A',
+                        f'{dataset}TargetMean': 'N/A',
+                        f'{dataset}TargetStd': 'N/A',
+                    })
+
+            if output['primaryCount'] > 0 and output['secondaryCount'] > 0:
+                output['errorWassersteinDistance'] = wasserstein_distance(
+                    filtered_secondary_dataset.loc[:, self.error_column_name],
+                    filtered_primary_dataset.loc[:, self.error_column_name])
+
+                output['targetWassersteinDistance'] = wasserstein_distance(
+                    filtered_secondary_dataset.loc[:, self.target_feature_name],
+                    filtered_primary_dataset.loc[:, self.target_feature_name])
+            else:
+                output['errorWassersteinDistance'] = 'N/A'
+                output['targetWassersteinDistance'] = 'N/A'
+
+            return output
+
+        def add_patterns(grouped_patterns_dictionary: Dict, primary_dataset: str,
+                         secondary_dataset: str) -> None:
+            """
+            Group by all features in secondary_dataset and try to find these patterns in primary dataset.
+
+            :param grouped_patterns_dictionary: the patterns data dictionary
+            :param primary_dataset: the name of the primary data set
+            :param secondary_dataset: the name of the secondary data set
+            :return: None
+            """
+
+            primary_df, secondary_df = self._get_primary_secondary_datasets(primary_dataset, secondary_dataset)
+            key = f'{primary_dataset}_{secondary_dataset}'
+            patterns_dictionary = {}
+
+            group_by_features = self.categorical_features[:]
+
+            numerical_features = list(filter(lambda f_name: f_name != self.target_feature_name,
+                                             self.numerical_features))
+
+            for numerical_feature in numerical_features:
+                binning_features_name = f'{numerical_feature}_BIN'
+
+                secondary_df.loc[:, binning_features_name], bins = pd.cut(secondary_df.loc[:, numerical_feature],
+                                                                          retbins=True, include_lowest=True,
+                                                                          bins=self._default_numerical_bins_for_grouping)
+                primary_df.loc[:, binning_features_name] = pd.cut(primary_df.loc[:, numerical_feature], bins=bins)
+
+                primary_df = primary_df.dropna()
+                primary_df.loc[:, binning_features_name] = primary_df.loc[:, binning_features_name].astype(str)
+                secondary_df.loc[:, binning_features_name] = secondary_df.loc[:, binning_features_name].astype(str)
+                group_by_features.append(binning_features_name)
+
+            primary_df = primary_df.drop(numerical_features, axis=1)
+            secondary_df = secondary_df.drop(numerical_features, axis=1)
+
+            secondary_groupby_all_df = secondary_df.groupby(by=group_by_features).mean()
+            secondary_all_groups = secondary_groupby_all_df.index.tolist()
+
+            patterns_list = []
+            for index, group in enumerate(secondary_all_groups):
+                group_dict = {'name': f'Group {index}', 'features': {}}
+
+                features_values = []
+                for feature_index,  feature in enumerate(group_by_features):
+                    group_dict['features'][feature] = group[feature_index]
+                    features_values.append((feature, group[feature_index]))
+
+                count_error_target_dict = query_datasets_for_count_error_target(primary_df,
+                                                                                secondary_df,
+                                                                                features_values)
+                group_dict.update(count_error_target_dict)
+                patterns_list.append(group_dict)
+
+            patterns_dictionary[key] = patterns_list
+            grouped_patterns_dictionary.update(patterns_dictionary)
+
+        grouped_patterns_dict = {}
+        for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets, self._secondary_datasets):
+            add_patterns(grouped_patterns_dict, primary_dataset_name, secondary_dataset_name)
+
+        self._update_report({'grouped_patterns': grouped_patterns_dict})

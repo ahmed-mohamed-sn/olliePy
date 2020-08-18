@@ -1,19 +1,19 @@
 [tool.poetry]
 name = "olliePy"
-version = "0.1.3"
+version = "0.1.6"
 description = "An interactive reporting tool written in python for machine learning experiments that generates interactive reports written in VueJS."
 authors = ["ahmed.mohamed <hanoush87@gmail.com>", "aysenur.bilgin <aysenur.bilgin@gmail.com>"]
 packages = [{ include = "reports-templates" }, {include = "olliepy"}]
 
 [tool.poetry.dependencies]
-python = "^3.7"
-pandas = "^1.1.0"
-scikit-learn = "^0.23.2"
-scipy = "^1.5.2"
-numpy = "^1.19.1"
-flask = "^1.1.2"
-pycrypto = "^2.6.1"
-ipython = "^7.17.0"
+python = ">= 3.6"
+pandas = ">= 0.25.0"
+scikit-learn = ">= 0.22"
+scipy = ">= 1.3.0"
+numpy = ">= 1.17.0"
+flask = ">= 1.1.0"
+pycrypto = ">= 2.6.1"
+ipython = ">= 7.0.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
