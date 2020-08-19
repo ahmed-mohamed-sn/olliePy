@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "olliePy"
-version = "0.1.6"
+version = "0.1.8"
 description = "An interactive reporting tool written in python for machine learning experiments that generates interactive reports written in VueJS."
 authors = ["ahmed.mohamed <hanoush87@gmail.com>", "aysenur.bilgin <aysenur.bilgin@gmail.com>"]
 packages = [{ include = "reports-templates" }, {include = "olliepy"}]
