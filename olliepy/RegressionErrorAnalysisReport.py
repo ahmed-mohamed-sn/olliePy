@@ -656,16 +656,16 @@ class RegressionErrorAnalysisReport(Report):
                 if output[f'{dataset}Count'] == 1:
                     output.update({
                         f'{dataset}ErrorMean': df.loc[:, self.error_column_name].values[0],
-                        f'{dataset}ErrorStd': 'N/A',
+                        f'{dataset}ErrorStd': None,
                         f'{dataset}TargetMean': df.loc[:, self.target_feature_name].values[0],
-                        f'{dataset}TargetStd': 'N/A',
+                        f'{dataset}TargetStd': None,
                     })
                 elif output[f'{dataset}Count'] == 0:
                     output.update({
-                        f'{dataset}ErrorMean': 'N/A',
-                        f'{dataset}ErrorStd': 'N/A',
-                        f'{dataset}TargetMean': 'N/A',
-                        f'{dataset}TargetStd': 'N/A',
+                        f'{dataset}ErrorMean': None,
+                        f'{dataset}ErrorStd': None,
+                        f'{dataset}TargetMean': None,
+                        f'{dataset}TargetStd': None,
                     })
 
             if output['primaryCount'] > 0 and output['secondaryCount'] > 0:
@@ -677,8 +677,8 @@ class RegressionErrorAnalysisReport(Report):
                     filtered_secondary_dataset.loc[:, self.target_feature_name],
                     filtered_primary_dataset.loc[:, self.target_feature_name])
             else:
-                output['errorWassersteinDistance'] = 'N/A'
-                output['targetWassersteinDistance'] = 'N/A'
+                output['errorWassersteinDistance'] = None
+                output['targetWassersteinDistance'] = None
 
             return output
 
