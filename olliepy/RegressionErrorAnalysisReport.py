@@ -6,7 +6,7 @@ from scipy.spatial.distance import cosine
 from scipy.stats import ks_2samp, wasserstein_distance
 from itertools import product
 from sklearn.preprocessing import LabelEncoder
-
+import time
 
 def validate_attributes(train_df, test_df, target_feature_name, error_column_name,
                         error_classes, acceptable_error_class, numerical_features, categorical_features):
@@ -176,6 +176,7 @@ class RegressionErrorAnalysisReport(Report):
 
         :return: None
         """
+        tic = time.perf_counter()
         cosine_similarity_threshold: float = 0.8
 
         self._add_user_defined_data()
@@ -188,6 +189,9 @@ class RegressionErrorAnalysisReport(Report):
 
         self._add_parallel_coordinates_plot(cosine_similarity_threshold)
         self._find_and_add_all_secondary_datasets_patterns()
+        toc = time.perf_counter()
+
+        print(f"The report was created in {toc - tic:0.4f} seconds")
 
         if self.encryption_secret:
             print(f'Your encryption secret is {self.encryption_secret}')
@@ -312,20 +316,22 @@ class RegressionErrorAnalysisReport(Report):
         :return: the merged dataframe
         """
         if primary_dataset == self._training_data_name:
-            primary_count_df = self.train_df.loc[:, [feature_name]].value_counts(normalize=normalize)
+            primary_count_df = self.train_df.loc[:, feature_name].value_counts(normalize=normalize)
         else:
             primary_count_df = self.test_df.loc[
-                self.test_df[self._error_class_col_name] == primary_dataset, [feature_name]].value_counts(
+                self.test_df[self._error_class_col_name] == primary_dataset, feature_name].value_counts(
                 normalize=normalize)
         if secondary_dataset == self._testing_data_name:
-            secondary_count_df = self.test_df.loc[:, [feature_name]].value_counts(normalize=normalize)
+            secondary_count_df = self.test_df.loc[:, feature_name].value_counts(normalize=normalize)
         else:
             secondary_count_df = self.test_df.loc[
-                self.test_df[self._error_class_col_name] == secondary_dataset, [feature_name]].value_counts(
+                self.test_df[self._error_class_col_name] == secondary_dataset, feature_name].value_counts(
                 normalize=normalize)
 
-        primary_count_df = primary_count_df.reset_index().rename({0: primary_dataset}, axis=1)
-        secondary_count_df = secondary_count_df.reset_index().rename({0: secondary_dataset}, axis=1)
+        primary_count_df = primary_count_df.reset_index()\
+            .rename({feature_name: primary_dataset, 'index': feature_name}, axis=1)
+        secondary_count_df = secondary_count_df.reset_index()\
+            .rename({feature_name: secondary_dataset, 'index': feature_name}, axis=1)
         merged_cat_count = primary_count_df.merge(secondary_count_df, on=feature_name, how='outer').fillna(
             0).sort_values(by=primary_dataset, ascending=False)
 

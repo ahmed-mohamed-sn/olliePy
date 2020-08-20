@@ -6,3 +6,4 @@ __pycache__
 test_report.json
 dist
 olliepy.egg-info
+dask-worker-space
