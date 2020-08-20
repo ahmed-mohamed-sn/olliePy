@@ -1,5 +1,6 @@
 from typing import List, Dict, Tuple
 from .Report import Report
+import dask.dataframe as dd
 import pandas as pd
 from .utils.TypeChecking import is_instance
 from scipy.spatial.distance import cosine
@@ -153,8 +154,9 @@ class RegressionErrorAnalysisReport(Report):
                             numerical_features,
                             categorical_features)
 
-        self.train_df = train_df.copy()
-        self.test_df = test_df.copy()
+        self._dask_npartitions = 10
+        self.train_df = dd.from_pandas(train_df.copy(), npartitions=self._dask_npartitions)
+        self.test_df = dd.from_pandas(test_df.copy(), npartitions=self._dask_npartitions)
         self.target_feature_name = target_feature_name
         self.error_column_name = error_column_name
         self.error_classes = error_classes
@@ -169,6 +171,7 @@ class RegressionErrorAnalysisReport(Report):
         self._secondary_datasets.extend(list(self.error_classes.keys()))
         self._template_name = 'regression-error-analysis-report'
         self._default_numerical_bins_for_grouping = 10
+        self._n_jobs = 4
 
     def create_report(self) -> None:
         """
@@ -229,7 +232,9 @@ class RegressionErrorAnalysisReport(Report):
 
             return 'UNDEFINED_ERROR_CLASS'
 
-        self.test_df[self._error_class_col_name] = self.test_df[self.error_column_name].apply(add_error_class)
+        self.test_df[self._error_class_col_name] = self.test_df[self.error_column_name].apply(add_error_class, meta=('ERROR_CLASS', 'str'))
+        self.test_df = self.test_df.compute(num_workers=self._n_jobs)
+        self.test_df = dd.from_pandas(self.test_df, npartitions=self._dask_npartitions)
 
     def _add_datasets(self) -> None:
         """
@@ -254,33 +259,33 @@ class RegressionErrorAnalysisReport(Report):
             if self.numerical_features is not None and len(self.numerical_features) > 0:
                 for feature in self.numerical_features:
                     stats[feature] = {
-                        'min': df.loc[:, feature].min(),
-                        'mean': df.loc[:, feature].mean(),
-                        'std': df.loc[:, feature].std(),
-                        'median': df.loc[:, feature].median(),
-                        'max': df.loc[:, feature].max(),
-                        'count': int(df.loc[:, feature].count()),
-                        'missingCount': int(df.loc[:, feature].isna().sum()),
+                        'min': df.loc[:, feature].compute().min(),
+                        'mean': df.loc[:, feature].compute().mean(),
+                        'std': df.loc[:, feature].compute().std(),
+                        'median': df.loc[:, feature].compute().median(),
+                        'max': df.loc[:, feature].compute().max(),
+                        'count': int(df.loc[:, feature].compute().count()),
+                        'missingCount': int(df.loc[:, feature].compute().isna().sum()),
                     }
-                    data[feature] = df.loc[:, feature].values.tolist()
+                    data[feature] = df.loc[:, feature].compute().tolist()
 
             if self.categorical_features is not None and len(self.categorical_features) > 0:
                 for feature in self.categorical_features:
                     stats[feature] = {
-                        'uniqueCount': int(df.loc[:, feature].nunique()),
-                        'missingCount': int(df.loc[:, feature].isna().sum())
+                        'uniqueCount': int(df.loc[:, feature].compute().nunique()),
+                        'missingCount': int(df.loc[:, feature].compute().isna().sum())
                     }
 
             dataset_dict = {dataset_name: {
                 'info': {
                     'name': dataset_name,
-                    'numberOfRows': df.shape[0],
-                    'minError': df.loc[:, self.error_column_name].min(),
-                    'meanError': df.loc[:, self.error_column_name].mean(),
-                    'stdError': df.loc[:, self.error_column_name].std(),
-                    'medianError': df.loc[:, self.error_column_name].median(),
-                    'maxError': df.loc[:, self.error_column_name].max(),
-                    'errors': df.loc[:, self.error_column_name].tolist(),
+                    'numberOfRows': df.compute().shape[0],
+                    'minError': df.loc[:, self.error_column_name].compute().min(),
+                    'meanError': df.loc[:, self.error_column_name].compute().mean(),
+                    'stdError': df.loc[:, self.error_column_name].compute().std(),
+                    'medianError': df.loc[:, self.error_column_name].compute().median(),
+                    'maxError': df.loc[:, self.error_column_name].compute().max(),
+                    'errors': df.loc[:, self.error_column_name].compute().tolist(),
                     'stats': stats
                 },
                 'data': data
@@ -311,23 +316,30 @@ class RegressionErrorAnalysisReport(Report):
         :param normalize: whether to normalizr the categorical count, default:False
         :return: the merged dataframe
         """
+
+        train_df = self.train_df.compute()
+        test_df = self.test_df.compute()
+
         if primary_dataset == self._training_data_name:
-            primary_count_df = self.train_df.loc[:, [feature_name]].value_counts(normalize=normalize)
+            primary_count_df = train_df.loc[:, [feature_name]].value_counts(normalize=normalize)
         else:
-            primary_count_df = self.test_df.loc[
-                self.test_df[self._error_class_col_name] == primary_dataset, [feature_name]].value_counts(
+            primary_count_df = test_df.loc[
+                test_df[self._error_class_col_name] == primary_dataset, [feature_name]].value_counts(
                 normalize=normalize)
         if secondary_dataset == self._testing_data_name:
-            secondary_count_df = self.test_df.loc[:, [feature_name]].value_counts(normalize=normalize)
+            secondary_count_df = test_df.loc[:, [feature_name]].value_counts(normalize=normalize)
         else:
-            secondary_count_df = self.test_df.loc[
-                self.test_df[self._error_class_col_name] == secondary_dataset, [feature_name]].value_counts(
+            secondary_count_df = test_df.loc[
+                test_df[self._error_class_col_name] == secondary_dataset, [feature_name]].value_counts(
                 normalize=normalize)
 
         primary_count_df = primary_count_df.reset_index().rename({0: primary_dataset}, axis=1)
         secondary_count_df = secondary_count_df.reset_index().rename({0: secondary_dataset}, axis=1)
+
         merged_cat_count = primary_count_df.merge(secondary_count_df, on=feature_name, how='outer').fillna(
             0).sort_values(by=primary_dataset, ascending=False)
+
+        merged_cat_count = dd.from_pandas(merged_cat_count, npartitions=10)
 
         return merged_cat_count
 
@@ -357,9 +369,9 @@ class RegressionErrorAnalysisReport(Report):
 
             key = f'{primary_dataset}_{secondary_dataset}'
             title = f'{primary_dataset} vs {secondary_dataset}'
-            categories = merged_cat_count.loc[:, feature_name].tolist()
-            primary_data = merged_cat_count.loc[:, primary_dataset].tolist()
-            secondary_data = merged_cat_count.loc[:, secondary_dataset].tolist()
+            categories = merged_cat_count.loc[:, feature_name].compute().tolist()
+            primary_data = merged_cat_count.loc[:, primary_dataset].compute().tolist()
+            secondary_data = merged_cat_count.loc[:, secondary_dataset].compute().tolist()
             feature_dictionary.update({key: {
                 'title': title,
                 'categories': categories,
@@ -399,13 +411,13 @@ class RegressionErrorAnalysisReport(Report):
         """
         if primary_dataset == self._training_data_name:
             primary_df = self.train_df.copy()
-            primary_df.loc[:, self._error_class_col_name] = self._training_data_name
+            primary_df[self._error_class_col_name] = primary_df.apply(lambda row: self._training_data_name, axis=1, meta=str)
         else:
             primary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == primary_dataset, :].copy()
 
         if secondary_dataset == self._testing_data_name:
             secondary_df = self.test_df.copy()
-            secondary_df.loc[:, self._error_class_col_name] = self._testing_data_name
+            secondary_df[self._error_class_col_name] = secondary_df.apply(lambda row: self._training_data_name, axis=1, meta=str)
         else:
             secondary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == secondary_dataset, :].copy()
         return primary_df, secondary_df
@@ -444,8 +456,8 @@ class RegressionErrorAnalysisReport(Report):
                                                                                          primary_dataset,
                                                                                          secondary_dataset,
                                                                                          normalize=True)
-                    primary_vector = merged_cat_count.loc[:, primary_dataset].tolist()
-                    secondary_vector = merged_cat_count.loc[:, secondary_dataset].tolist()
+                    primary_vector = merged_cat_count.loc[:, primary_dataset].compute().tolist()
+                    secondary_vector = merged_cat_count.loc[:, secondary_dataset].compute().tolist()
                     cosine_similarity = _cosine_similarity(primary_vector, secondary_vector)
 
                     if cosine_similarity < cosine_similarity_threshold:
@@ -453,31 +465,31 @@ class RegressionErrorAnalysisReport(Report):
 
             if self.numerical_features is not None:
                 for numerical_feature in self.numerical_features:
-                    primary_q_1 = primary_df.loc[:, numerical_feature].quantile(first_quantile_threshold)
-                    primary_q_2 = primary_df.loc[:, numerical_feature].quantile(second_quantile_threshold)
-                    secondary_q_1 = secondary_df.loc[:, numerical_feature].quantile(first_quantile_threshold)
-                    secondary_q_2 = secondary_df.loc[:, numerical_feature].quantile(second_quantile_threshold)
+                    primary_q_1 = primary_df.loc[:, numerical_feature].quantile(first_quantile_threshold).compute()
+                    primary_q_2 = primary_df.loc[:, numerical_feature].quantile(second_quantile_threshold).compute()
+                    secondary_q_1 = secondary_df.loc[:, numerical_feature].quantile(first_quantile_threshold).compute()
+                    secondary_q_2 = secondary_df.loc[:, numerical_feature].quantile(second_quantile_threshold).compute()
                     if primary_q_1 >= secondary_q_2 or secondary_q_1 >= primary_q_2:
                         selected_features.append(numerical_feature)
 
             if len(selected_features) > 0:
                 key = f'{primary_dataset}_{secondary_dataset}'
-                combined_df = pd.concat([primary_df, secondary_df], axis=0).copy()
-                colors = combined_df.loc[:, self._error_class_col_name].apply(
+                combined_df = dd.concat([primary_df, secondary_df], axis=0).copy()
+                colors = combined_df.loc[:, self._error_class_col_name].compute().apply(
                     lambda error_class: 0 if error_class == primary_dataset else 1).tolist()
                 dimensions = []
                 for feature in selected_features:
                     if self.numerical_features is not None and feature in self.numerical_features:
-                        feature_min = combined_df.loc[:, feature].min()
-                        feature_max = combined_df.loc[:, feature].max()
+                        feature_min = combined_df.loc[:, feature].min().compute()
+                        feature_max = combined_df.loc[:, feature].max().compute()
                         dimensions.append({
                             'range': [feature_min, feature_max],
                             'label': feature,
-                            'values': combined_df.loc[:, feature].tolist()
+                            'values': combined_df.loc[:, feature].compute().tolist()
                         })
                     elif self.categorical_features is not None and feature in self.categorical_features:
                         label_encoder = LabelEncoder()
-                        values = label_encoder.fit_transform(combined_df.loc[:, feature])
+                        values = label_encoder.fit_transform(combined_df.loc[:, feature].compute())
                         values_range = [int(values.min()), int(values.max())]
                         tick_values = label_encoder.transform(label_encoder.classes_).tolist()
                         tick_text = label_encoder.classes_.tolist()
@@ -532,8 +544,8 @@ class RegressionErrorAnalysisReport(Report):
 
             if self.numerical_features is not None:
                 for numerical_feature in self.numerical_features:
-                    primary_values = primary_df.loc[:, numerical_feature].values
-                    secondary_values = secondary_df.loc[:, numerical_feature].values
+                    primary_values = primary_df.loc[:, numerical_feature].compute().values
+                    secondary_values = secondary_df.loc[:, numerical_feature].compute().values
                     p_value = ks_2samp(primary_values, secondary_values)[1]
                     wasser_distance = wasserstein_distance(secondary_values, primary_values)
                     tests_dictionary[key].update({
@@ -553,8 +565,8 @@ class RegressionErrorAnalysisReport(Report):
                                                                                              primary_dataset,
                                                                                              secondary_dataset,
                                                                                              normalize=True)
-                        primary_vector = merged_cat_count.loc[:, primary_dataset].tolist()
-                        secondary_vector = merged_cat_count.loc[:, secondary_dataset].tolist()
+                        primary_vector = merged_cat_count.loc[:, primary_dataset].compute().tolist()
+                        secondary_vector = merged_cat_count.loc[:, secondary_dataset].compute().tolist()
                         cosine_similarity = _cosine_similarity(primary_vector, secondary_vector)
                     else:
                         cosine_similarity = 1.0
@@ -621,8 +633,8 @@ class RegressionErrorAnalysisReport(Report):
                 query_list.append(f'{feature} == "{feature_value}"')
 
             query = ' and '.join(query_list)
-            filtered_primary_dataset = primary_df.query(query)
-            filtered_secondary_dataset = secondary_df.query(query)
+            filtered_primary_dataset = primary_df.query(query).compute()
+            filtered_secondary_dataset = secondary_df.query(query).compute()
 
             output = {
                 'primaryCount': filtered_primary_dataset.shape[0],
@@ -699,21 +711,21 @@ class RegressionErrorAnalysisReport(Report):
             for numerical_feature in numerical_features:
                 binning_features_name = f'{numerical_feature}_BIN'
 
-                secondary_df.loc[:, binning_features_name], bins = pd.cut(secondary_df.loc[:, numerical_feature],
+                secondary_df[binning_features_name], bins = pd.cut(secondary_df.loc[:, numerical_feature].compute(),
                                                                           retbins=True, include_lowest=True,
                                                                           bins=self._default_numerical_bins_for_grouping)
-                primary_df.loc[:, binning_features_name] = pd.cut(primary_df.loc[:, numerical_feature], bins=bins)
+                primary_df[binning_features_name] = primary_df.loc[:, numerical_feature].map_partitions(pd.cut, bins=bins)
 
                 primary_df = primary_df.dropna()
-                primary_df.loc[:, binning_features_name] = primary_df.loc[:, binning_features_name].astype(str)
-                secondary_df.loc[:, binning_features_name] = secondary_df.loc[:, binning_features_name].astype(str)
+                primary_df[binning_features_name] = primary_df.loc[:, binning_features_name].astype(str)
+                secondary_df[binning_features_name] = secondary_df.loc[:, binning_features_name].astype(str)
                 group_by_features.append(binning_features_name)
 
             primary_df = primary_df.drop(numerical_features, axis=1)
             secondary_df = secondary_df.drop(numerical_features, axis=1)
 
             secondary_groupby_all_df = secondary_df.groupby(by=group_by_features).mean()
-            secondary_all_groups = secondary_groupby_all_df.index.tolist()
+            secondary_all_groups = secondary_groupby_all_df.compute().index.tolist()
 
             patterns_list = []
             for index, group in enumerate(secondary_all_groups):
