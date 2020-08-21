@@ -8,6 +8,7 @@ from itertools import product
 from sklearn.preprocessing import LabelEncoder
 import time
 
+
 def validate_attributes(train_df, test_df, target_feature_name, error_column_name,
                         error_classes, acceptable_error_class, numerical_features, categorical_features):
     if type(train_df) is not pd.DataFrame:
@@ -328,9 +329,9 @@ class RegressionErrorAnalysisReport(Report):
                 self.test_df[self._error_class_col_name] == secondary_dataset, feature_name].value_counts(
                 normalize=normalize)
 
-        primary_count_df = primary_count_df.reset_index()\
+        primary_count_df = primary_count_df.reset_index() \
             .rename({feature_name: primary_dataset, 'index': feature_name}, axis=1)
-        secondary_count_df = secondary_count_df.reset_index()\
+        secondary_count_df = secondary_count_df.reset_index() \
             .rename({feature_name: secondary_dataset, 'index': feature_name}, axis=1)
         merged_cat_count = primary_count_df.merge(secondary_count_df, on=feature_name, how='outer').fillna(
             0).sort_values(by=primary_dataset, ascending=False)
@@ -726,7 +727,7 @@ class RegressionErrorAnalysisReport(Report):
                 group_dict = {'name': f'Group {index}', 'features': {}}
 
                 features_values = []
-                for feature_index,  feature in enumerate(group_by_features):
+                for feature_index, feature in enumerate(group_by_features):
                     group_dict['features'][feature] = group[feature_index]
                     features_values.append((feature, group[feature_index]))
 

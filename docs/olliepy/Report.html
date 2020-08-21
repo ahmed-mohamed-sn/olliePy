@@ -28,6 +28,10 @@
 </summary>
 <pre><code class="python">from os import path
 from typing import Dict
+import os
+from pathlib import Path
+from distutils.dir_util import copy_tree
+import json
 
 
 def validate_attributes(title, output_directory, subtitle, report_folder_name, encryption_secret,
@@ -57,6 +61,62 @@ def _generate_encryption_secret():
     letters = string.ascii_lowercase + string.ascii_uppercase + string.digits + string.punctuation
     result_str = &#39;&#39;.join(random.choice(letters) for i in range(length))
     return result_str
+
+
+def _copy_application_template(template_name: str, destination_path: str) -&gt; None:
+    package_path = str(Path(os.path.dirname(os.path.abspath(__file__))).parent)
+    source_path = path.join(package_path, f&#39;reports-templates/{template_name}&#39;)
+
+    copy_tree(source_path, destination_path)
+
+
+def _zip_directory(path: str, zip_handler):
+    for root, dirs, files in os.walk(path):
+        for file in files:
+            zip_handler.write(os.path.join(root, file))
+
+
+def _start_server_and_view_report(report_directory: str, mode: str, port: int) -&gt; None:
+    &#34;&#34;&#34;
+    Serve the report to the user using a web server.
+
+    :param report_directory: The directory created report is saved
+    :param mode: server mode (&#39;server&#39;: will open a new tab in your default browser,
+    &#39;js&#39;: will open a new tab in your browser using a different method, &#39;jupyter&#39;: will open the report application
+    in your notebook).
+    default: &#39;server&#39;
+    :param port: the server port. default: random between (1024-49151)
+    :return: None
+    &#34;&#34;&#34;
+    print(&#39;&#39;&#39;\n\n ### \nServing the report this way, might not work on all machine.
+Try different server mode (&#39;server&#39;, &#39;js&#39; or &#39;jupyter&#39;) or save and download the report and open index.html \n###\n\n&#39;&#39;&#39;)
+    print(&#39;Clear your browser\&#39;s cache if your report was not updated\n\n&#39;)
+    import multiprocessing as mp
+    import time
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(&#34;app&#34;, f&#39;{report_directory}/app.py&#39;)
+    app = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(app)
+    try:
+        p = mp.Process(target=app.run_application, args=(port, report_directory))
+        p.start()
+        time.sleep(1.0)
+        url = f&#39;http://127.0.0.1:{port}/&#39;
+        if mode == &#39;server&#39;:
+            import webbrowser
+            webbrowser.open(url)
+        elif mode == &#39;js&#39;:
+            from IPython.core.display import display
+            from IPython.display import Javascript
+            display(Javascript(&#39;window.open(&#34;{url}&#34;);&#39;.format(url=url)))
+        else:
+            from IPython.display import IFrame
+            from IPython.core.display import display
+            display(IFrame(&#39;http://127.0.0.1:5000/&#39;, &#39;100%&#39;, &#39;800px&#39;))
+        p.join()
+    except (KeyboardInterrupt, SystemExit):
+        print(&#39;\n! Received keyboard interrupt, stopping server.\n&#39;)
+    pass
 
 
 class Report:
@@ -128,7 +188,98 @@ class Report:
         :param data: Dict, the data dictionary that will be added to the report dictionary in report_data
         :return: None
         &#34;&#34;&#34;
-        self.report_data[&#39;report&#39;].update(data)</code></pre>
+        self.report_data[&#39;report&#39;].update(data)
+
+    def _serve_report_using_flask(self, template_name: str, mode: str, port: int) -&gt; None:
+        &#34;&#34;&#34;
+        Creates the report directory, copies the web application based on the template name,
+        saves the report data and starts the flask server.
+
+        :param template_name: the name of the report&#39;s template
+        :param mode: the server mode
+        :param port: the server port
+        :return: None
+        &#34;&#34;&#34;
+        report_directory = self._create_report_directory()
+        _copy_application_template(template_name, report_directory)
+        self._save_report_data(report_directory)
+        _start_server_and_view_report(report_directory, mode, port)
+
+    def _save_the_report(self, template_name: str, zip_report: bool) -&gt; None:
+        &#34;&#34;&#34;
+        Creates the report directory, copies the web application based on the template name,
+        saves the report data.
+
+        :param template_name: the name of the report&#39;s template
+        :return: None
+        &#34;&#34;&#34;
+        report_directory = self._create_report_directory()
+        _copy_application_template(template_name, report_directory)
+        self._save_report_data(report_directory)
+
+        if zip_report:
+            self._zip_report_directory(report_directory)
+
+        print(f&#39;&#39;&#39;The report has been saved.
+To view the report, go to the report&#39;s directory ({report_directory}) and open index.html then upload report_data.json.
+To zip the report directory, set zip_report=True when saving.&#39;&#39;&#39;)
+
+    def _create_report_directory(self) -&gt; str:
+        &#34;&#34;&#34;
+        Creates the report directory if it doesn&#39;t exist.
+
+        :return: report_directory
+        &#34;&#34;&#34;
+        report_folder = self.report_folder_name if self.report_folder_name else self.title
+        report_directory = path.join(self.output_directory, report_folder)
+        if not os.path.exists(report_directory):
+            os.mkdir(report_directory)
+
+        return report_directory
+
+    def _save_report_data(self, report_directory: str) -&gt; None:
+        &#34;&#34;&#34;
+        Takes the report_directory and saves the data as json there.
+
+        :param report_directory:
+        :return: None
+        &#34;&#34;&#34;
+        if self.encryption_secret:
+            data = self._encrypt_report_data()
+            with open(path.join(report_directory, &#39;report_data.json&#39;), &#39;wb&#39;) as file:
+                file.write(data)
+                file.close()
+        else:
+            data = self.report_data
+            with open(path.join(report_directory, &#39;report_data.json&#39;), &#39;w&#39;) as file_path:
+                json.dump(data, file_path)
+
+    def _zip_report_directory(self, report_directory: str) -&gt; None:
+        import shutil
+        report_folder = self.report_folder_name if self.report_folder_name else self.title
+        shutil.make_archive(f&#39;{self.output_directory}/{report_folder}&#39;, &#39;zip&#39;, report_directory)
+
+    def _encrypt_report_data(self):
+        from Crypto import Random
+        from Crypto.Cipher import AES
+        import base64
+        BLOCK_SIZE = 16
+
+        def pad(data):
+            length = 16 - (len(data) % 16)
+            return data.decode(&#34;utf-8&#34;) + chr(length) * length
+
+        def encrypt(message, passphrase):
+            IV = Random.new().read(BLOCK_SIZE)
+            aes = AES.new(passphrase, AES.MODE_CFB, IV, segment_size=128)
+            return base64.b64encode(IV + aes.encrypt(pad(message).encode(&#34;utf-8&#34;)))
+
+        key = self.encryption_secret.encode(&#39;utf-8&#39;)
+        encoded_data = json.dumps(self.report_data).encode(&#39;utf-8&#39;)
+
+        encrypted_data = encrypt(encoded_data, key)
+
+        return encrypted_data</code></pre>
 </details>
 </section>
 <section>
@@ -273,7 +424,98 @@ updates the report dictionary inside the report_data dictionary</p></div>
         :param data: Dict, the data dictionary that will be added to the report dictionary in report_data
         :return: None
         &#34;&#34;&#34;
-        self.report_data[&#39;report&#39;].update(data)</code></pre>
+        self.report_data[&#39;report&#39;].update(data)
+
+    def _serve_report_using_flask(self, template_name: str, mode: str, port: int) -&gt; None:
+        &#34;&#34;&#34;
+        Creates the report directory, copies the web application based on the template name,
+        saves the report data and starts the flask server.
+
+        :param template_name: the name of the report&#39;s template
+        :param mode: the server mode
+        :param port: the server port
+        :return: None
+        &#34;&#34;&#34;
+        report_directory = self._create_report_directory()
+        _copy_application_template(template_name, report_directory)
+        self._save_report_data(report_directory)
+        _start_server_and_view_report(report_directory, mode, port)
+
+    def _save_the_report(self, template_name: str, zip_report: bool) -&gt; None:
+        &#34;&#34;&#34;
+        Creates the report directory, copies the web application based on the template name,
+        saves the report data.
+
+        :param template_name: the name of the report&#39;s template
+        :return: None
+        &#34;&#34;&#34;
+        report_directory = self._create_report_directory()
+        _copy_application_template(template_name, report_directory)
+        self._save_report_data(report_directory)
+
+        if zip_report:
+            self._zip_report_directory(report_directory)
+
+        print(f&#39;&#39;&#39;The report has been saved.
+To view the report, go to the report&#39;s directory ({report_directory}) and open index.html then upload report_data.json.
+To zip the report directory, set zip_report=True when saving.&#39;&#39;&#39;)
+
+    def _create_report_directory(self) -&gt; str:
+        &#34;&#34;&#34;
+        Creates the report directory if it doesn&#39;t exist.
+
+        :return: report_directory
+        &#34;&#34;&#34;
+        report_folder = self.report_folder_name if self.report_folder_name else self.title
+        report_directory = path.join(self.output_directory, report_folder)
+        if not os.path.exists(report_directory):
+            os.mkdir(report_directory)
+
+        return report_directory
+
+    def _save_report_data(self, report_directory: str) -&gt; None:
+        &#34;&#34;&#34;
+        Takes the report_directory and saves the data as json there.
+
+        :param report_directory:
+        :return: None
+        &#34;&#34;&#34;
+        if self.encryption_secret:
+            data = self._encrypt_report_data()
+            with open(path.join(report_directory, &#39;report_data.json&#39;), &#39;wb&#39;) as file:
+                file.write(data)
+                file.close()
+        else:
+            data = self.report_data
+            with open(path.join(report_directory, &#39;report_data.json&#39;), &#39;w&#39;) as file_path:
+                json.dump(data, file_path)
+
+    def _zip_report_directory(self, report_directory: str) -&gt; None:
+        import shutil
+        report_folder = self.report_folder_name if self.report_folder_name else self.title
+        shutil.make_archive(f&#39;{self.output_directory}/{report_folder}&#39;, &#39;zip&#39;, report_directory)
+
+    def _encrypt_report_data(self):
+        from Crypto import Random
+        from Crypto.Cipher import AES
+        import base64
+        BLOCK_SIZE = 16
+
+        def pad(data):
+            length = 16 - (len(data) % 16)
+            return data.decode(&#34;utf-8&#34;) + chr(length) * length
+
+        def encrypt(message, passphrase):
+            IV = Random.new().read(BLOCK_SIZE)
+            aes = AES.new(passphrase, AES.MODE_CFB, IV, segment_size=128)
+            return base64.b64encode(IV + aes.encrypt(pad(message).encode(&#34;utf-8&#34;)))
+
+        key = self.encryption_secret.encode(&#39;utf-8&#39;)
+        encoded_data = json.dumps(self.report_data).encode(&#39;utf-8&#39;)
+
+        encrypted_data = encrypt(encoded_data, key)
+
+        return encrypted_data</code></pre>
 </details>
 <h3>Subclasses</h3>
 <ul class="hlist">

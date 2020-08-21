@@ -28,7 +28,7 @@
 </summary>
 <pre><code class="python">from .RegressionErrorAnalysisReport import RegressionErrorAnalysisReport
 
-__version__ = &#39;0.1.0&#39;
+__version__ = &#39;0.1.12&#39;
 __all__ = [&#34;RegressionErrorAnalysisReport&#34;]</code></pre>
 </details>
 </section>
@@ -74,9 +74,9 @@ and the error column in order to calculate the error class</dd>
 <dt><strong><code>error_column_name</code></strong> :&ensp;<code>str</code></dt>
 <dd>the name of the calculated error column 'Prediction - Target' (see example on github for more information)</dd>
 <dt><strong><code>error_classes</code></strong> :&ensp;<code>Dict[str, Tuple]</code></dt>
-<dd>a dictionary containing the definition of the error classes that will be created. The key is the error_class name
-and the value is the minimum (inclusive) and maximum (exclusive) which will be used to calculate the error_class
-of the test observations. For example:
+<dd>a dictionary containing the definition of the error classes that will be created.
+The key is the error_class name and the value is the minimum (inclusive) and maximum (exclusive)
+which will be used to calculate the error_class of the test observations. For example:
 error_classes = {
 'EXTREME_UNDER_ESTIMATION': (-8.0, -4.0), # return 'EXTREME_UNDER_ESTIMATION' if -8.0 &lt;= error &lt; -4.0
 'HIGH_UNDER_ESTIMATION': (-4.0, -3.0), # return 'HIGH_UNDER_ESTIMATION' if -4.0 &lt;= error &lt; -3.0
@@ -130,9 +130,9 @@ creates the error analysis report</p></div>
     error_column_name : str
         the name of the calculated error column &#39;Prediction - Target&#39; (see example on github for more information)
     error_classes : Dict[str, Tuple]
-        a dictionary containing the definition of the error classes that will be created. The key is the error_class name
-        and the value is the minimum (inclusive) and maximum (exclusive) which will be used to calculate the error_class
-        of the test observations. For example:
+        a dictionary containing the definition of the error classes that will be created.
+        The key is the error_class name and the value is the minimum (inclusive) and maximum (exclusive)
+        which will be used to calculate the error_class of the test observations. For example:
         error_classes = {
         &#39;EXTREME_UNDER_ESTIMATION&#39;: (-8.0, -4.0), # return &#39;EXTREME_UNDER_ESTIMATION&#39; if -8.0 &lt;= error &lt; -4.0
         &#39;HIGH_UNDER_ESTIMATION&#39;: (-4.0, -3.0), # return &#39;HIGH_UNDER_ESTIMATION&#39; if -4.0 &lt;= error &lt; -3.0
@@ -208,31 +208,51 @@ creates the error analysis report</p></div>
         self._training_data_name = &#39;Training data&#39;
         self._testing_data_name = &#39;Testing data&#39;
         self._error_class_col_name = &#39;ERROR_CLASS&#39;
+        self._primary_datasets = [self._training_data_name, self.acceptable_error_class]
+        self._secondary_datasets = [self._testing_data_name]
+        self._secondary_datasets.extend(list(self.error_classes.keys()))
+        self._template_name = &#39;regression-error-analysis-report&#39;
+        self._default_numerical_bins_for_grouping = 10
 
     def create_report(self) -&gt; None:
         &#34;&#34;&#34;
-        Creates a report using the user defined data and the data calculated based on the error
+        Creates a report using the user defined data and the data calculated based on the error.
+
         :return: None
         &#34;&#34;&#34;
+        tic = time.perf_counter()
+        cosine_similarity_threshold: float = 0.8
 
         self._add_user_defined_data()
         self._add_error_class_to_test_df()
         self._add_datasets()
+        self._add_statistical_tests(cosine_similarity_threshold)
+
+        if self.categorical_features is not None and len(self.categorical_features) &gt; 0:
+            self._add_categorical_count_plot()
+
+        self._add_parallel_coordinates_plot(cosine_similarity_threshold)
+        self._find_and_add_all_secondary_datasets_patterns()
+        toc = time.perf_counter()
+
+        print(f&#34;The report was created in {toc - tic:0.4f} seconds&#34;)
+
+        if self.encryption_secret:
+            print(f&#39;Your encryption secret is {self.encryption_secret}&#39;)
 
     def _add_user_defined_data(self) -&gt; None:
         &#34;&#34;&#34;
-        Adds user defined data to the report
+        Adds user defined data to the report.
+
         :return: None
         &#34;&#34;&#34;
 
-        self._update_report({&#39;primaryDatasets&#39;: [self._training_data_name, self.acceptable_error_class]})
+        self._update_report({&#39;primaryDatasets&#39;: self._primary_datasets})
 
-        secondary_datasets = [self._testing_data_name]
-        secondary_datasets.extend(list(self.error_classes.keys()))
-
-        self._update_report({&#39;secondaryDatasets&#39;: secondary_datasets})
+        self._update_report({&#39;secondaryDatasets&#39;: self._secondary_datasets})
 
         if self.numerical_features:
+            self.numerical_features.append(self.target_feature_name)
             self._update_report({&#39;numericalFeatures&#39;: self.numerical_features})
 
         if self.categorical_features:
@@ -243,7 +263,8 @@ creates the error analysis report</p></div>
     def _add_error_class_to_test_df(self) -&gt; None:
         &#34;&#34;&#34;
         adds the error class to each observation in the test set (test_df) based on the
-        error classes provided by the user
+        error classes provided by the user.
+
         :return: None
         &#34;&#34;&#34;
 
@@ -260,7 +281,8 @@ creates the error analysis report</p></div>
 
     def _add_datasets(self) -&gt; None:
         &#34;&#34;&#34;
-        Adds datasets to reports (info, stats, numerical data)
+        Adds datasets to reports (info, stats, numerical data).
+
         :return: None
         &#34;&#34;&#34;
 
@@ -268,7 +290,8 @@ creates the error analysis report</p></div>
 
         def add_dataset(df: pd.DataFrame, dataset_name: str) -&gt; None:
             &#34;&#34;&#34;
-            Adds a dataset stats and data to the datasets_dict
+            Adds a dataset stats and data to the datasets_dict.
+
             :param df: pd.DataFrame, the selected dataset dataframe
             :param dataset_name: str, the dataset name
             :return: None
@@ -276,23 +299,25 @@ creates the error analysis report</p></div>
             stats = {}
             data = {}
 
-            for feature in self.numerical_features:
-                stats[feature] = {
-                    &#39;min&#39;: df.loc[:, feature].min(),
-                    &#39;mean&#39;: df.loc[:, feature].mean(),
-                    &#39;std&#39;: df.loc[:, feature].std(),
-                    &#39;median&#39;: df.loc[:, feature].median(),
-                    &#39;max&#39;: df.loc[:, feature].max(),
-                    &#39;count&#39;: df.loc[:, feature].count(),
-                    &#39;missingCount&#39;: df.loc[:, feature].isna().sum(),
-                }
-                data[feature] = df.loc[:, feature].values.tolist()
+            if self.numerical_features is not None and len(self.numerical_features) &gt; 0:
+                for feature in self.numerical_features:
+                    stats[feature] = {
+                        &#39;min&#39;: df.loc[:, feature].min(),
+                        &#39;mean&#39;: df.loc[:, feature].mean(),
+                        &#39;std&#39;: df.loc[:, feature].std(),
+                        &#39;median&#39;: df.loc[:, feature].median(),
+                        &#39;max&#39;: df.loc[:, feature].max(),
+                        &#39;count&#39;: int(df.loc[:, feature].count()),
+                        &#39;missingCount&#39;: int(df.loc[:, feature].isna().sum()),
+                    }
+                    data[feature] = df.loc[:, feature].values.tolist()
 
-            for feature in self.categorical_features:
-                stats[feature] = {
-                    &#39;uniqueCount&#39;: df.loc[:, feature].nunique(),
-                    &#39;missingCount&#39;: df.loc[:, feature].isna().sum()
-                }
+            if self.categorical_features is not None and len(self.categorical_features) &gt; 0:
+                for feature in self.categorical_features:
+                    stats[feature] = {
+                        &#39;uniqueCount&#39;: int(df.loc[:, feature].nunique()),
+                        &#39;missingCount&#39;: int(df.loc[:, feature].isna().sum())
+                    }
 
             dataset_dict = {dataset_name: {
                 &#39;info&#39;: {
@@ -303,6 +328,7 @@ creates the error analysis report</p></div>
                     &#39;stdError&#39;: df.loc[:, self.error_column_name].std(),
                     &#39;medianError&#39;: df.loc[:, self.error_column_name].median(),
                     &#39;maxError&#39;: df.loc[:, self.error_column_name].max(),
+                    &#39;errors&#39;: df.loc[:, self.error_column_name].tolist(),
                     &#39;stats&#39;: stats
                 },
                 &#39;data&#39;: data
@@ -314,10 +340,454 @@ creates the error analysis report</p></div>
         add_dataset(self.test_df, self._testing_data_name)
 
         for error_class_name in self.error_classes.keys():
-            df = self.test_df.loc[self.test_df[self._error_class_col_name] == error_class_name, :]
-            add_dataset(df, error_class_name)
+            selected_df = self.test_df.loc[self.test_df[self._error_class_col_name] == error_class_name, :]
+            add_dataset(selected_df, error_class_name)
 
-        self._update_report({&#39;datasets&#39;: datasets_dict})</code></pre>
+        self._update_report({&#39;datasets&#39;: datasets_dict})
+
+    def _count_categories_and_merge_count_dataframes(self, feature_name: str, primary_dataset: str,
+                                                     secondary_dataset: str,
+                                                     normalize=False) -&gt; pd.DataFrame:
+        &#34;&#34;&#34;
+        It counts the different categories (of the provided feature) for the primary and secondary dataset then merge
+        the count dataframes into a single dataframe that contains all the categories.
+        It also fills missing values with 0.
+
+        :param feature_name: the feature name
+        :param primary_dataset: the primary dataset name
+        :param secondary_dataset: the secondary dataset name
+        :param normalize: whether to normalizr the categorical count, default:False
+        :return: the merged dataframe
+        &#34;&#34;&#34;
+        if primary_dataset == self._training_data_name:
+            primary_count_df = self.train_df.loc[:, feature_name].value_counts(normalize=normalize)
+        else:
+            primary_count_df = self.test_df.loc[
+                self.test_df[self._error_class_col_name] == primary_dataset, feature_name].value_counts(
+                normalize=normalize)
+        if secondary_dataset == self._testing_data_name:
+            secondary_count_df = self.test_df.loc[:, feature_name].value_counts(normalize=normalize)
+        else:
+            secondary_count_df = self.test_df.loc[
+                self.test_df[self._error_class_col_name] == secondary_dataset, feature_name].value_counts(
+                normalize=normalize)
+
+        primary_count_df = primary_count_df.reset_index() \
+            .rename({feature_name: primary_dataset, &#39;index&#39;: feature_name}, axis=1)
+        secondary_count_df = secondary_count_df.reset_index() \
+            .rename({feature_name: secondary_dataset, &#39;index&#39;: feature_name}, axis=1)
+        merged_cat_count = primary_count_df.merge(secondary_count_df, on=feature_name, how=&#39;outer&#39;).fillna(
+            0).sort_values(by=primary_dataset, ascending=False)
+
+        return merged_cat_count
+
+    def _add_categorical_count_plot(self) -&gt; None:
+        &#34;&#34;&#34;
+        Add the categorical count plots (stacked bar plot) data to the report
+        :return: None
+        &#34;&#34;&#34;
+
+        def add_categorical_count_data(feature_dictionary: Dict, feature_name: str, primary_dataset: str,
+                                       secondary_dataset: str) -&gt; None:
+            &#34;&#34;&#34;
+            Calculate the value counts for each dataset and for that particular categorical feature.
+            Then groups the value_counts() dataframes afterwards it computes the data needed for the stacked bar plot
+            in plotly.
+
+            :param feature_dictionary: the feature dictionary that will be added the categorical count plot data
+            :param feature_name: the feature name
+            :param primary_dataset: the primary dataset name
+            :param secondary_dataset: the secondary dataset name
+            :return: None
+            &#34;&#34;&#34;
+            merged_cat_count = self._count_categories_and_merge_count_dataframes(feature_name,
+                                                                                 primary_dataset,
+                                                                                 secondary_dataset,
+                                                                                 normalize=False)
+
+            key = f&#39;{primary_dataset}_{secondary_dataset}&#39;
+            title = f&#39;{primary_dataset} vs {secondary_dataset}&#39;
+            categories = merged_cat_count.loc[:, feature_name].tolist()
+            primary_data = merged_cat_count.loc[:, primary_dataset].tolist()
+            secondary_data = merged_cat_count.loc[:, secondary_dataset].tolist()
+            feature_dictionary.update({key: {
+                &#39;title&#39;: title,
+                &#39;categories&#39;: categories,
+                &#39;series&#39;: [
+                    {
+                        &#39;name&#39;: primary_dataset,
+                        &#39;color&#39;: &#39;#8180FF&#39;,
+                        &#39;data&#39;: primary_data
+                    },
+                    {
+                        &#39;name&#39;: secondary_dataset,
+                        &#39;color&#39;: &#39;#FF938D&#39;,
+                        &#39;data&#39;: secondary_data
+                    }
+                ]
+            }})
+
+        categorical_count_dict = {}
+        for feature in self.categorical_features:
+            feature_dict = {}
+            for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets,
+                                                                        self._secondary_datasets):
+                if primary_dataset_name != secondary_dataset_name:
+                    add_categorical_count_data(feature_dict, feature, primary_dataset_name, secondary_dataset_name)
+                    categorical_count_dict.update({feature: feature_dict})
+
+        self._update_report({&#39;categorical_count_plots&#39;: categorical_count_dict})
+
+    def _get_primary_secondary_datasets(self, primary_dataset: str, secondary_dataset: str) -&gt; Tuple[
+        pd.DataFrame, pd.DataFrame]:
+        &#34;&#34;&#34;
+        Finds the correct primary and secondary datasets and return them.
+
+        :param primary_dataset: the name of the primary dataset
+        :param secondary_dataset: the name of the secondary dataset
+        :return: primary_df, secondary_df
+        &#34;&#34;&#34;
+        if primary_dataset == self._training_data_name:
+            primary_df = self.train_df.copy()
+            primary_df.loc[:, self._error_class_col_name] = self._training_data_name
+        else:
+            primary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == primary_dataset, :].copy()
+
+        if secondary_dataset == self._testing_data_name:
+            secondary_df = self.test_df.copy()
+            secondary_df.loc[:, self._error_class_col_name] = self._testing_data_name
+        else:
+            secondary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == secondary_dataset, :].copy()
+        return primary_df, secondary_df
+
+    def _add_parallel_coordinates_plot(self, cosine_similarity_threshold) -&gt; None:
+        &#34;&#34;&#34;
+        Check for suitable features (numerical based on quantiles(default: 0.25, 0.75)
+        and categorical based on cosine similarity).
+        Afterwards it adds the needed data for the plotly parallel coordinates plot.
+
+        :param cosine_similarity_threshold: the cosine similarity threshold for the categorical features
+        :return: None
+        &#34;&#34;&#34;
+
+        def add_parallel_coordinates(parallel_coordinates_dictionary: Dict, primary_dataset: str,
+                                     secondary_dataset: str) -&gt; None:
+            &#34;&#34;&#34;
+            Decides which features will be added to the parallel coordinates plot based on predefined thresholds.
+            Then prepares the data that is expected by the plotly parallel coordinates plot.
+
+            :param parallel_coordinates_dictionary: the parallel coordinates data dictionary
+            :param primary_dataset: the name of the primary dataset
+            :param secondary_dataset: the name of the secondary dataset
+            :return: None
+            &#34;&#34;&#34;
+            selected_features = []
+
+            first_quantile_threshold = 0.25
+            second_quantile_threshold = 0.75
+
+            primary_df, secondary_df = self._get_primary_secondary_datasets(primary_dataset, secondary_dataset)
+
+            if self.categorical_features is not None:
+                for categorical_feature in self.categorical_features:
+                    merged_cat_count = self._count_categories_and_merge_count_dataframes(categorical_feature,
+                                                                                         primary_dataset,
+                                                                                         secondary_dataset,
+                                                                                         normalize=True)
+                    primary_vector = merged_cat_count.loc[:, primary_dataset].tolist()
+                    secondary_vector = merged_cat_count.loc[:, secondary_dataset].tolist()
+                    cosine_similarity = _cosine_similarity(primary_vector, secondary_vector)
+
+                    if cosine_similarity &lt; cosine_similarity_threshold:
+                        selected_features.append(categorical_feature)
+
+            if self.numerical_features is not None:
+                for numerical_feature in self.numerical_features:
+                    primary_q_1 = primary_df.loc[:, numerical_feature].quantile(first_quantile_threshold)
+                    primary_q_2 = primary_df.loc[:, numerical_feature].quantile(second_quantile_threshold)
+                    secondary_q_1 = secondary_df.loc[:, numerical_feature].quantile(first_quantile_threshold)
+                    secondary_q_2 = secondary_df.loc[:, numerical_feature].quantile(second_quantile_threshold)
+                    if primary_q_1 &gt;= secondary_q_2 or secondary_q_1 &gt;= primary_q_2:
+                        selected_features.append(numerical_feature)
+
+            if len(selected_features) &gt; 0:
+                key = f&#39;{primary_dataset}_{secondary_dataset}&#39;
+                combined_df = pd.concat([primary_df, secondary_df], axis=0).copy()
+                colors = combined_df.loc[:, self._error_class_col_name].apply(
+                    lambda error_class: 0 if error_class == primary_dataset else 1).tolist()
+                dimensions = []
+                for feature in selected_features:
+                    if self.numerical_features is not None and feature in self.numerical_features:
+                        feature_min = combined_df.loc[:, feature].min()
+                        feature_max = combined_df.loc[:, feature].max()
+                        dimensions.append({
+                            &#39;range&#39;: [feature_min, feature_max],
+                            &#39;label&#39;: feature,
+                            &#39;values&#39;: combined_df.loc[:, feature].tolist()
+                        })
+                    elif self.categorical_features is not None and feature in self.categorical_features:
+                        label_encoder = LabelEncoder()
+                        values = label_encoder.fit_transform(combined_df.loc[:, feature])
+                        values_range = [int(values.min()), int(values.max())]
+                        tick_values = label_encoder.transform(label_encoder.classes_).tolist()
+                        tick_text = label_encoder.classes_.tolist()
+                        dimensions.append({
+                            &#39;range&#39;: values_range,
+                            &#39;label&#39;: feature,
+                            &#39;values&#39;: values.tolist(),
+                            &#39;tickvals&#39;: tick_values,
+                            &#39;ticktext&#39;: tick_text
+                        })
+
+                if len(dimensions) &gt; 1:
+                    parallel_coordinates_dictionary.update({key: {
+                        &#39;primaryDatasetName&#39;: primary_dataset,
+                        &#39;secondaryDatasetName&#39;: secondary_dataset,
+                        &#39;colors&#39;: colors,
+                        &#39;dimensions&#39;: dimensions
+                    }})
+
+        parallel_coordinates_dict = {}
+        for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets, self._secondary_datasets):
+            if primary_dataset_name != secondary_dataset_name:
+                add_parallel_coordinates(parallel_coordinates_dict, primary_dataset_name, secondary_dataset_name)
+
+        if len(parallel_coordinates_dict) &gt; 0:
+            self._update_report({&#39;parallel_coordinates&#39;: parallel_coordinates_dict})
+
+    def _add_statistical_tests(self, cosine_similarity_threshold) -&gt; None:
+        &#34;&#34;&#34;
+        Calculates and adds statistical tests to the report data.
+
+        :param cosine_similarity_threshold: the cosine similarity threshold for the categorical features
+        :return: None
+        &#34;&#34;&#34;
+
+        def add_statistical_test(statistical_tests_dictionary: Dict, primary_dataset: str,
+                                 secondary_dataset: str) -&gt; None:
+            &#34;&#34;&#34;
+            Calculates statistical tests (ks_2samp) and metrics (wasserstein distance, cosine similarity)
+            then adds the results to the dictionary.
+
+            :param statistical_tests_dictionary: the statistical tests data dictionary
+            :param primary_dataset: the name of the primary data set
+            :param secondary_dataset: the name of the secondary data set
+            :return: None
+            &#34;&#34;&#34;
+
+            primary_df, secondary_df = self._get_primary_secondary_datasets(primary_dataset, secondary_dataset)
+            key = f&#39;{primary_dataset}_{secondary_dataset}&#39;
+            tests_dictionary = {key: {}}
+            p_value_threshold = 0.01
+
+            if self.numerical_features is not None:
+                for numerical_feature in self.numerical_features:
+                    primary_values = primary_df.loc[:, numerical_feature].values
+                    secondary_values = secondary_df.loc[:, numerical_feature].values
+                    p_value = ks_2samp(primary_values, secondary_values)[1]
+                    wasser_distance = wasserstein_distance(secondary_values, primary_values)
+                    tests_dictionary[key].update({
+                        numerical_feature: {
+                            &#39;ks_2samp&#39;: {
+                                &#39;p_value&#39;: p_value,
+                                &#39;p_value_threshold&#39;: p_value_threshold
+                            },
+                            &#39;wasserstein_distance&#39;: wasser_distance
+                        }
+                    })
+
+            if self.categorical_features is not None:
+                for categorical_feature in self.categorical_features:
+                    if primary_dataset != secondary_dataset:
+                        merged_cat_count = self._count_categories_and_merge_count_dataframes(categorical_feature,
+                                                                                             primary_dataset,
+                                                                                             secondary_dataset,
+                                                                                             normalize=True)
+                        primary_vector = merged_cat_count.loc[:, primary_dataset].tolist()
+                        secondary_vector = merged_cat_count.loc[:, secondary_dataset].tolist()
+                        cosine_similarity = _cosine_similarity(primary_vector, secondary_vector)
+                    else:
+                        cosine_similarity = 1.0
+
+                    tests_dictionary[key].update({
+                        categorical_feature: {
+                            &#39;cosine_similarity&#39;: {
+                                &#39;cosine_similarity&#39;: cosine_similarity,
+                                &#39;cosine_similarity_threshold&#39;: cosine_similarity_threshold
+                            }
+                        }
+                    })
+
+            statistical_tests_dictionary.update(tests_dictionary)
+
+        statistical_tests_dict = {}
+        for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets, self._secondary_datasets):
+            add_statistical_test(statistical_tests_dict, primary_dataset_name, secondary_dataset_name)
+
+        self._update_report({&#39;statistical_tests&#39;: statistical_tests_dict})
+
+    def serve_report_from_local_server(self, mode: str = &#39;server&#39;, port: int = None) -&gt; None:
+        &#34;&#34;&#34;
+        Serve the report to the user using a web server.
+        modes:
+        1- &#39;server&#39;: will open a new tab in the default browser using webbrowser package
+        2- &#39;js&#39;: will open a new tab in the default browser using IPython
+        3- &#39;jupyter&#39;: will open the report in a jupyter notebook
+
+        :param mode: server mode (&#39;server&#39;: will open a new tab in your default browser,
+        &#39;js&#39;: will open a new tab in your browser using a different method, &#39;jupyter&#39;: will open the report application
+        in your notebook).
+        default: &#39;server&#39;
+        :param port: the server port. default: None. a random port will be generated between (1024-49151)
+        :return: None
+        &#34;&#34;&#34;
+        if not port:
+            import random
+            port = random.randint(1024, 49151)
+        super()._serve_report_using_flask(self._template_name, mode, port)
+
+    def save_report(self, zip_report: bool = False) -&gt; None:
+        &#34;&#34;&#34;
+        Creates the report directory, copies the web application based on the template name,
+        saves the report data.
+
+        :param zip_report: enable it in order to zip the directory for downloading. default: False
+        :return: None
+        &#34;&#34;&#34;
+
+        super()._save_the_report(self._template_name, zip_report)
+
+    def _find_and_add_all_secondary_datasets_patterns(self) -&gt; None:
+        &#34;&#34;&#34;
+        Find all groups in secondary datasets and check if they exist in the primary datasets.
+        Output the groups, error and target distributions and the distance between the distributions.
+
+        :return: None
+        &#34;&#34;&#34;
+
+        def query_datasets_for_count_error_target(primary_df, secondary_df, features_values):
+            query_list = []
+            for feature, feature_value in features_values:
+                query_list.append(f&#39;{feature} == &#34;{feature_value}&#34;&#39;)
+
+            query = &#39; and &#39;.join(query_list)
+            filtered_primary_dataset = primary_df.query(query)
+            filtered_secondary_dataset = secondary_df.query(query)
+
+            output = {
+                &#39;primaryCount&#39;: filtered_primary_dataset.shape[0],
+                &#39;secondaryCount&#39;: filtered_secondary_dataset.shape[0],
+                &#39;secondaryErrorMean&#39;: filtered_secondary_dataset.loc[:, self.error_column_name].mean(),
+                &#39;secondaryErrorStd&#39;: filtered_secondary_dataset.loc[:, self.error_column_name].std(),
+                &#39;secondaryTargetMean&#39;: filtered_secondary_dataset.loc[:, self.target_feature_name].mean(),
+                &#39;secondaryTargetStd&#39;: filtered_secondary_dataset.loc[:, self.target_feature_name].std(),
+                &#39;primaryTargetValues&#39;: filtered_primary_dataset.loc[:, self.target_feature_name].tolist(),
+                &#39;secondaryTargetValues&#39;: filtered_secondary_dataset.loc[:, self.target_feature_name].tolist(),
+                &#39;primaryErrorValues&#39;: filtered_primary_dataset.loc[:, self.error_column_name].tolist(),
+                &#39;secondaryErrorValues&#39;: filtered_secondary_dataset.loc[:, self.error_column_name].tolist(),
+                &#39;primaryErrorMean&#39;: filtered_primary_dataset.loc[:, self.error_column_name].mean(),
+                &#39;primaryErrorStd&#39;: filtered_primary_dataset.loc[:, self.error_column_name].std(),
+                &#39;primaryTargetMean&#39;: filtered_primary_dataset.loc[:, self.target_feature_name].mean(),
+                &#39;primaryTargetStd&#39;: filtered_primary_dataset.loc[:, self.target_feature_name].std()
+            }
+
+            for dataset in [&#39;primary&#39;, &#39;secondary&#39;]:
+                if dataset == &#39;primary&#39;:
+                    df = filtered_primary_dataset
+                else:
+                    df = filtered_secondary_dataset
+
+                if output[f&#39;{dataset}Count&#39;] == 1:
+                    output.update({
+                        f&#39;{dataset}ErrorMean&#39;: df.loc[:, self.error_column_name].values[0],
+                        f&#39;{dataset}ErrorStd&#39;: None,
+                        f&#39;{dataset}TargetMean&#39;: df.loc[:, self.target_feature_name].values[0],
+                        f&#39;{dataset}TargetStd&#39;: None,
+                    })
+                elif output[f&#39;{dataset}Count&#39;] == 0:
+                    output.update({
+                        f&#39;{dataset}ErrorMean&#39;: None,
+                        f&#39;{dataset}ErrorStd&#39;: None,
+                        f&#39;{dataset}TargetMean&#39;: None,
+                        f&#39;{dataset}TargetStd&#39;: None,
+                    })
+
+            if output[&#39;primaryCount&#39;] &gt; 0 and output[&#39;secondaryCount&#39;] &gt; 0:
+                output[&#39;errorWassersteinDistance&#39;] = wasserstein_distance(
+                    filtered_secondary_dataset.loc[:, self.error_column_name],
+                    filtered_primary_dataset.loc[:, self.error_column_name])
+
+                output[&#39;targetWassersteinDistance&#39;] = wasserstein_distance(
+                    filtered_secondary_dataset.loc[:, self.target_feature_name],
+                    filtered_primary_dataset.loc[:, self.target_feature_name])
+            else:
+                output[&#39;errorWassersteinDistance&#39;] = None
+                output[&#39;targetWassersteinDistance&#39;] = None
+
+            return output
+
+        def add_patterns(grouped_patterns_dictionary: Dict, primary_dataset: str,
+                         secondary_dataset: str) -&gt; None:
+            &#34;&#34;&#34;
+            Group by all features in secondary_dataset and try to find these patterns in primary dataset.
+
+            :param grouped_patterns_dictionary: the patterns data dictionary
+            :param primary_dataset: the name of the primary data set
+            :param secondary_dataset: the name of the secondary data set
+            :return: None
+            &#34;&#34;&#34;
+
+            primary_df, secondary_df = self._get_primary_secondary_datasets(primary_dataset, secondary_dataset)
+            key = f&#39;{primary_dataset}_{secondary_dataset}&#39;
+            patterns_dictionary = {}
+
+            group_by_features = self.categorical_features[:]
+
+            numerical_features = list(filter(lambda f_name: f_name != self.target_feature_name,
+                                             self.numerical_features))
+
+            for numerical_feature in numerical_features:
+                binning_features_name = f&#39;{numerical_feature}_BIN&#39;
+
+                secondary_df.loc[:, binning_features_name], bins = pd.cut(secondary_df.loc[:, numerical_feature],
+                                                                          retbins=True, include_lowest=True,
+                                                                          bins=self._default_numerical_bins_for_grouping)
+                primary_df.loc[:, binning_features_name] = pd.cut(primary_df.loc[:, numerical_feature], bins=bins)
+
+                primary_df = primary_df.dropna()
+                primary_df.loc[:, binning_features_name] = primary_df.loc[:, binning_features_name].astype(str)
+                secondary_df.loc[:, binning_features_name] = secondary_df.loc[:, binning_features_name].astype(str)
+                group_by_features.append(binning_features_name)
+
+            primary_df = primary_df.drop(numerical_features, axis=1)
+            secondary_df = secondary_df.drop(numerical_features, axis=1)
+
+            secondary_groupby_all_df = secondary_df.groupby(by=group_by_features).mean()
+            secondary_all_groups = secondary_groupby_all_df.index.tolist()
+
+            patterns_list = []
+            for index, group in enumerate(secondary_all_groups):
+                group_dict = {&#39;name&#39;: f&#39;Group {index}&#39;, &#39;features&#39;: {}}
+
+                features_values = []
+                for feature_index, feature in enumerate(group_by_features):
+                    group_dict[&#39;features&#39;][feature] = group[feature_index]
+                    features_values.append((feature, group[feature_index]))
+
+                count_error_target_dict = query_datasets_for_count_error_target(primary_df,
+                                                                                secondary_df,
+                                                                                features_values)
+                group_dict.update(count_error_target_dict)
+                patterns_list.append(group_dict)
+
+            patterns_dictionary[key] = patterns_list
+            grouped_patterns_dictionary.update(patterns_dictionary)
+
+        grouped_patterns_dict = {}
+        for primary_dataset_name, secondary_dataset_name in product(self._primary_datasets, self._secondary_datasets):
+            add_patterns(grouped_patterns_dict, primary_dataset_name, secondary_dataset_name)
+
+        self._update_report({&#39;grouped_patterns&#39;: grouped_patterns_dict})</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -329,21 +799,101 @@ creates the error analysis report</p></div>
 <span>def <span class="ident">create_report</span></span>(<span>self) ‑> NoneType</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Creates a report using the user defined data and the data calculated based on the error
-:return: None</p></div>
+<div class="desc"><p>Creates a report using the user defined data and the data calculated based on the error.</p>
+<p>:return: None</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def create_report(self) -&gt; None:
     &#34;&#34;&#34;
-    Creates a report using the user defined data and the data calculated based on the error
+    Creates a report using the user defined data and the data calculated based on the error.
+
     :return: None
     &#34;&#34;&#34;
+    tic = time.perf_counter()
+    cosine_similarity_threshold: float = 0.8
 
     self._add_user_defined_data()
     self._add_error_class_to_test_df()
-    self._add_datasets()</code></pre>
+    self._add_datasets()
+    self._add_statistical_tests(cosine_similarity_threshold)
+
+    if self.categorical_features is not None and len(self.categorical_features) &gt; 0:
+        self._add_categorical_count_plot()
+
+    self._add_parallel_coordinates_plot(cosine_similarity_threshold)
+    self._find_and_add_all_secondary_datasets_patterns()
+    toc = time.perf_counter()
+
+    print(f&#34;The report was created in {toc - tic:0.4f} seconds&#34;)
+
+    if self.encryption_secret:
+        print(f&#39;Your encryption secret is {self.encryption_secret}&#39;)</code></pre>
+</details>
+</dd>
+<dt id="olliepy.RegressionErrorAnalysisReport.save_report"><code class="name flex">
+<span>def <span class="ident">save_report</span></span>(<span>self, zip_report: bool = False) ‑> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Creates the report directory, copies the web application based on the template name,
+saves the report data.</p>
+<p>:param zip_report: enable it in order to zip the directory for downloading. default: False
+:return: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save_report(self, zip_report: bool = False) -&gt; None:
+    &#34;&#34;&#34;
+    Creates the report directory, copies the web application based on the template name,
+    saves the report data.
+
+    :param zip_report: enable it in order to zip the directory for downloading. default: False
+    :return: None
+    &#34;&#34;&#34;
+
+    super()._save_the_report(self._template_name, zip_report)</code></pre>
+</details>
+</dd>
+<dt id="olliepy.RegressionErrorAnalysisReport.serve_report_from_local_server"><code class="name flex">
+<span>def <span class="ident">serve_report_from_local_server</span></span>(<span>self, mode: str = 'server', port: int = None) ‑> NoneType</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Serve the report to the user using a web server.
+modes:
+1- 'server': will open a new tab in the default browser using webbrowser package
+2- 'js': will open a new tab in the default browser using IPython
+3- 'jupyter': will open the report in a jupyter notebook</p>
+<p>:param mode: server mode ('server': will open a new tab in your default browser,
+'js': will open a new tab in your browser using a different method, 'jupyter': will open the report application
+in your notebook).
+default: 'server'
+:param port: the server port. default: None. a random port will be generated between (1024-49151)
+:return: None</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def serve_report_from_local_server(self, mode: str = &#39;server&#39;, port: int = None) -&gt; None:
+    &#34;&#34;&#34;
+    Serve the report to the user using a web server.
+    modes:
+    1- &#39;server&#39;: will open a new tab in the default browser using webbrowser package
+    2- &#39;js&#39;: will open a new tab in the default browser using IPython
+    3- &#39;jupyter&#39;: will open the report in a jupyter notebook
+
+    :param mode: server mode (&#39;server&#39;: will open a new tab in your default browser,
+    &#39;js&#39;: will open a new tab in your browser using a different method, &#39;jupyter&#39;: will open the report application
+    in your notebook).
+    default: &#39;server&#39;
+    :param port: the server port. default: None. a random port will be generated between (1024-49151)
+    :return: None
+    &#34;&#34;&#34;
+    if not port:
+        import random
+        port = random.randint(1024, 49151)
+    super()._serve_report_using_flask(self._template_name, mode, port)</code></pre>
 </details>
 </dd>
 </dl>
@@ -369,6 +919,8 @@ creates the error analysis report</p></div>
 <h4><code><a title="olliepy.RegressionErrorAnalysisReport" href="#olliepy.RegressionErrorAnalysisReport">RegressionErrorAnalysisReport</a></code></h4>
 <ul class="">
 <li><code><a title="olliepy.RegressionErrorAnalysisReport.create_report" href="#olliepy.RegressionErrorAnalysisReport.create_report">create_report</a></code></li>
+<li><code><a title="olliepy.RegressionErrorAnalysisReport.save_report" href="#olliepy.RegressionErrorAnalysisReport.save_report">save_report</a></code></li>
+<li><code><a title="olliepy.RegressionErrorAnalysisReport.serve_report_from_local_server" href="#olliepy.RegressionErrorAnalysisReport.serve_report_from_local_server">serve_report_from_local_server</a></code></li>
 </ul>
 </li>
 </ul>
