@@ -10,6 +10,7 @@ app.config['ENV'] = 'development'
 app.debug = False
 application_folder = None
 
+
 def run_application(port, folder):
     app.static_folder = folder
     app.template_folder = folder
