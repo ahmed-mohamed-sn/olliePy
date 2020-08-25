@@ -1,4 +1,4 @@
-from typing import List, Dict, Tuple
+from typing import List, Dict, Tuple, Union
 from .Report import Report
 import pandas as pd
 from .utils.TypeChecking import is_instance
@@ -171,14 +171,22 @@ class RegressionErrorAnalysisReport(Report):
         self._template_name = 'regression-error-analysis-report'
         self._default_numerical_bins_for_grouping = 10
 
-    def create_report(self) -> None:
+    def create_report(self,
+                      enable_parallel_coordinates_plot: bool = True,
+                      parallel_coordinates_features: Union[str, List[str]] = 'auto',
+                      cosine_similarity_threshold: float = 0.8,
+                      parallel_coordinates_q1_threshold: float = 0.25,
+                      parallel_coordinates_q2_threshold: float = 0.75,
+                      enable_patterns_report: bool = True,
+                      patterns_report_group_by_categorical_features: Union[str, List[str]] = 'all',
+                      patterns_report_group_by_numerical_features: Union[str, List[str]] = 'all',
+                      patterns_report_number_of_bins: Union[int, List[int]] = 10) -> None:
         """
         Creates a report using the user defined data and the data calculated based on the error.
 
         :return: None
         """
         tic = time.perf_counter()
-        cosine_similarity_threshold: float = 0.8
 
         self._add_user_defined_data()
         self._add_error_class_to_test_df()
@@ -209,7 +217,8 @@ class RegressionErrorAnalysisReport(Report):
         self._update_report({'secondaryDatasets': self._secondary_datasets})
 
         if self.numerical_features:
-            self.numerical_features.append(self.target_feature_name)
+            if self.target_feature_name not in self.numerical_features:
+                self.numerical_features.append(self.target_feature_name)
             self._update_report({'numericalFeatures': self.numerical_features})
 
         if self.categorical_features:
