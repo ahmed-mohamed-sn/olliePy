@@ -7,3 +7,5 @@ test_report.json
 dist
 olliepy.egg-info
 dask-worker-space
+generateDocs.sh
+generateSphinxDocs.sh
