@@ -7,7 +7,7 @@
 > The data scientist only needs to provide the data and any required 
 > information and OlliePy will generate the rest.
 
-### <br/>Get started by following the [**OlliePy** guide](https://htmlpreview.github.io/?https://github.com/ahmed-mohamed-sn/olliePy/blob/master/docs/olliepy/index.html)
+### <br/>Get started by following the [**OlliePy** guide](https://ahmed-mohamed-sn.github.io/olliePy/)
 
 ### <br/>Error analysis report for regression demo
 ![OlliePy demo](./sphinxSource/source/_static/imgs/error-analysis-regression-Demo.gif)
