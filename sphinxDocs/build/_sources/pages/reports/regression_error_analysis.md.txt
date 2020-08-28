@@ -14,7 +14,7 @@ y_train_pred = pipeline.predict(X_train)
 train_df['error'] = y_train_pred - y_train
 ```
 
-3- Calculate the error the test/validation data
+3- Calculate the error for the test/validation data
 
 ```
 y_test_pred = pipeline.predict(X_test)
@@ -30,7 +30,7 @@ test_df['error'].hist(bins=100)
 ![Error distribution](../../_static/imgs/TestErrorDistribution.png)
 
 5- Create the error classes dictionary using the error distribution, where the key is the name of the error class,
- and the value is the min (inclusive) and max (exclusive) error of the class.
+ and the value is the min (inclusive) and max (exclusive) error of the class as a tuple.
  
 ```
 error_classes = {

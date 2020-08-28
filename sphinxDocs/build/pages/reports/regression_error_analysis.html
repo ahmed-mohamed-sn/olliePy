@@ -171,7 +171,7 @@
 <span class="n">train_df</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_train_pred</span> <span class="o">-</span> <span class="n">y_train</span>
 </pre></div>
 </div>
-<p>3- Calculate the error the test/validation data</p>
+<p>3- Calculate the error for the test/validation data</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">y_test_pred</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 <span class="n">test_df</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">y_test_pred</span> <span class="o">-</span> <span class="n">y_test</span>
 </pre></div>
@@ -182,7 +182,7 @@
 </div>
 <p><img alt="Error distribution" src="../../_images/TestErrorDistribution.png" /></p>
 <p>5- Create the error classes dictionary using the error distribution, where the key is the name of the error class,
-and the value is the min (inclusive) and max (exclusive) error of the class.</p>
+and the value is the min (inclusive) and max (exclusive) error of the class as a tuple.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">error_classes</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;EXTREME_UNDER_ESTIMATION&#39;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">8.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.0</span><span class="p">),</span>
     <span class="s1">&#39;HIGH_UNDER_ESTIMATION&#39;</span><span class="p">:</span> <span class="p">(</span><span class="o">-</span><span class="mf">4.0</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.0</span><span class="p">),</span>
