@@ -1,2 +1,1 @@
-pdoc --html --force -o ./docs olliepy/
-
+sphinx-build -b html sphineSource/source ../docs
