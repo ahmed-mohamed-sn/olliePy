@@ -1,3 +1,5 @@
+
+![OlliePy logo](./sphinxDocs/source/_static/imgs/logo.png)
 # OlliePy - An alternative approach for evaluating ML models
 > **OlliePy** is a python package which helps the data scientists in
 > evaluating and analysing their machine learning experiments by
