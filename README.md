@@ -8,4 +8,4 @@
 ### <br/>Get started by following the [**OlliePy** guide](https://htmlpreview.github.io/?https://github.com/ahmed-mohamed-sn/olliePy/blob/master/docs/olliepy/index.html)
 
 ### <br/>Error analysis report for regression demo
-![OlliePy demo](./sphinxDocs/source/_static/imgs/OlliePy-Demo.gif)
+![OlliePy demo](./sphinxDocs/source/_static/imgs/error-analysis-regression-Demo.gif)

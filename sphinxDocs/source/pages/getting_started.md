@@ -5,4 +5,4 @@
 - [Error analysis report for regression problems](./reports/regression_error_analysis.html)
 
 ## [Error Analysis Report for Regression Problems](./reports/regression_error_analysis.html)
-![RegressionErrorAnalysis](../_static/imgs/OlliePy-Demo.gif)
+![RegressionErrorAnalysis](../_static/imgs/error-analysis-regression-Demo.gif)
