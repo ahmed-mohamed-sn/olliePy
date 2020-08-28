@@ -10,4 +10,4 @@
 ### <br/>Get started by following the [**OlliePy** guide](https://ahmed-mohamed-sn.github.io/olliePy/)
 
 ### <br/>Error analysis report for regression demo
-![OlliePy demo](./sphinxSource/source/_static/imgs/error-analysis-regression-Demo.gif)
+![OlliePy demo](./sphinxSource/source/_static/imgs/error-analysis-regression-demo.gif)
