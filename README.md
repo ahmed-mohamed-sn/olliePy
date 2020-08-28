@@ -1,5 +1,5 @@
 
-![OlliePy logo](./sphinxDocs/source/_static/imgs/logo.png)
+![OlliePy logo](./sphinxSource/source/_static/imgs/logo.png)
 # OlliePy - An alternative approach for evaluating ML models
 > **OlliePy** is a python package which can help the data scientists in
 > evaluating and analysing their machine learning experiments by
@@ -10,4 +10,4 @@
 ### <br/>Get started by following the [**OlliePy** guide](https://htmlpreview.github.io/?https://github.com/ahmed-mohamed-sn/olliePy/blob/master/docs/olliepy/index.html)
 
 ### <br/>Error analysis report for regression demo
-![OlliePy demo](./sphinxDocs/source/_static/imgs/error-analysis-regression-Demo.gif)
+![OlliePy demo](./sphinxSource/source/_static/imgs/error-analysis-regression-Demo.gif)
