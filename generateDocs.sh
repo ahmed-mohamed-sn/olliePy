@@ -1,1 +1,2 @@
-sphinx-build -b html sphineSource/source ../docs
+#sphinx-build -b html ./sphinxSource/source ./docs
+cd sphinxSource && make clean && make html

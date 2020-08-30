@@ -80,11 +80,11 @@ Try different server mode ('server', 'js' or 'jupyter') or save and download the
         elif mode == 'js':
             from IPython.core.display import display
             from IPython.display import Javascript
-            display(Javascript('window.open("{url}");'.format(url=url)))
+            display(Javascript(f'window.open("{url}");'))
         else:
             from IPython.display import IFrame
             from IPython.core.display import display
-            display(IFrame('http://127.0.0.1:5000/', '100%', '800px'))
+            display(IFrame(f'{url}', '100%', '800px'))
         p.join()
     except (KeyboardInterrupt, SystemExit):
         print('\n! Received keyboard interrupt, stopping server.\n')
@@ -200,7 +200,7 @@ To zip the report directory, set zip_report=True when saving.''')
         """
         Creates the report directory if it doesn't exist.
 
-        :return: report_directory
+        :return: report_directory: the report directory
         """
         report_folder = self.report_folder_name if self.report_folder_name else self.title
         report_directory = path.join(self.output_directory, report_folder)
@@ -227,11 +227,22 @@ To zip the report directory, set zip_report=True when saving.''')
                 json.dump(data, file_path)
 
     def _zip_report_directory(self, report_directory: str) -> None:
+        """
+        Zip the report directory so it can be easier to download, in case the end user is not working locally.
+
+        :param report_directory: the report directory to zip
+        :return:
+        """
         import shutil
         report_folder = self.report_folder_name if self.report_folder_name else self.title
         shutil.make_archive(f'{self.output_directory}/{report_folder}', 'zip', report_directory)
 
-    def _encrypt_report_data(self):
+    def _encrypt_report_data(self) -> bytes:
+        """
+        Encrypt Report data using 128 bit AES secret
+
+        :return: encrypted_data: the encrypted data in bytes
+        """
         from Crypto import Random
         from Crypto.Cipher import AES
         import base64
