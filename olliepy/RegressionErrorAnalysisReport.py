@@ -171,16 +171,7 @@ class RegressionErrorAnalysisReport(Report):
         self._template_name = 'regression-error-analysis-report'
         self._default_numerical_bins_for_grouping = 10
 
-    def create_report(self,
-                      enable_parallel_coordinates_plot: bool = True,
-                      parallel_coordinates_features: Union[str, List[str]] = 'auto',
-                      cosine_similarity_threshold: float = 0.8,
-                      parallel_coordinates_q1_threshold: float = 0.25,
-                      parallel_coordinates_q2_threshold: float = 0.75,
-                      enable_patterns_report: bool = True,
-                      patterns_report_group_by_categorical_features: Union[str, List[str]] = 'all',
-                      patterns_report_group_by_numerical_features: Union[str, List[str]] = 'all',
-                      patterns_report_number_of_bins: Union[int, List[int]] = 10) -> None:
+    def create_report(self, cosine_similarity_threshold: float = 0.8) -> None:
         """
         Creates a report using the user defined data and the data calculated based on the error.
 
