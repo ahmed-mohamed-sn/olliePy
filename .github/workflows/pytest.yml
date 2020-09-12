@@ -9,7 +9,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - run: sudo apt-get install python-dev
+    - run: sudo apt-get install gcc python-dev
     - name: Python Pytest GitHub Action
       uses: fylein/python-pytest-github-action@v2
       with:
