@@ -6,11 +6,21 @@ jobs:
   build:
 
     runs-on: macos-latest
-
+    strategy:
+      matrix:
+        python-version: [ 3.6, 3.7, 3.8 ]
     steps:
     - uses: actions/checkout@v2
-    - name: Python Pytest GitHub Action
-      uses: fylein/python-pytest-github-action@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
       with:
-        args: pip3 install -r ./tests/requirements.txt && pytest tests
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest
+        pip install -r ./tests/requirements.txt
+    - name: Test OlliePy
+      run: |
+        pytest tests
 
