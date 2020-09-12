@@ -321,6 +321,7 @@ class RegressionErrorAnalysisReport(Report):
         :return: None
         """
 
+        self.report_data['report'] = {}
         validate_create_report_attributes(enable_patterns_report,
                                           patterns_report_group_by_categorical_features,
                                           patterns_report_group_by_numerical_features,
