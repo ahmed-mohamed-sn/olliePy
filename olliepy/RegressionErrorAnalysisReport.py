@@ -9,33 +9,95 @@ from sklearn.preprocessing import LabelEncoder
 import time
 
 
-def validate_create_report_attributes(enable_parallel_coordinates_plot: bool,
+def validate_create_report_attributes(enable_patterns_report: bool,
+                                      patterns_report_group_by_categorical_features: Union[str, List[str]],
+                                      patterns_report_group_by_numerical_features: Union[str, List[str]],
+                                      patterns_report_number_of_bins: Union[int, List[int]],
+                                      enable_parallel_coordinates_plot: bool,
                                       cosine_similarity_threshold: float,
                                       parallel_coordinates_q1_threshold: float,
                                       parallel_coordinates_q2_threshold: float,
                                       parallel_coordinates_features: Union[str, List[str]],
+                                      categorical_features: List[str],
+                                      numerical_features: List[str],
                                       all_features: List[str]):
+    if type(enable_patterns_report) is not bool:
+        raise TypeError('provided enable_patterns_report is not valid. enable_patterns_report has to be a bool')
+
+    if not is_instance(patterns_report_group_by_categorical_features, Union[str, List[str]]):
+        raise TypeError('''provided patterns_report_group_by_categorical_features is not valid.
+            patterns_report_group_by_categorical_features has to be a str == "all" or a list of categorical features''')
+
+    if not is_instance(patterns_report_group_by_numerical_features, Union[str, List[str]]):
+        raise TypeError('''provided patterns_report_group_by_numerical_features is not valid.
+        patterns_report_group_by_numerical_features has to be a str == "all" or a list of numerical features''')
+
+    if type(
+            patterns_report_group_by_categorical_features) is str and patterns_report_group_by_categorical_features != 'all':
+        raise AttributeError('''provided patterns_report_group_by_categorical_features is not valid.
+            patterns_report_group_by_categorical_features has to be "all" if the provided value is a string''')
+
+    if type(
+            patterns_report_group_by_numerical_features) is str and patterns_report_group_by_numerical_features != 'all':
+        raise AttributeError('''provided patterns_report_group_by_numerical_features is not valid.
+            patterns_report_group_by_numerical_features has to be "all" if the provided value is a string''')
+
+    if is_instance(patterns_report_group_by_categorical_features, List[str]):
+        unknown_features = [feature for feature in patterns_report_group_by_categorical_features if
+                            feature not in categorical_features]
+        if len(unknown_features) > 0:
+            raise AttributeError(f'''provided patterns_report_group_by_categorical_features is not valid.
+            these features {unknown_features} do not exist in the categorical features''')
+
+    if is_instance(patterns_report_group_by_numerical_features, List[str]):
+        unknown_features = [feature for feature in patterns_report_group_by_numerical_features if
+                            feature not in numerical_features]
+        if len(unknown_features) > 0:
+            raise AttributeError(f'''provided patterns_report_group_by_numerical_features is not valid.
+            these features {unknown_features} do not exist in the numerical features''')
+
+    if not is_instance(patterns_report_number_of_bins, Union[int, List[int]]):
+        raise TypeError('''provided patterns_report_number_of_bins is not valid.
+        patterns_report_number_of_bins has to be an int or a list of ints (one for each numerical feature provided in patterns_report_group_by_numerical_features)''')
+
+    if is_instance(patterns_report_number_of_bins, List[int]) and type(
+            patterns_report_group_by_numerical_features) is str:
+        raise AttributeError('''provided patterns_report_number_of_bins is not valid.
+        patterns_report_number_of_bins can be a list of ints if a list of numerical features were provided in patterns_report_group_by_numerical_features''')
+
+    if is_instance(patterns_report_number_of_bins, List[int]) and is_instance(
+            patterns_report_group_by_numerical_features, List[str]):
+        if len(patterns_report_number_of_bins) != len(patterns_report_group_by_numerical_features):
+            raise AttributeError('''provided patterns_report_number_of_bins is not valid.
+            patterns_report_number_of_bins list length has to be equal to the number of features provided in patterns_report_group_by_numerical_features''')
 
     if type(enable_parallel_coordinates_plot) is not bool:
-        raise TypeError('provided enable_parallel_coordinates_plot is not valid. enable_parallel_coordinates_plot has to be a bool')
+        raise TypeError(
+            'provided enable_parallel_coordinates_plot is not valid. enable_parallel_coordinates_plot has to be a bool')
 
     if type(cosine_similarity_threshold) is not float:
-        raise TypeError('provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be a float')
+        raise TypeError(
+            'provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be a float')
 
     if cosine_similarity_threshold <= 0.0 or cosine_similarity_threshold >= 1.0:
-        raise AttributeError('provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be between 0.0 and 1.0')
+        raise AttributeError(
+            'provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be between 0.0 and 1.0')
 
     if type(parallel_coordinates_q1_threshold) is not float:
-        raise TypeError('provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be a float')
+        raise TypeError(
+            'provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be a float')
 
     if type(parallel_coordinates_q2_threshold) is not float:
-        raise TypeError('provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be a float')
+        raise TypeError(
+            'provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be a float')
 
     if parallel_coordinates_q1_threshold <= 0.0 or parallel_coordinates_q1_threshold >= 1.0:
-        raise AttributeError('provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be between 0.0 and 1.0')
+        raise AttributeError(
+            'provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be between 0.0 and 1.0')
 
     if parallel_coordinates_q2_threshold <= 0.0 or parallel_coordinates_q2_threshold >= 1.0:
-        raise AttributeError('provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be between 0.0 and 1.0')
+        raise AttributeError(
+            'provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be between 0.0 and 1.0')
 
     if parallel_coordinates_q2_threshold <= parallel_coordinates_q1_threshold:
         raise AttributeError('''provided parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold are not valid.
@@ -58,7 +120,6 @@ def validate_create_report_attributes(enable_parallel_coordinates_plot: bool,
     if is_instance(parallel_coordinates_features, List[str]) and len(parallel_coordinates_features) < 2:
         raise AttributeError(f'''provided parallel_coordinates_features is not valid.
             parallel_coordinates_features has to contain at least two features to plot''')
-
 
 
 def validate_attributes(train_df, test_df, target_feature_name, error_column_name,
@@ -214,10 +275,10 @@ class RegressionErrorAnalysisReport(Report):
         self.test_df = test_df.copy()
         self.target_feature_name = target_feature_name
         self.error_column_name = error_column_name
-        self.error_classes = error_classes
+        self.error_classes = error_classes.copy()
         self.acceptable_error_class = acceptable_error_class
-        self.numerical_features = numerical_features
-        self.categorical_features = categorical_features
+        self.numerical_features = numerical_features[:]
+        self.categorical_features = categorical_features[:]
         self._training_data_name = 'Training data'
         self._testing_data_name = 'Testing data'
         self._error_class_col_name = 'ERROR_CLASS'
@@ -225,9 +286,12 @@ class RegressionErrorAnalysisReport(Report):
         self._secondary_datasets = [self._testing_data_name]
         self._secondary_datasets.extend(list(self.error_classes.keys()))
         self._template_name = 'regression-error-analysis-report'
-        self._default_numerical_bins_for_grouping = 10
 
     def create_report(self,
+                      enable_patterns_report: bool = True,
+                      patterns_report_group_by_categorical_features: Union[str, List[str]] = 'all',
+                      patterns_report_group_by_numerical_features: Union[str, List[str]] = 'all',
+                      patterns_report_number_of_bins: Union[int, List[int]] = 10,
                       enable_parallel_coordinates_plot: bool = True,
                       cosine_similarity_threshold: float = 0.8,
                       parallel_coordinates_q1_threshold: float = 0.25,
@@ -236,6 +300,11 @@ class RegressionErrorAnalysisReport(Report):
         """
         Creates a report using the user defined data and the data calculated based on the error.
 
+        :param enable_patterns_report: enables the patterns report. default: True
+        :param patterns_report_group_by_categorical_features: categorical features to use in the patterns report. default: 'all'
+        :param patterns_report_group_by_numerical_features: numerical features to use in the patterns report. default: 'all'
+        :param patterns_report_number_of_bins: number of bins to use for each provided numerical feature
+         or one number of bins to use for all provided numerical features. default: 10
         :param enable_parallel_coordinates_plot: enables the parallel coordinates plot. default: True
         :param cosine_similarity_threshold: The cosine similarity threshold to decide if the categorical distribution of
          the primary and secondary datasets are similar.
@@ -249,14 +318,20 @@ class RegressionErrorAnalysisReport(Report):
                 - parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold which are two quantile values.
                     if primary_quantile_1 >= secondary_quantile_2 or secondary_quantile_1 >= primary_quantile_2
                         then the numerical feature is selected and will be added to the plot.
-        :return:
+        :return: None
         """
 
-        validate_create_report_attributes(enable_parallel_coordinates_plot,
+        validate_create_report_attributes(enable_patterns_report,
+                                          patterns_report_group_by_categorical_features,
+                                          patterns_report_group_by_numerical_features,
+                                          patterns_report_number_of_bins,
+                                          enable_parallel_coordinates_plot,
                                           cosine_similarity_threshold,
                                           parallel_coordinates_q1_threshold,
                                           parallel_coordinates_q2_threshold,
                                           parallel_coordinates_features,
+                                          self.categorical_features,
+                                          self.numerical_features,
                                           self.train_df.columns.tolist())
         tic = time.perf_counter()
 
@@ -274,7 +349,11 @@ class RegressionErrorAnalysisReport(Report):
                                                 parallel_coordinates_q2_threshold,
                                                 parallel_coordinates_features)
 
-        self._find_and_add_all_secondary_datasets_patterns()
+        if enable_patterns_report:
+            self._find_and_add_all_secondary_datasets_patterns(patterns_report_group_by_categorical_features,
+                                                               patterns_report_group_by_numerical_features,
+                                                               patterns_report_number_of_bins)
+
         toc = time.perf_counter()
 
         print(f"The report was created in {toc - tic:0.4f} seconds")
@@ -711,11 +790,18 @@ class RegressionErrorAnalysisReport(Report):
 
         super()._save_the_report(self._template_name, zip_report)
 
-    def _find_and_add_all_secondary_datasets_patterns(self) -> None:
+    def _find_and_add_all_secondary_datasets_patterns(self,
+                                                      patterns_report_group_by_categorical_features,
+                                                      patterns_report_group_by_numerical_features,
+                                                      patterns_report_number_of_bins) -> None:
         """
         Find all groups in secondary datasets and check if they exist in the primary datasets.
-        Output the groups, error and target distributions and the distance between the distributions.
+        Outputs the groups, error and target distributions and the distance between the distributions.
 
+        :param patterns_report_group_by_categorical_features: categorical features to use in the patterns report. default: 'all'
+        :param patterns_report_group_by_numerical_features: numerical features to use in the patterns report. default: 'all'
+        :param patterns_report_number_of_bins: number of bins to use for each provided numerical feature
+         or one number of bins to use for all provided numerical features. default: 10
         :return: None
         """
 
@@ -795,17 +881,28 @@ class RegressionErrorAnalysisReport(Report):
             key = f'{primary_dataset}_{secondary_dataset}'
             patterns_dictionary = {}
 
-            group_by_features = self.categorical_features[:]
+            if patterns_report_group_by_categorical_features == 'all':
+                group_by_features = self.categorical_features[:]
+            else:
+                group_by_features = patterns_report_group_by_categorical_features[:]
 
-            numerical_features = list(filter(lambda f_name: f_name != self.target_feature_name,
-                                             self.numerical_features))
+            if patterns_report_group_by_numerical_features == 'all':
+                numerical_features = list(filter(lambda f_name: f_name != self.target_feature_name,
+                                                 self.numerical_features))
+            else:
+                numerical_features = patterns_report_group_by_numerical_features[:]
 
-            for numerical_feature in numerical_features:
+            for numerical_feature_index, numerical_feature in enumerate(numerical_features):
                 binning_features_name = f'{numerical_feature}_BIN'
+
+                if type(patterns_report_number_of_bins) is int:
+                    number_of_bins = patterns_report_number_of_bins
+                else:
+                    number_of_bins = patterns_report_number_of_bins[numerical_feature_index]
 
                 secondary_df.loc[:, binning_features_name], bins = pd.cut(secondary_df.loc[:, numerical_feature],
                                                                           retbins=True, include_lowest=True,
-                                                                          bins=self._default_numerical_bins_for_grouping)
+                                                                          bins=number_of_bins)
                 primary_df.loc[:, binning_features_name] = pd.cut(primary_df.loc[:, numerical_feature], bins=bins)
 
                 primary_df = primary_df.dropna()
@@ -820,13 +917,18 @@ class RegressionErrorAnalysisReport(Report):
             secondary_all_groups = secondary_groupby_all_df.index.tolist()
 
             patterns_list = []
+            groupby_features_length = len(group_by_features)
             for index, group in enumerate(secondary_all_groups):
                 group_dict = {'name': f'Group {index}', 'features': {}}
 
                 features_values = []
                 for feature_index, feature in enumerate(group_by_features):
-                    group_dict['features'][feature] = group[feature_index]
-                    features_values.append((feature, group[feature_index]))
+                    if groupby_features_length > 1:
+                        group_dict['features'][feature] = group[feature_index]
+                        features_values.append((feature, group[feature_index]))
+                    else:
+                        group_dict['features'][feature] = group
+                        features_values.append((feature, group))
 
                 count_error_target_dict = query_datasets_for_count_error_target(primary_df,
                                                                                 secondary_df,
