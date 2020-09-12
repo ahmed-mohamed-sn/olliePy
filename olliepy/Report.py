@@ -61,7 +61,7 @@ def _start_server_and_view_report(report_directory: str, mode: str, port: int) -
     :return: None
     """
     print('''\n\n ### \nServing the report this way, might not work on all machines.
-Try different server mode ('server', 'js' or 'jupyter') or save and download the report and open index.html \n###\n\n''')
+Try different server modes ('server', 'js' or 'jupyter') or save and download the report and open index.html \n###\n\n''')
     print('Clear your browser\'s cache if your report was not updated\n\n')
     import multiprocessing as mp
     import time

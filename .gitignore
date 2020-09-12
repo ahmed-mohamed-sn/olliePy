@@ -9,3 +9,4 @@ olliepy.egg-info
 dask-worker-space
 generateDocs.sh
 generateSphinxDocs.sh
+runTests.sh
