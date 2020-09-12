@@ -383,9 +383,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_datasets</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_testing_data_name</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_datasets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_classes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span> <span class="o">=</span> <span class="s1">&#39;regression-error-analysis-report&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_default_numerical_bins_for_grouping</span> <span class="o">=</span> <span class="mi">10</span>
 
 <div class="viewcode-block" id="RegressionErrorAnalysisReport.create_report"><a class="viewcode-back" href="../../pages/API/regression_error_analysis_report.html#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.create_report">[docs]</a>    <span class="k">def</span> <span class="nf">create_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                      <span class="n">enable_patterns_report</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                      <span class="n">patterns_report_group_by_categorical_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>
+                      <span class="n">patterns_report_group_by_numerical_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>
+                      <span class="n">patterns_report_number_of_bins</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
                       <span class="n">enable_parallel_coordinates_plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                       <span class="n">cosine_similarity_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
                       <span class="n">parallel_coordinates_q1_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span>
@@ -394,6 +397,11 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a report using the user defined data and the data calculated based on the error.</span>
 
+<span class="sd">        :param enable_patterns_report: enables the patterns report. default: True</span>
+<span class="sd">        :param patterns_report_group_by_categorical_features: categorical features to use in the patterns report. default: &#39;all&#39;</span>
+<span class="sd">        :param patterns_report_group_by_numerical_features: numerical features to use in the patterns report. default: &#39;all&#39;</span>
+<span class="sd">        :param patterns_report_number_of_bins: number of bins to use for each provided numerical feature</span>
+<span class="sd">         or one number of bins to use for all provided numerical features. default: 10</span>
 <span class="sd">        :param enable_parallel_coordinates_plot: enables the parallel coordinates plot. default: True</span>
 <span class="sd">        :param cosine_similarity_threshold: The cosine similarity threshold to decide if the categorical distribution of</span>
 <span class="sd">         the primary and secondary datasets are similar.</span>
