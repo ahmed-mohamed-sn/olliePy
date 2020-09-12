@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>olliepy.Report &mdash; Olliepy 0.1.14 documentation</title>
+  <title>olliepy.Report &mdash; Olliepy 0.1.17 documentation</title>
   
 
   
@@ -279,7 +279,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Report.__init__"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                  <span class="n">output_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                  <span class="n">subtitle</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -310,17 +310,17 @@
         <span class="k">if</span> <span class="n">subtitle</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;subtitle&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">subtitle</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;report&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;report&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="nf">_update_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Report._update_report"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report._update_report">[docs]</a>    <span class="k">def</span> <span class="nf">_update_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Updates the report dictionary in report_data</span>
 <span class="sd">        :param data: Dict, the data dictionary that will be added to the report dictionary in report_data</span>
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;report&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;report&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_serve_report_using_flask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Report._serve_report_using_flask"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report._serve_report_using_flask">[docs]</a>    <span class="k">def</span> <span class="nf">_serve_report_using_flask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the report directory, copies the web application based on the template name,</span>
 <span class="sd">        saves the report data and starts the flask server.</span>
@@ -333,9 +333,9 @@
         <span class="n">report_directory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_report_directory</span><span class="p">()</span>
         <span class="n">_copy_application_template</span><span class="p">(</span><span class="n">template_name</span><span class="p">,</span> <span class="n">report_directory</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_save_report_data</span><span class="p">(</span><span class="n">report_directory</span><span class="p">)</span>
-        <span class="n">_start_server_and_view_report</span><span class="p">(</span><span class="n">report_directory</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+        <span class="n">_start_server_and_view_report</span><span class="p">(</span><span class="n">report_directory</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_save_the_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">zip_report</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Report._save_the_report"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report._save_the_report">[docs]</a>    <span class="k">def</span> <span class="nf">_save_the_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">zip_report</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the report directory, copies the web application based on the template name,</span>
 <span class="sd">        saves the report data.</span>
@@ -352,9 +352,9 @@
 
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;The report has been saved.</span>
 <span class="s1">To view the report, go to the report&#39;s directory (</span><span class="si">{</span><span class="n">report_directory</span><span class="si">}</span><span class="s1">) and open index.html then upload report_data.json.</span>
-<span class="s1">To zip the report directory, set zip_report=True when saving.&#39;&#39;&#39;</span><span class="p">)</span>
+<span class="s1">To zip the report directory, set zip_report=True when saving.&#39;&#39;&#39;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_create_report_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="Report._create_report_directory"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report._create_report_directory">[docs]</a>    <span class="k">def</span> <span class="nf">_create_report_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the report directory if it doesn&#39;t exist.</span>
 
@@ -365,9 +365,9 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">report_directory</span><span class="p">):</span>
             <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">report_directory</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">report_directory</span>
+        <span class="k">return</span> <span class="n">report_directory</span></div>
 
-    <span class="k">def</span> <span class="nf">_save_report_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">report_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Report._save_report_data"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report._save_report_data">[docs]</a>    <span class="k">def</span> <span class="nf">_save_report_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">report_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes the report_directory and saves the data as json there.</span>
 
@@ -382,9 +382,9 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">report_directory</span><span class="p">,</span> <span class="s1">&#39;report_data.json&#39;</span><span class="p">),</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file_path</span><span class="p">:</span>
-                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+                <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_zip_report_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">report_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Report._zip_report_directory"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report._zip_report_directory">[docs]</a>    <span class="k">def</span> <span class="nf">_zip_report_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">report_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Zip the report directory so it can be easier to download, in case the end user is not working locally.</span>
 
@@ -393,9 +393,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">shutil</span>
         <span class="n">report_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_folder_name</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_folder_name</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">title</span>
-        <span class="n">shutil</span><span class="o">.</span><span class="n">make_archive</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">report_folder</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;zip&#39;</span><span class="p">,</span> <span class="n">report_directory</span><span class="p">)</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">make_archive</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">report_folder</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;zip&#39;</span><span class="p">,</span> <span class="n">report_directory</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_encrypt_report_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
+<div class="viewcode-block" id="Report._encrypt_report_data"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report._encrypt_report_data">[docs]</a>    <span class="k">def</span> <span class="nf">_encrypt_report_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bytes</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Encrypt Report data using 128 bit AES secret</span>
 
@@ -420,7 +420,7 @@
 
         <span class="n">encrypted_data</span> <span class="o">=</span> <span class="n">encrypt</span><span class="p">(</span><span class="n">encoded_data</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">encrypted_data</span></div>
+        <span class="k">return</span> <span class="n">encrypted_data</span></div></div>
 </pre></div>
 
            </div>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Report &mdash; Olliepy 0.1.14 documentation</title>
+  <title>Report &mdash; Olliepy 0.1.17 documentation</title>
   
 
   
@@ -194,44 +194,97 @@ you can also view encryption_secret to get the generated secret.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="olliepy.Report.Report.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">output_directory</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">subtitle</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">report_folder_name</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encryption_secret</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">generate_encryption_secret</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/Report.html#Report.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.Report.Report.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+<dt id="olliepy.Report.Report._create_report_directory">
+<code class="sig-name descname">_create_report_directory</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; str<a class="reference internal" href="../../_modules/olliepy/Report.html#Report._create_report_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.Report.Report._create_report_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the report directory if it doesn’t exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>report_directory: the report directory</p>
+</dd>
+</dl>
 </dd></dl>
 
-<p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#olliepy.Report.Report.__init__" title="olliepy.Report.Report.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(title, output_directory[, …])</p></td>
-<td><p>Initialize self.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_update_report</span></code>(data)</p></td>
-<td><p>Updates the report dictionary in report_data :param data: Dict, the data dictionary that will be added to the report dictionary in report_data :return: None</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_serve_report_using_flask</span></code>(template_name, …)</p></td>
-<td><p>Creates the report directory, copies the web application based on the template name, saves the report data and starts the flask server.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_save_the_report</span></code>(template_name, zip_report)</p></td>
-<td><p>Creates the report directory, copies the web application based on the template name, saves the report data.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_save_report_data</span></code>(report_directory)</p></td>
-<td><p>Takes the report_directory and saves the data as json there.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_encrypt_report_data</span></code>()</p></td>
-<td><p>Encrypt Report data using 128 bit AES secret</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_create_report_directory</span></code>()</p></td>
-<td><p>Creates the report directory if it doesn’t exist.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_zip_report_directory</span></code>(report_directory)</p></td>
-<td><p>Zip the report directory so it can be easier to download, in case the end user is not working locally.</p></td>
-</tr>
-</tbody>
-</table>
+<dl class="py method">
+<dt id="olliepy.Report.Report._encrypt_report_data">
+<code class="sig-name descname">_encrypt_report_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; bytes<a class="reference internal" href="../../_modules/olliepy/Report.html#Report._encrypt_report_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.Report.Report._encrypt_report_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encrypt Report data using 128 bit AES secret</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>encrypted_data: the encrypted data in bytes</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.Report.Report._save_report_data">
+<code class="sig-name descname">_save_report_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">report_directory</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/Report.html#Report._save_report_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.Report.Report._save_report_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes the report_directory and saves the data as json there.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>report_directory</strong> – </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.Report.Report._save_the_report">
+<code class="sig-name descname">_save_the_report</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">template_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">zip_report</span><span class="p">:</span> <span class="n">bool</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/Report.html#Report._save_the_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.Report.Report._save_the_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the report directory, copies the web application based on the template name,
+saves the report data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>template_name</strong> – the name of the report’s template</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.Report.Report._serve_report_using_flask">
+<code class="sig-name descname">_serve_report_using_flask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">template_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">mode</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">port</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/Report.html#Report._serve_report_using_flask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.Report.Report._serve_report_using_flask" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the report directory, copies the web application based on the template name,
+saves the report data and starts the flask server.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>template_name</strong> – the name of the report’s template</p></li>
+<li><p><strong>mode</strong> – the server mode</p></li>
+<li><p><strong>port</strong> – the server port</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.Report.Report._update_report">
+<code class="sig-name descname">_update_report</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">Dict</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/Report.html#Report._update_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.Report.Report._update_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates the report dictionary in report_data
+:param data: Dict, the data dictionary that will be added to the report dictionary in report_data
+:return: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.Report.Report._zip_report_directory">
+<code class="sig-name descname">_zip_report_directory</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">report_directory</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/Report.html#Report._zip_report_directory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.Report.Report._zip_report_directory" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zip the report directory so it can be easier to download, in case the end user is not working locally.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>report_directory</strong> – the report directory to zip</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
