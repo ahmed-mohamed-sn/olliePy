@@ -12,5 +12,5 @@ jobs:
     - name: Python Pytest GitHub Action
       uses: fylein/python-pytest-github-action@v2
       with:
-        args: sudo apt-get install python-dev && pip3 install -r ./tests/requirements.txt && pytest tests
+        args: apt-get install python-dev && pip3 install -r ./tests/requirements.txt && pytest tests
 
