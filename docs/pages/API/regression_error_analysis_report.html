@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>RegressionErrorAnalysisReport &mdash; Olliepy 0.1.14 documentation</title>
+  <title>RegressionErrorAnalysisReport &mdash; Olliepy 0.1.17 documentation</title>
   
 
   
@@ -170,7 +170,7 @@
 <dt id="olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport">
 <em class="property">class </em><code class="sig-prename descclassname">olliepy.RegressionErrorAnalysisReport.</code><code class="sig-name descname">RegressionErrorAnalysisReport</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">output_directory</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">train_df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">test_df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">target_feature_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">error_column_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">error_classes</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">acceptable_error_class</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">numerical_features</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">categorical_features</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">subtitle</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">report_folder_name</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encryption_secret</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">generate_encryption_secret</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/olliepy/RegressionErrorAnalysisReport.html#RegressionErrorAnalysisReport"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport" title="Permalink to this definition">¶</a></dt>
 <dd><p>RegressionErrorAnalysisReport creates a report that analyzes the error in regression problems.</p>
-<dl class="simple">
+<dl>
 <dt>title<span class="classifier">str</span></dt><dd><p>the title of the report</p>
 </dd>
 <dt>output_directory<span class="classifier">str</span></dt><dd><p>the directory where the report folder will be created</p>
@@ -186,15 +186,26 @@ and the error column in order to calculate the error class</p>
 </dd>
 <dt>error_classes<span class="classifier">Dict[str, Tuple]</span></dt><dd><p>a dictionary containing the definition of the error classes that will be created.
 The key is the error_class name and the value is the minimum (inclusive) and maximum (exclusive)
-which will be used to calculate the error_class of the test observations. For example:
-error_classes = {
-‘EXTREME_UNDER_ESTIMATION’: (-8.0, -4.0), # return ‘EXTREME_UNDER_ESTIMATION’ if -8.0 &lt;= error &lt; -4.0
-‘HIGH_UNDER_ESTIMATION’: (-4.0, -3.0), # return ‘HIGH_UNDER_ESTIMATION’ if -4.0 &lt;= error &lt; -3.0
-‘MEDIUM_UNDER_ESTIMATION’: (-3.0, -1.0), # return ‘MEDIUM_UNDER_ESTIMATION’ if -3.0 &lt;= error &lt; -1.0
-‘LOW_UNDER_ESTIMATION’: (-1.0, -0.5), # return ‘LOW_UNDER_ESTIMATION’ if -1.0 &lt;= error &lt; -0.5
-‘ACCEPTABLE’: (-0.5, 0.5), # return ‘ACCEPTABLE’ if -0.5 &lt;= error &lt; 0.5
-‘OVER_ESTIMATING’: (0.5, 3.0) # return ‘OVER_ESTIMATING’ if -0.5 &lt;= error &lt; 3.0
-}</p>
+which will be used to calculate the error_class of the test observations.</p>
+<blockquote>
+<div><dl class="simple">
+<dt>For example: error_classes = {</dt><dd><dl class="simple">
+<dt>‘EXTREME_UNDER_ESTIMATION’: (-8.0, -4.0),</dt><dd><p>returns ‘EXTREME_UNDER_ESTIMATION’ if -8.0 &lt;= error &lt; -4.0</p>
+</dd>
+<dt>‘HIGH_UNDER_ESTIMATION’: (-4.0, -3.0),</dt><dd><p>returns ‘HIGH_UNDER_ESTIMATION’ if -4.0 &lt;= error &lt; -3.0</p>
+</dd>
+<dt>‘MEDIUM_UNDER_ESTIMATION’: (-3.0, -1.0),</dt><dd><p>returns ‘MEDIUM_UNDER_ESTIMATION’ if -3.0 &lt;= error &lt; -1.0</p>
+</dd>
+<dt>‘LOW_UNDER_ESTIMATION’: (-1.0, -0.5),</dt><dd><p>returns ‘LOW_UNDER_ESTIMATION’ if -1.0 &lt;= error &lt; -0.5</p>
+</dd>
+<dt>‘ACCEPTABLE’: (-0.5, 0.5),</dt><dd><p>returns ‘ACCEPTABLE’ if -0.5 &lt;= error &lt; 0.5</p>
+</dd>
+<dt>‘OVER_ESTIMATING’: (0.5, 3.0) }</dt><dd><p>returns ‘OVER_ESTIMATING’ if -0.5 &lt;= error &lt; 3.0</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
 </dd>
 <dt>acceptable_error_class: str</dt><dd><p>the name of the acceptable error class that was defined in error_classes</p>
 </dd>
@@ -207,7 +218,7 @@ error_classes = {
 <dt>report_folder_name<span class="classifier">str default=None</span></dt><dd><p>the name of the folder that will contain all the generated report files.
 If not set, the title of the report will be used.</p>
 </dd>
-<dt>encryption_secret<span class="classifier">str default=None</span></dt><dd><p>the secret that will be used to encrypt the generated report data.
+<dt>encryption_secret<span class="classifier">str default=None</span></dt><dd><p>the 16 characters secret that will be used to encrypt the generated report data.
 If it is not set, the generated data won’t be encrypted.</p>
 </dd>
 <dt>generate_encryption_secret<span class="classifier">bool default=False</span></dt><dd><p>the encryption_secret will be generated and its value returned as output.
@@ -219,59 +230,87 @@ you can also view encryption_secret to get the generated secret.</p>
 </dd>
 </dl>
 <dl class="py method">
-<dt id="olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.__init__">
-<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">output_directory</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">train_df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">test_df</span><span class="p">:</span> <span class="n">pandas.core.frame.DataFrame</span></em>, <em class="sig-param"><span class="n">target_feature_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">error_column_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">error_classes</span><span class="p">:</span> <span class="n">Dict<span class="p">[</span>str<span class="p">, </span>Tuple<span class="p">[</span>float<span class="p">, </span>float<span class="p">]</span><span class="p">]</span></span></em>, <em class="sig-param"><span class="n">acceptable_error_class</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">numerical_features</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">categorical_features</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">subtitle</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">report_folder_name</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encryption_secret</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">generate_encryption_secret</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/olliepy/RegressionErrorAnalysisReport.html#RegressionErrorAnalysisReport.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initialize self.  See help(type(self)) for accurate signature.</p>
+<dt id="olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.create_report">
+<code class="sig-name descname">create_report</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">enable_parallel_coordinates_plot</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">True</span></em>, <em class="sig-param"><span class="n">cosine_similarity_threshold</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.8</span></em>, <em class="sig-param"><span class="n">parallel_coordinates_q1_threshold</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.25</span></em>, <em class="sig-param"><span class="n">parallel_coordinates_q2_threshold</span><span class="p">:</span> <span class="n">float</span> <span class="o">=</span> <span class="default_value">0.75</span></em>, <em class="sig-param"><span class="n">parallel_coordinates_features</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>str<span class="p">, </span>List<span class="p">[</span>str<span class="p">]</span><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">'auto'</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/RegressionErrorAnalysisReport.html#RegressionErrorAnalysisReport.create_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.create_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a report using the user defined data and the data calculated based on the error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>enable_parallel_coordinates_plot</strong> – enables the parallel coordinates plot. default: True</p></li>
+<li><p><strong>cosine_similarity_threshold</strong> – The cosine similarity threshold to decide if the categorical distribution of
+the primary and secondary datasets are similar.</p></li>
+<li><p><strong>parallel_coordinates_q1_threshold</strong> – the first quantile threshold to be used
+if parallel_coordinates_features == ‘auto’. default: 0.25</p></li>
+<li><p><strong>parallel_coordinates_q2_threshold</strong> – the second quantile threshold to be used
+if parallel_coordinates_features == ‘auto’. default: 0.75</p></li>
+<li><p><strong>parallel_coordinates_features</strong> – The list of features to display on the parallel coordinates plot. default: ‘auto’</p></li>
+</ul>
+</dd>
+</dl>
+<ul class="simple">
+<li><dl class="simple">
+<dt>If parallel_coordinates_features is set to ‘auto’, OlliePy will select the features with a distribution shift based on 3 thresholds:</dt><dd><ul>
+<li><p>cosine_similarity_threshold to be used to select categorical features if the cosine_similarity is lower than the threshold.</p></li>
+<li><dl class="simple">
+<dt>parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold which are two quantile values.</dt><dd><dl class="simple">
+<dt>if primary_quantile_1 &gt;= secondary_quantile_2 or secondary_quantile_1 &gt;= primary_quantile_2</dt><dd><p>then the numerical feature is selected and will be added to the plot.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
 </dd></dl>
 
-<p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.__init__" title="olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.__init__"><code class="xref py py-obj docutils literal notranslate"><span class="pre">__init__</span></code></a>(title, output_directory, train_df, …)</p></td>
-<td><p>Initialize self.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_report</span></code>([…])</p></td>
-<td><p>Creates a report using the user defined data and the data calculated based on the error.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">serve_report_from_local_server</span></code>([mode, port])</p></td>
-<td><p>Serve the report to the user using a web server.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_report</span></code>([zip_report])</p></td>
-<td><p>Creates the report directory, copies the web application based on the template name, saves the report data.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_add_user_defined_data</span></code>()</p></td>
-<td><p>Adds user defined data to the report.</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_add_error_class_to_test_df</span></code>()</p></td>
-<td><p>adds the error class to each observation in the test set (test_df) based on the error classes provided by the user.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_add_datasets</span></code>()</p></td>
-<td><p>Adds datasets to reports (info, stats, numerical data).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_count_categories_and_merge_count_dataframes</span></code>(…)</p></td>
-<td><p>It counts the different categories (of the provided feature) for the primary and secondary dataset then merge the count dataframes into a single dataframe that contains all the categories.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_add_categorical_count_plot</span></code>()</p></td>
-<td><p>Add the categorical count plots (stacked bar plot) data to the report :return: None</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_get_primary_secondary_datasets</span></code>(…)</p></td>
-<td><p>Finds the correct primary and secondary datasets and return them.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_add_parallel_coordinates_plot</span></code>(…)</p></td>
-<td><p>Check for suitable features (numerical based on quantiles(default: 0.25, 0.75) and categorical based on cosine similarity).</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_add_statistical_tests</span></code>(…)</p></td>
-<td><p>Calculates and adds statistical tests to the report data.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">_find_and_add_all_secondary_datasets_patterns</span></code>()</p></td>
-<td><p>Find all groups in secondary datasets and check if they exist in the primary datasets.</p></td>
-</tr>
-</tbody>
-</table>
+<dl class="py method">
+<dt id="olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.save_report">
+<code class="sig-name descname">save_report</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">zip_report</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/RegressionErrorAnalysisReport.html#RegressionErrorAnalysisReport.save_report"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.save_report" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the report directory, copies the web application based on the template name,
+saves the report data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>zip_report</strong> – enable it in order to zip the directory for downloading. default: False</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.serve_report_from_local_server">
+<code class="sig-name descname">serve_report_from_local_server</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mode</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'server'</span></em>, <em class="sig-param"><span class="n">port</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/RegressionErrorAnalysisReport.html#RegressionErrorAnalysisReport.serve_report_from_local_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.serve_report_from_local_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serve the report to the user using a web server.
+Available modes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘server’: will open a new tab in the default browser using webbrowser package</p></li>
+<li><p>‘js’: will open a new tab in the default browser using IPython</p></li>
+<li><p>‘jupyter’: will open the report in a jupyter notebook</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> – the selected web server mode. default: ‘server’</p></li>
+<li><p><strong>port</strong> – the server port. default: None. a random port will be generated between (1024-49151)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>

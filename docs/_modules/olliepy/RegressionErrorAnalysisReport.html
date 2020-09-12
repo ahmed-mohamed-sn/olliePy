@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>olliepy.RegressionErrorAnalysisReport &mdash; Olliepy 0.1.14 documentation</title>
+  <title>olliepy.RegressionErrorAnalysisReport &mdash; Olliepy 0.1.17 documentation</title>
   
 
   
@@ -167,13 +167,65 @@
 <span class="kn">import</span> <span class="nn">time</span>
 
 
+<span class="k">def</span> <span class="nf">validate_create_report_attributes</span><span class="p">(</span><span class="n">enable_parallel_coordinates_plot</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                                      <span class="n">cosine_similarity_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                      <span class="n">parallel_coordinates_q1_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                      <span class="n">parallel_coordinates_q2_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+                                      <span class="n">parallel_coordinates_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+                                      <span class="n">all_features</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">enable_parallel_coordinates_plot</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided enable_parallel_coordinates_plot is not valid. enable_parallel_coordinates_plot has to be a bool&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">cosine_similarity_threshold</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be a float&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cosine_similarity_threshold</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">cosine_similarity_threshold</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be between 0.0 and 1.0&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">parallel_coordinates_q1_threshold</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be a float&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">parallel_coordinates_q2_threshold</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be a float&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">parallel_coordinates_q1_threshold</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">parallel_coordinates_q1_threshold</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be between 0.0 and 1.0&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">parallel_coordinates_q2_threshold</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">parallel_coordinates_q2_threshold</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be between 0.0 and 1.0&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">parallel_coordinates_q2_threshold</span> <span class="o">&lt;=</span> <span class="n">parallel_coordinates_q1_threshold</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold are not valid.</span>
+<span class="s1">                parallel_coordinates_q2_threshold has to greater than parallel_coordinates_q1_threshold&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided parallel_coordinates_features is not valid.</span>
+<span class="s1">                parallel_coordinates_features has to be a str == &quot;auto&quot; or a list of features&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span> <span class="ow">and</span> <span class="n">parallel_coordinates_features</span> <span class="o">!=</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided parallel_coordinates_features is not valid.</span>
+<span class="s1">                parallel_coordinates_features has to be &quot;auto&quot; if the provided value is a string&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="n">unknown_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature</span> <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">parallel_coordinates_features</span> <span class="k">if</span> <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_features</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unknown_features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided parallel_coordinates_features is not valid.</span>
+<span class="s1">            these features </span><span class="si">{</span><span class="n">unknown_features</span><span class="si">}</span><span class="s1"> do not exist in the dataframe&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided parallel_coordinates_features is not valid.</span>
+<span class="s1">            parallel_coordinates_features has to contain at least two features to plot&#39;&#39;&#39;</span><span class="p">)</span>
+
+
+
 <span class="k">def</span> <span class="nf">validate_attributes</span><span class="p">(</span><span class="n">train_df</span><span class="p">,</span> <span class="n">test_df</span><span class="p">,</span> <span class="n">target_feature_name</span><span class="p">,</span> <span class="n">error_column_name</span><span class="p">,</span>
                         <span class="n">error_classes</span><span class="p">,</span> <span class="n">acceptable_error_class</span><span class="p">,</span> <span class="n">numerical_features</span><span class="p">,</span> <span class="n">categorical_features</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">train_df</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided train_df is not valid. train_df has to be a pandas dataframe&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided train_df is not valid. train_df has to be a pandas dataframe&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">test_df</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided test_df is not valid. test_df has to be a pandas dataframe&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided test_df is not valid. test_df has to be a pandas dataframe&#39;</span><span class="p">)</span>
 
     <span class="n">train_columns</span> <span class="o">=</span> <span class="n">train_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
     <span class="n">test_columns</span> <span class="o">=</span> <span class="n">test_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
@@ -199,8 +251,7 @@
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided error_column_name (</span><span class="si">{</span><span class="n">error_column_name</span><span class="si">}</span><span class="s1">) is not test_df&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">error_classes</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;provided error_classes is not valid. error_classes has to be a Dict[str, Tuple[float, float]]&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided error_classes is not valid. error_classes has to be a Dict[str, Tuple[float, float]]&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">acceptable_error_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">acceptable_error_class</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided acceptable_error_class is not valid.</span>
@@ -211,14 +262,14 @@
 <span class="s1">                            </span><span class="se">\n</span><span class="si">{</span><span class="n">acceptable_error_class</span><span class="si">}</span><span class="s1"> has to be defined in error_classes&#39;&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">numerical_features</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">categorical_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;both numerical_features and categorical_features are not defined.</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;both numerical_features and categorical_features are not defined.</span>
 <span class="s1">                                </span><span class="se">\n</span><span class="s1">you need to provide one of them or both in order to proceed.&#39;&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">numerical_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">numerical_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided numerical_features is not valid. numerical_features has to be a List[str]&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided numerical_features is not valid. numerical_features has to be a List[str]&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">categorical_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">categorical_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided categorical_features is not valid. categorical_features has to be a List[str]&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided categorical_features is not valid. categorical_features has to be a List[str]&#39;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_cosine_similarity</span><span class="p">(</span><span class="n">vector_a</span><span class="p">,</span> <span class="n">vector_b</span><span class="p">):</span>
@@ -247,15 +298,20 @@
 <span class="sd">    error_classes : Dict[str, Tuple]</span>
 <span class="sd">        a dictionary containing the definition of the error classes that will be created.</span>
 <span class="sd">        The key is the error_class name and the value is the minimum (inclusive) and maximum (exclusive)</span>
-<span class="sd">        which will be used to calculate the error_class of the test observations. For example:</span>
-<span class="sd">        error_classes = {</span>
-<span class="sd">        &#39;EXTREME_UNDER_ESTIMATION&#39;: (-8.0, -4.0), # return &#39;EXTREME_UNDER_ESTIMATION&#39; if -8.0 &lt;= error &lt; -4.0</span>
-<span class="sd">        &#39;HIGH_UNDER_ESTIMATION&#39;: (-4.0, -3.0), # return &#39;HIGH_UNDER_ESTIMATION&#39; if -4.0 &lt;= error &lt; -3.0</span>
-<span class="sd">        &#39;MEDIUM_UNDER_ESTIMATION&#39;: (-3.0, -1.0), # return &#39;MEDIUM_UNDER_ESTIMATION&#39; if -3.0 &lt;= error &lt; -1.0</span>
-<span class="sd">        &#39;LOW_UNDER_ESTIMATION&#39;: (-1.0, -0.5), # return &#39;LOW_UNDER_ESTIMATION&#39; if -1.0 &lt;= error &lt; -0.5</span>
-<span class="sd">        &#39;ACCEPTABLE&#39;: (-0.5, 0.5), # return &#39;ACCEPTABLE&#39; if -0.5 &lt;= error &lt; 0.5</span>
-<span class="sd">        &#39;OVER_ESTIMATING&#39;: (0.5, 3.0) # return &#39;OVER_ESTIMATING&#39; if -0.5 &lt;= error &lt; 3.0</span>
-<span class="sd">        }</span>
+<span class="sd">        which will be used to calculate the error_class of the test observations.</span>
+<span class="sd">            For example: error_classes = {</span>
+<span class="sd">             &#39;EXTREME_UNDER_ESTIMATION&#39;: (-8.0, -4.0),</span>
+<span class="sd">                returns &#39;EXTREME_UNDER_ESTIMATION&#39; if -8.0 &lt;= error &lt; -4.0</span>
+<span class="sd">             &#39;HIGH_UNDER_ESTIMATION&#39;: (-4.0, -3.0),</span>
+<span class="sd">                returns &#39;HIGH_UNDER_ESTIMATION&#39; if -4.0 &lt;= error &lt; -3.0</span>
+<span class="sd">             &#39;MEDIUM_UNDER_ESTIMATION&#39;: (-3.0, -1.0),</span>
+<span class="sd">                returns &#39;MEDIUM_UNDER_ESTIMATION&#39; if -3.0 &lt;= error &lt; -1.0</span>
+<span class="sd">             &#39;LOW_UNDER_ESTIMATION&#39;: (-1.0, -0.5),</span>
+<span class="sd">                returns &#39;LOW_UNDER_ESTIMATION&#39; if -1.0 &lt;= error &lt; -0.5</span>
+<span class="sd">             &#39;ACCEPTABLE&#39;: (-0.5, 0.5),</span>
+<span class="sd">                returns &#39;ACCEPTABLE&#39; if -0.5 &lt;= error &lt; 0.5</span>
+<span class="sd">             &#39;OVER_ESTIMATING&#39;: (0.5, 3.0) }</span>
+<span class="sd">                returns &#39;OVER_ESTIMATING&#39; if -0.5 &lt;= error &lt; 3.0</span>
 <span class="sd">    acceptable_error_class: str</span>
 <span class="sd">        the name of the acceptable error class that was defined in error_classes</span>
 <span class="sd">    numerical_features : List[str] default=None</span>
@@ -268,7 +324,7 @@
 <span class="sd">        the name of the folder that will contain all the generated report files.</span>
 <span class="sd">        If not set, the title of the report will be used.</span>
 <span class="sd">    encryption_secret : str default=None</span>
-<span class="sd">        the secret that will be used to encrypt the generated report data.</span>
+<span class="sd">        the 16 characters secret that will be used to encrypt the generated report data.</span>
 <span class="sd">        If it is not set, the generated data won&#39;t be encrypted.</span>
 <span class="sd">    generate_encryption_secret : bool default=False</span>
 <span class="sd">        the encryption_secret will be generated and its value returned as output.</span>
@@ -281,7 +337,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="RegressionErrorAnalysisReport.__init__"><a class="viewcode-back" href="../../pages/API/regression_error_analysis_report.html#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                  <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                  <span class="n">output_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                  <span class="n">train_df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
@@ -327,23 +383,39 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_datasets</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_testing_data_name</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_datasets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_classes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span> <span class="o">=</span> <span class="s1">&#39;regression-error-analysis-report&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_default_numerical_bins_for_grouping</span> <span class="o">=</span> <span class="mi">10</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default_numerical_bins_for_grouping</span> <span class="o">=</span> <span class="mi">10</span>
 
-    <span class="k">def</span> <span class="nf">create_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="RegressionErrorAnalysisReport.create_report"><a class="viewcode-back" href="../../pages/API/regression_error_analysis_report.html#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.create_report">[docs]</a>    <span class="k">def</span> <span class="nf">create_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                       <span class="n">enable_parallel_coordinates_plot</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                      <span class="n">parallel_coordinates_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
                       <span class="n">cosine_similarity_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span>
                       <span class="n">parallel_coordinates_q1_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">,</span>
                       <span class="n">parallel_coordinates_q2_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.75</span><span class="p">,</span>
-                      <span class="n">enable_patterns_report</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                      <span class="n">patterns_report_group_by_categorical_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>
-                      <span class="n">patterns_report_group_by_numerical_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>
-                      <span class="n">patterns_report_number_of_bins</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+                      <span class="n">parallel_coordinates_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a report using the user defined data and the data calculated based on the error.</span>
 
-<span class="sd">        :return: None</span>
+<span class="sd">        :param enable_parallel_coordinates_plot: enables the parallel coordinates plot. default: True</span>
+<span class="sd">        :param cosine_similarity_threshold: The cosine similarity threshold to decide if the categorical distribution of</span>
+<span class="sd">         the primary and secondary datasets are similar.</span>
+<span class="sd">        :param parallel_coordinates_q1_threshold: the first quantile threshold to be used</span>
+<span class="sd">         if parallel_coordinates_features == &#39;auto&#39;. default: 0.25</span>
+<span class="sd">        :param parallel_coordinates_q2_threshold: the second quantile threshold to be used</span>
+<span class="sd">         if parallel_coordinates_features == &#39;auto&#39;. default: 0.75</span>
+<span class="sd">        :param parallel_coordinates_features: The list of features to display on the parallel coordinates plot. default: &#39;auto&#39;</span>
+<span class="sd">        - If parallel_coordinates_features is set to &#39;auto&#39;, OlliePy will select the features with a distribution shift based on 3 thresholds:</span>
+<span class="sd">                - cosine_similarity_threshold to be used to select categorical features if the cosine_similarity is lower than the threshold.</span>
+<span class="sd">                - parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold which are two quantile values.</span>
+<span class="sd">                    if primary_quantile_1 &gt;= secondary_quantile_2 or secondary_quantile_1 &gt;= primary_quantile_2</span>
+<span class="sd">                        then the numerical feature is selected and will be added to the plot.</span>
+<span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">validate_create_report_attributes</span><span class="p">(</span><span class="n">enable_parallel_coordinates_plot</span><span class="p">,</span>
+                                          <span class="n">cosine_similarity_threshold</span><span class="p">,</span>
+                                          <span class="n">parallel_coordinates_q1_threshold</span><span class="p">,</span>
+                                          <span class="n">parallel_coordinates_q2_threshold</span><span class="p">,</span>
+                                          <span class="n">parallel_coordinates_features</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">train_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
         <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_add_user_defined_data</span><span class="p">()</span>
@@ -354,14 +426,19 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_add_categorical_count_plot</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_add_parallel_coordinates_plot</span><span class="p">(</span><span class="n">cosine_similarity_threshold</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">enable_parallel_coordinates_plot</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_parallel_coordinates_plot</span><span class="p">(</span><span class="n">cosine_similarity_threshold</span><span class="p">,</span>
+                                                <span class="n">parallel_coordinates_q1_threshold</span><span class="p">,</span>
+                                                <span class="n">parallel_coordinates_q2_threshold</span><span class="p">,</span>
+                                                <span class="n">parallel_coordinates_features</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_find_and_add_all_secondary_datasets_patterns</span><span class="p">()</span>
         <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The report was created in </span><span class="si">{</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="si">:</span><span class="s2">0.4f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encryption_secret</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Your encryption secret is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">encryption_secret</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Your encryption secret is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">encryption_secret</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_add_user_defined_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -584,14 +661,28 @@
             <span class="n">secondary_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">test_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_error_class_col_name</span><span class="p">]</span> <span class="o">==</span> <span class="n">secondary_dataset</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">primary_df</span><span class="p">,</span> <span class="n">secondary_df</span>
 
-    <span class="k">def</span> <span class="nf">_add_parallel_coordinates_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cosine_similarity_threshold</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_add_parallel_coordinates_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                       <span class="n">cosine_similarity_threshold</span><span class="p">,</span>
+                                       <span class="n">parallel_coordinates_q1_threshold</span><span class="p">,</span>
+                                       <span class="n">parallel_coordinates_q2_threshold</span><span class="p">,</span>
+                                       <span class="n">parallel_coordinates_features</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check for suitable features (numerical based on quantiles(default: 0.25, 0.75)</span>
 <span class="sd">        and categorical based on cosine similarity).</span>
 <span class="sd">        Afterwards it adds the needed data for the plotly parallel coordinates plot.</span>
 
 <span class="sd">        :param cosine_similarity_threshold: the cosine similarity threshold for the categorical features</span>
-<span class="sd">        :return: None</span>
+<span class="sd">        :param parallel_coordinates_q1_threshold: the first quantile threshold to be used</span>
+<span class="sd">         if parallel_coordinates_features == &#39;auto&#39;. default: 0.25</span>
+<span class="sd">        :param parallel_coordinates_q2_threshold: the second quantile threshold to be used</span>
+<span class="sd">         if parallel_coordinates_features == &#39;auto&#39;. default: 0.75</span>
+<span class="sd">        :param parallel_coordinates_features: The list of features to display on the parallel coordinates plot. default: &#39;auto&#39;</span>
+<span class="sd">        - If parallel_coordinates_features is set to &#39;auto&#39;, OlliePy will select the features with a distribution shift based on 3 thresholds:</span>
+<span class="sd">                - cosine_similarity_threshold to be used to select categorical features if the cosine_similarity is lower than the threshold.</span>
+<span class="sd">                - parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold which are two quantile values.</span>
+<span class="sd">                    if primary_quantile_1 &gt;= secondary_quantile_2 or secondary_quantile_1 &gt;= primary_quantile_2</span>
+<span class="sd">                        then the numerical feature is selected and will be added to the plot.</span>
+<span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">def</span> <span class="nf">add_parallel_coordinates</span><span class="p">(</span><span class="n">parallel_coordinates_dictionary</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">primary_dataset</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -605,14 +696,14 @@
 <span class="sd">            :param secondary_dataset: the name of the secondary dataset</span>
 <span class="sd">            :return: None</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="n">selected_features</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">selected_features</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">parallel_coordinates_features</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span> <span class="k">else</span> <span class="n">parallel_coordinates_features</span>
 
-            <span class="n">first_quantile_threshold</span> <span class="o">=</span> <span class="mf">0.25</span>
-            <span class="n">second_quantile_threshold</span> <span class="o">=</span> <span class="mf">0.75</span>
+            <span class="n">first_quantile_threshold</span> <span class="o">=</span> <span class="n">parallel_coordinates_q1_threshold</span>
+            <span class="n">second_quantile_threshold</span> <span class="o">=</span> <span class="n">parallel_coordinates_q2_threshold</span>
 
             <span class="n">primary_df</span><span class="p">,</span> <span class="n">secondary_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_primary_secondary_datasets</span><span class="p">(</span><span class="n">primary_dataset</span><span class="p">,</span> <span class="n">secondary_dataset</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parallel_coordinates_features</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">categorical_feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">:</span>
                     <span class="n">merged_cat_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_count_categories_and_merge_count_dataframes</span><span class="p">(</span><span class="n">categorical_feature</span><span class="p">,</span>
                                                                                          <span class="n">primary_dataset</span><span class="p">,</span>
@@ -625,7 +716,7 @@
                     <span class="k">if</span> <span class="n">cosine_similarity</span> <span class="o">&lt;</span> <span class="n">cosine_similarity_threshold</span><span class="p">:</span>
                         <span class="n">selected_features</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">categorical_feature</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">parallel_coordinates_features</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">numerical_feature</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">numerical_features</span><span class="p">:</span>
                     <span class="n">primary_q_1</span> <span class="o">=</span> <span class="n">primary_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">numerical_feature</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">first_quantile_threshold</span><span class="p">)</span>
                     <span class="n">primary_q_2</span> <span class="o">=</span> <span class="n">primary_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">numerical_feature</span><span class="p">]</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">second_quantile_threshold</span><span class="p">)</span>
@@ -750,27 +841,24 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_report</span><span class="p">({</span><span class="s1">&#39;statistical_tests&#39;</span><span class="p">:</span> <span class="n">statistical_tests_dict</span><span class="p">})</span>
 
-    <span class="k">def</span> <span class="nf">serve_report_from_local_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="RegressionErrorAnalysisReport.serve_report_from_local_server"><a class="viewcode-back" href="../../pages/API/regression_error_analysis_report.html#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.serve_report_from_local_server">[docs]</a>    <span class="k">def</span> <span class="nf">serve_report_from_local_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;server&#39;</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Serve the report to the user using a web server.</span>
-<span class="sd">        modes:</span>
-<span class="sd">        1- &#39;server&#39;: will open a new tab in the default browser using webbrowser package</span>
-<span class="sd">        2- &#39;js&#39;: will open a new tab in the default browser using IPython</span>
-<span class="sd">        3- &#39;jupyter&#39;: will open the report in a jupyter notebook</span>
+<span class="sd">        Available modes:</span>
+<span class="sd">                - &#39;server&#39;: will open a new tab in the default browser using webbrowser package</span>
+<span class="sd">                - &#39;js&#39;: will open a new tab in the default browser using IPython</span>
+<span class="sd">                - &#39;jupyter&#39;: will open the report in a jupyter notebook</span>
 
-<span class="sd">        :param mode: server mode (&#39;server&#39;: will open a new tab in your default browser,</span>
-<span class="sd">        &#39;js&#39;: will open a new tab in your browser using a different method, &#39;jupyter&#39;: will open the report application</span>
-<span class="sd">        in your notebook).</span>
-<span class="sd">        default: &#39;server&#39;</span>
+<span class="sd">        :param mode: the selected web server mode. default: &#39;server&#39;</span>
 <span class="sd">        :param port: the server port. default: None. a random port will be generated between (1024-49151)</span>
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">port</span><span class="p">:</span>
             <span class="kn">import</span> <span class="nn">random</span>
             <span class="n">port</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">49151</span><span class="p">)</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_serve_report_using_flask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_serve_report_using_flask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">save_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zip_report</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="RegressionErrorAnalysisReport.save_report"><a class="viewcode-back" href="../../pages/API/regression_error_analysis_report.html#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.save_report">[docs]</a>    <span class="k">def</span> <span class="nf">save_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zip_report</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the report directory, copies the web application based on the template name,</span>
 <span class="sd">        saves the report data.</span>
@@ -779,7 +867,7 @@
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_save_the_report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span><span class="p">,</span> <span class="n">zip_report</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_save_the_report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span><span class="p">,</span> <span class="n">zip_report</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_find_and_add_all_secondary_datasets_patterns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>

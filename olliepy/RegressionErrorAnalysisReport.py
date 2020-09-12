@@ -9,13 +9,65 @@ from sklearn.preprocessing import LabelEncoder
 import time
 
 
+def validate_create_report_attributes(enable_parallel_coordinates_plot: bool,
+                                      cosine_similarity_threshold: float,
+                                      parallel_coordinates_q1_threshold: float,
+                                      parallel_coordinates_q2_threshold: float,
+                                      parallel_coordinates_features: Union[str, List[str]],
+                                      all_features: List[str]):
+
+    if type(enable_parallel_coordinates_plot) is not bool:
+        raise TypeError('provided enable_parallel_coordinates_plot is not valid. enable_parallel_coordinates_plot has to be a bool')
+
+    if type(cosine_similarity_threshold) is not float:
+        raise TypeError('provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be a float')
+
+    if cosine_similarity_threshold <= 0.0 or cosine_similarity_threshold >= 1.0:
+        raise AttributeError('provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be between 0.0 and 1.0')
+
+    if type(parallel_coordinates_q1_threshold) is not float:
+        raise TypeError('provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be a float')
+
+    if type(parallel_coordinates_q2_threshold) is not float:
+        raise TypeError('provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be a float')
+
+    if parallel_coordinates_q1_threshold <= 0.0 or parallel_coordinates_q1_threshold >= 1.0:
+        raise AttributeError('provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be between 0.0 and 1.0')
+
+    if parallel_coordinates_q2_threshold <= 0.0 or parallel_coordinates_q2_threshold >= 1.0:
+        raise AttributeError('provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be between 0.0 and 1.0')
+
+    if parallel_coordinates_q2_threshold <= parallel_coordinates_q1_threshold:
+        raise AttributeError('''provided parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold are not valid.
+                parallel_coordinates_q2_threshold has to greater than parallel_coordinates_q1_threshold''')
+
+    if not is_instance(parallel_coordinates_features, Union[str, List[str]]):
+        raise TypeError('''provided parallel_coordinates_features is not valid.
+                parallel_coordinates_features has to be a str == "auto" or a list of features''')
+
+    if type(parallel_coordinates_features) is str and parallel_coordinates_features != 'auto':
+        raise AttributeError('''provided parallel_coordinates_features is not valid.
+                parallel_coordinates_features has to be "auto" if the provided value is a string''')
+
+    if is_instance(parallel_coordinates_features, List[str]):
+        unknown_features = [feature for feature in parallel_coordinates_features if feature not in all_features]
+        if len(unknown_features) > 0:
+            raise AttributeError(f'''provided parallel_coordinates_features is not valid.
+            these features {unknown_features} do not exist in the dataframe''')
+
+    if is_instance(parallel_coordinates_features, List[str]) and len(parallel_coordinates_features) < 2:
+        raise AttributeError(f'''provided parallel_coordinates_features is not valid.
+            parallel_coordinates_features has to contain at least two features to plot''')
+
+
+
 def validate_attributes(train_df, test_df, target_feature_name, error_column_name,
                         error_classes, acceptable_error_class, numerical_features, categorical_features):
     if type(train_df) is not pd.DataFrame:
-        raise TypeError(f'provided train_df is not valid. train_df has to be a pandas dataframe')
+        raise TypeError('provided train_df is not valid. train_df has to be a pandas dataframe')
 
     if type(test_df) is not pd.DataFrame:
-        raise TypeError(f'provided test_df is not valid. test_df has to be a pandas dataframe')
+        raise TypeError('provided test_df is not valid. test_df has to be a pandas dataframe')
 
     train_columns = train_df.columns.to_list()
     test_columns = test_df.columns.to_list()
@@ -41,8 +93,7 @@ def validate_attributes(train_df, test_df, target_feature_name, error_column_nam
         raise TypeError(f'provided error_column_name ({error_column_name}) is not test_df')
 
     if not is_instance(error_classes, Dict[str, Tuple[float, float]]):
-        raise TypeError(
-            f'provided error_classes is not valid. error_classes has to be a Dict[str, Tuple[float, float]]')
+        raise TypeError('provided error_classes is not valid. error_classes has to be a Dict[str, Tuple[float, float]]')
 
     if acceptable_error_class is not None and type(acceptable_error_class) is not str:
         raise TypeError(f'''provided acceptable_error_class is not valid.
@@ -53,14 +104,14 @@ def validate_attributes(train_df, test_df, target_feature_name, error_column_nam
                             \n{acceptable_error_class} has to be defined in error_classes''')
 
     if numerical_features is None and categorical_features is None:
-        raise AttributeError(f'''both numerical_features and categorical_features are not defined.
+        raise AttributeError('''both numerical_features and categorical_features are not defined.
                                 \nyou need to provide one of them or both in order to proceed.''')
 
     if numerical_features is not None and not is_instance(numerical_features, List[str]):
-        raise TypeError(f'provided numerical_features is not valid. numerical_features has to be a List[str]')
+        raise TypeError('provided numerical_features is not valid. numerical_features has to be a List[str]')
 
     if categorical_features is not None and not is_instance(categorical_features, List[str]):
-        raise TypeError(f'provided categorical_features is not valid. categorical_features has to be a List[str]')
+        raise TypeError('provided categorical_features is not valid. categorical_features has to be a List[str]')
 
 
 def _cosine_similarity(vector_a, vector_b):
@@ -89,15 +140,20 @@ class RegressionErrorAnalysisReport(Report):
     error_classes : Dict[str, Tuple]
         a dictionary containing the definition of the error classes that will be created.
         The key is the error_class name and the value is the minimum (inclusive) and maximum (exclusive)
-        which will be used to calculate the error_class of the test observations. For example:
-        error_classes = {
-        'EXTREME_UNDER_ESTIMATION': (-8.0, -4.0), # return 'EXTREME_UNDER_ESTIMATION' if -8.0 <= error < -4.0
-        'HIGH_UNDER_ESTIMATION': (-4.0, -3.0), # return 'HIGH_UNDER_ESTIMATION' if -4.0 <= error < -3.0
-        'MEDIUM_UNDER_ESTIMATION': (-3.0, -1.0), # return 'MEDIUM_UNDER_ESTIMATION' if -3.0 <= error < -1.0
-        'LOW_UNDER_ESTIMATION': (-1.0, -0.5), # return 'LOW_UNDER_ESTIMATION' if -1.0 <= error < -0.5
-        'ACCEPTABLE': (-0.5, 0.5), # return 'ACCEPTABLE' if -0.5 <= error < 0.5
-        'OVER_ESTIMATING': (0.5, 3.0) # return 'OVER_ESTIMATING' if -0.5 <= error < 3.0
-        }
+        which will be used to calculate the error_class of the test observations.
+            For example: error_classes = {
+             'EXTREME_UNDER_ESTIMATION': (-8.0, -4.0),
+                returns 'EXTREME_UNDER_ESTIMATION' if -8.0 <= error < -4.0
+             'HIGH_UNDER_ESTIMATION': (-4.0, -3.0),
+                returns 'HIGH_UNDER_ESTIMATION' if -4.0 <= error < -3.0
+             'MEDIUM_UNDER_ESTIMATION': (-3.0, -1.0),
+                returns 'MEDIUM_UNDER_ESTIMATION' if -3.0 <= error < -1.0
+             'LOW_UNDER_ESTIMATION': (-1.0, -0.5),
+                returns 'LOW_UNDER_ESTIMATION' if -1.0 <= error < -0.5
+             'ACCEPTABLE': (-0.5, 0.5),
+                returns 'ACCEPTABLE' if -0.5 <= error < 0.5
+             'OVER_ESTIMATING': (0.5, 3.0) }
+                returns 'OVER_ESTIMATING' if -0.5 <= error < 3.0
     acceptable_error_class: str
         the name of the acceptable error class that was defined in error_classes
     numerical_features : List[str] default=None
@@ -110,7 +166,7 @@ class RegressionErrorAnalysisReport(Report):
         the name of the folder that will contain all the generated report files.
         If not set, the title of the report will be used.
     encryption_secret : str default=None
-        the secret that will be used to encrypt the generated report data.
+        the 16 characters secret that will be used to encrypt the generated report data.
         If it is not set, the generated data won't be encrypted.
     generate_encryption_secret : bool default=False
         the encryption_secret will be generated and its value returned as output.
@@ -173,19 +229,35 @@ class RegressionErrorAnalysisReport(Report):
 
     def create_report(self,
                       enable_parallel_coordinates_plot: bool = True,
-                      parallel_coordinates_features: Union[str, List[str]] = 'auto',
                       cosine_similarity_threshold: float = 0.8,
                       parallel_coordinates_q1_threshold: float = 0.25,
                       parallel_coordinates_q2_threshold: float = 0.75,
-                      enable_patterns_report: bool = True,
-                      patterns_report_group_by_categorical_features: Union[str, List[str]] = 'all',
-                      patterns_report_group_by_numerical_features: Union[str, List[str]] = 'all',
-                      patterns_report_number_of_bins: Union[int, List[int]] = 10) -> None:
+                      parallel_coordinates_features: Union[str, List[str]] = 'auto') -> None:
         """
         Creates a report using the user defined data and the data calculated based on the error.
 
-        :return: None
+        :param enable_parallel_coordinates_plot: enables the parallel coordinates plot. default: True
+        :param cosine_similarity_threshold: The cosine similarity threshold to decide if the categorical distribution of
+         the primary and secondary datasets are similar.
+        :param parallel_coordinates_q1_threshold: the first quantile threshold to be used
+         if parallel_coordinates_features == 'auto'. default: 0.25
+        :param parallel_coordinates_q2_threshold: the second quantile threshold to be used
+         if parallel_coordinates_features == 'auto'. default: 0.75
+        :param parallel_coordinates_features: The list of features to display on the parallel coordinates plot. default: 'auto'
+        - If parallel_coordinates_features is set to 'auto', OlliePy will select the features with a distribution shift based on 3 thresholds:
+                - cosine_similarity_threshold to be used to select categorical features if the cosine_similarity is lower than the threshold.
+                - parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold which are two quantile values.
+                    if primary_quantile_1 >= secondary_quantile_2 or secondary_quantile_1 >= primary_quantile_2
+                        then the numerical feature is selected and will be added to the plot.
+        :return:
         """
+
+        validate_create_report_attributes(enable_parallel_coordinates_plot,
+                                          cosine_similarity_threshold,
+                                          parallel_coordinates_q1_threshold,
+                                          parallel_coordinates_q2_threshold,
+                                          parallel_coordinates_features,
+                                          self.train_df.columns.tolist())
         tic = time.perf_counter()
 
         self._add_user_defined_data()
@@ -196,7 +268,12 @@ class RegressionErrorAnalysisReport(Report):
         if self.categorical_features is not None and len(self.categorical_features) > 0:
             self._add_categorical_count_plot()
 
-        self._add_parallel_coordinates_plot(cosine_similarity_threshold)
+        if enable_parallel_coordinates_plot:
+            self._add_parallel_coordinates_plot(cosine_similarity_threshold,
+                                                parallel_coordinates_q1_threshold,
+                                                parallel_coordinates_q2_threshold,
+                                                parallel_coordinates_features)
+
         self._find_and_add_all_secondary_datasets_patterns()
         toc = time.perf_counter()
 
@@ -426,14 +503,28 @@ class RegressionErrorAnalysisReport(Report):
             secondary_df = self.test_df.loc[self.test_df[self._error_class_col_name] == secondary_dataset, :].copy()
         return primary_df, secondary_df
 
-    def _add_parallel_coordinates_plot(self, cosine_similarity_threshold) -> None:
+    def _add_parallel_coordinates_plot(self,
+                                       cosine_similarity_threshold,
+                                       parallel_coordinates_q1_threshold,
+                                       parallel_coordinates_q2_threshold,
+                                       parallel_coordinates_features) -> None:
         """
         Check for suitable features (numerical based on quantiles(default: 0.25, 0.75)
         and categorical based on cosine similarity).
         Afterwards it adds the needed data for the plotly parallel coordinates plot.
 
         :param cosine_similarity_threshold: the cosine similarity threshold for the categorical features
-        :return: None
+        :param parallel_coordinates_q1_threshold: the first quantile threshold to be used
+         if parallel_coordinates_features == 'auto'. default: 0.25
+        :param parallel_coordinates_q2_threshold: the second quantile threshold to be used
+         if parallel_coordinates_features == 'auto'. default: 0.75
+        :param parallel_coordinates_features: The list of features to display on the parallel coordinates plot. default: 'auto'
+        - If parallel_coordinates_features is set to 'auto', OlliePy will select the features with a distribution shift based on 3 thresholds:
+                - cosine_similarity_threshold to be used to select categorical features if the cosine_similarity is lower than the threshold.
+                - parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold which are two quantile values.
+                    if primary_quantile_1 >= secondary_quantile_2 or secondary_quantile_1 >= primary_quantile_2
+                        then the numerical feature is selected and will be added to the plot.
+        :return:
         """
 
         def add_parallel_coordinates(parallel_coordinates_dictionary: Dict, primary_dataset: str,
@@ -447,14 +538,14 @@ class RegressionErrorAnalysisReport(Report):
             :param secondary_dataset: the name of the secondary dataset
             :return: None
             """
-            selected_features = []
+            selected_features = [] if parallel_coordinates_features == 'auto' else parallel_coordinates_features
 
-            first_quantile_threshold = 0.25
-            second_quantile_threshold = 0.75
+            first_quantile_threshold = parallel_coordinates_q1_threshold
+            second_quantile_threshold = parallel_coordinates_q2_threshold
 
             primary_df, secondary_df = self._get_primary_secondary_datasets(primary_dataset, secondary_dataset)
 
-            if self.categorical_features is not None:
+            if self.categorical_features is not None and parallel_coordinates_features == 'auto':
                 for categorical_feature in self.categorical_features:
                     merged_cat_count = self._count_categories_and_merge_count_dataframes(categorical_feature,
                                                                                          primary_dataset,
@@ -467,7 +558,7 @@ class RegressionErrorAnalysisReport(Report):
                     if cosine_similarity < cosine_similarity_threshold:
                         selected_features.append(categorical_feature)
 
-            if self.numerical_features is not None:
+            if self.numerical_features is not None and parallel_coordinates_features == 'auto':
                 for numerical_feature in self.numerical_features:
                     primary_q_1 = primary_df.loc[:, numerical_feature].quantile(first_quantile_threshold)
                     primary_q_2 = primary_df.loc[:, numerical_feature].quantile(second_quantile_threshold)
@@ -595,15 +686,12 @@ class RegressionErrorAnalysisReport(Report):
     def serve_report_from_local_server(self, mode: str = 'server', port: int = None) -> None:
         """
         Serve the report to the user using a web server.
-        modes:
-        1- 'server': will open a new tab in the default browser using webbrowser package
-        2- 'js': will open a new tab in the default browser using IPython
-        3- 'jupyter': will open the report in a jupyter notebook
+        Available modes:
+                - 'server': will open a new tab in the default browser using webbrowser package
+                - 'js': will open a new tab in the default browser using IPython
+                - 'jupyter': will open the report in a jupyter notebook
 
-        :param mode: server mode ('server': will open a new tab in your default browser,
-        'js': will open a new tab in your browser using a different method, 'jupyter': will open the report application
-        in your notebook).
-        default: 'server'
+        :param mode: the selected web server mode. default: 'server'
         :param port: the server port. default: None. a random port will be generated between (1024-49151)
         :return: None
         """
