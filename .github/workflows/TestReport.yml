@@ -34,4 +34,5 @@ jobs:
       - name: Attach the report
         uses: actions/upload-artifact@v2
         with:
+          name: 'test-report'
           path: test-reports/index.html
