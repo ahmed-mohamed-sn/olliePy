@@ -1,8 +1,12 @@
-name: Test
+name: TestReport
 on: push
 jobs:
   test:
     runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        python-version: [ 3.6, 3.7, 3.8 ]
+        poetry-version: [ 1.0, 1.0.10 ]
     name: Generate Test Reports
     env:
       RESULTS_PATH: alternate-location
