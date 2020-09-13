@@ -34,4 +34,4 @@ jobs:
       - name: Attach the report
         uses: actions/upload-artifact@v2
         with:
-          path: /github/workspace/test-reports/*
+          path: test-reports/index.html
