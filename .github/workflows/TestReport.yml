@@ -31,6 +31,9 @@ jobs:
         uses: AutoModality/action-xunit-viewer@v1.0.1
       - name: Attach the report
         uses: actions/upload-artifact@v1
+        runs: |
+          echo ${{ steps.xunit-viewer.outputs.report-name }}
+          echo ${{ steps.xunit-viewer.outputs.report-dir }}
         with:
           name: ${{ steps.xunit-viewer.outputs.report-name }}
           path: ${{ steps.xunit-viewer.outputs.report-dir }}
