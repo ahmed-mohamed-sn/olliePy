@@ -42,12 +42,6 @@ def _copy_application_template(template_name: str, destination_path: str) -> Non
     copy_tree(source_path, destination_path)
 
 
-def _zip_directory(path: str, zip_handler):
-    for root, dirs, files in os.walk(path):
-        for file in files:
-            zip_handler.write(os.path.join(root, file))
-
-
 def _start_server_and_view_report(report_directory: str, mode: str, port: int) -> None:
     """
     Serve the report to the user using a web server.

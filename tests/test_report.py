@@ -156,9 +156,10 @@ def test_save_report():
                     subtitle='Test report subtitle',
                     report_folder_name='TestReport')
 
-    if os.path.exists(f'{valid_output_directory}/{report.report_folder_name}'):
-        delete_directory(f'{valid_output_directory}/{report.report_folder_name}')
-        os.remove(f'{valid_output_directory}/{report.report_folder_name}.zip')
+    report_path = f'{valid_output_directory}/{report.report_folder_name}'
+    if os.path.exists(report_path):
+        delete_directory(report_path)
+        os.remove(f'{report_path}.zip')
 
     report._save_the_report('regression-error-analysis-report', zip_report=False)
     assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}')
@@ -169,3 +170,29 @@ def test_save_report():
     assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}')
     assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}/report_data.json')
     assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}.zip')
+
+
+def test_encrypted_save_report():
+    import os
+
+    report = Report(title='Test report title',
+                    output_directory=valid_output_directory,
+                    subtitle='Test report subtitle',
+                    report_folder_name='EncryptedTestReport',
+                    generate_encryption_secret=True)
+
+    report_path = f'{valid_output_directory}/{report.report_folder_name}'
+    if os.path.exists(report_path):
+        delete_directory(report_path)
+        os.remove(f'{report_path}.zip')
+
+    report._save_the_report('regression-error-analysis-report', zip_report=False)
+    assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}')
+    assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}/report_data.json')
+    assert not os.path.exists(f'{valid_output_directory}/{report.report_folder_name}.zip')
+
+    report._save_the_report('regression-error-analysis-report', zip_report=True)
+    assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}')
+    assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}/report_data.json')
+    assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}.zip')
+

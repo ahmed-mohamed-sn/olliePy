@@ -25,7 +25,7 @@ jobs:
           poetry install
       - name: Test OlliePy
         run: |
-          poetry run pytest --junit-xml=./test-reports/reprot.xml tests
+          poetry run pytest --junit-xml=./test-reports/report.xml --cov-report=html:./test-reports/coverage --cov=olliepy tests/
       - name: Generate report
         id: xunit-viewer
         uses: AutoModality/action-xunit-viewer@v1.0.1
@@ -36,3 +36,5 @@ jobs:
         with:
           name: 'test-report'
           path: test-reports/index.html
+      - name: Upload coverage reports
+        run: bash <(curl -s https://codecov.io/bash) -t ${{ env.CODECOV_TOKEN }}

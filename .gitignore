@@ -15,3 +15,4 @@ out
 tests/output/*
 !tests/output/README.md
 test-reports
+.coverage

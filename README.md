@@ -1,5 +1,7 @@
 
 ![OlliePy logo](./sphinxSource/source/_static/imgs/logo.png)
+[![PyPI Latest Release](https://img.shields.io/pypi/v/olliepy.svg)](https://pypi.org/project/olliepy/)
+[![License](https://img.shields.io/pypi/l/olliepy.svg)](https://github.com/ahmed-mohamed-sn/olliepy/blob/master/LICENSE)
 ![TestReport](https://github.com/ahmed-mohamed-sn/olliePy/workflows/TestReport/badge.svg?branch=master)
 ![Pytest](https://github.com/ahmed-mohamed-sn/olliePy/workflows/Pytest/badge.svg)
 # OlliePy - An alternative approach for evaluating ML models
