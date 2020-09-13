@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest]
-        python-version: [ 3.6, 3.7, 3.8 ]
+        python-version: [ 3.6, 3.7]
         poetry-version: [1.0, 1.0.10]
     steps:
     - uses: actions/checkout@v2
