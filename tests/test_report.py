@@ -150,13 +150,15 @@ def test_update_report():
 
 def test_save_report():
     import os
-    delete_directory(valid_output_directory)
-    os.mkdir(valid_output_directory)
 
     report = Report(title='Test report title',
                     output_directory=valid_output_directory,
                     subtitle='Test report subtitle',
                     report_folder_name='TestReport')
+
+    if os.path.exists(f'{valid_output_directory}/{report.report_folder_name}'):
+        delete_directory(f'{valid_output_directory}/{report.report_folder_name}')
+        os.remove(f'{valid_output_directory}/{report.report_folder_name}.zip')
 
     report._save_the_report('regression-error-analysis-report', zip_report=False)
     assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}')
