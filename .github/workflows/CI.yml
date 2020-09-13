@@ -1,6 +1,12 @@
-name: Pytest
+name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
@@ -27,4 +33,12 @@ jobs:
     - name: Test OlliePy
       run: |
         poetry run pytest tests
-
+    - name: Configure poetry's pypi token
+      run: |
+        poetry config pypi-token.pypi ${{ secrets.CODECOV_TOKEN }}
+    - name: Build OlliePy
+      run: |
+        poetry build
+    - name: Publish OlliePy
+      run: |
+        poetry publish
