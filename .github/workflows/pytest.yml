@@ -29,7 +29,6 @@ jobs:
       run: |
         poetry run pytest --junit-xml=./tests/tests-report/reprot.xml tests
     - name: Generate Test Report
-        id: xunit-viewer
         uses: AutoModality/action-xunit-viewer@v1
         with:
           results: ${{ env.TEST_RESULTS_PATH }}
