@@ -35,7 +35,7 @@ jobs:
         poetry run pytest tests
     - name: Configure poetry's pypi token
       if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7' &&  matrix.poetry-version == '1.0.10'}}
-      run: poetry config pypi-token.pypi ${{ secrets.CODECOV_TOKEN }}
+      run: poetry config pypi-token.pypi ${{ secrets.POETRY_TOKEN }}
     - name: Build OlliePy
       if: ${{ matrix.os == 'ubuntu-latest' && matrix.python-version == '3.7' &&  matrix.poetry-version == '1.0.10'}}
       run: poetry build
