@@ -29,7 +29,8 @@ jobs:
       - name: Generate report
         id: xunit-viewer
         uses: AutoModality/action-xunit-viewer@v1.0.1
-      - run: echo "$(/github/workspace/test-reports/index.html)"
+      - name: The generated report
+        run: echo "The report is ${{ steps.xunit-viewer.outputs.report-file }}"
       - name: Attach the report
         uses: actions/upload-artifact@v2
         with:
