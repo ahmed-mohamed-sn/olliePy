@@ -138,20 +138,20 @@ def validate_attributes(train_df, test_df, target_feature_name, error_column_nam
                             \ntarget_feature_name ({target_feature_name}) has to be a str''')
 
     if target_feature_name not in train_columns:
-        raise TypeError(f'provided target_feature_name ({target_feature_name}) is not train_df')
+        raise AttributeError(f'provided target_feature_name ({target_feature_name}) is not train_df')
 
     if target_feature_name not in test_columns:
-        raise TypeError(f'provided target_feature_name ({target_feature_name}) is not test_df')
+        raise AttributeError(f'provided target_feature_name ({target_feature_name}) is not test_df')
 
     if type(error_column_name) is not str:
         raise TypeError(f'''provided error_column_name is not valid.
                             \ntest_error_column_name ({error_column_name}) has to be a str''')
 
     if error_column_name not in train_columns:
-        raise TypeError(f'provided error_column_name ({error_column_name}) is not train_df')
+        raise AttributeError(f'provided error_column_name ({error_column_name}) is not train_df')
 
     if error_column_name not in test_columns:
-        raise TypeError(f'provided error_column_name ({error_column_name}) is not test_df')
+        raise AttributeError(f'provided error_column_name ({error_column_name}) is not test_df')
 
     if not is_instance(error_classes, Dict[str, Tuple[float, float]]):
         raise TypeError('provided error_classes is not valid. error_classes has to be a Dict[str, Tuple[float, float]]')
@@ -161,7 +161,7 @@ def validate_attributes(train_df, test_df, target_feature_name, error_column_nam
                             \nacceptable_error_class ({acceptable_error_class}) has to be a str or None''')
 
     if acceptable_error_class is not None and acceptable_error_class not in error_classes:
-        raise TypeError(f'''provided acceptable_error_class is not valid.
+        raise AttributeError(f'''provided acceptable_error_class is not valid.
                             \n{acceptable_error_class} has to be defined in error_classes''')
 
     if numerical_features is None and categorical_features is None:

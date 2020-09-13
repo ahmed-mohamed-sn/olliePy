@@ -11,9 +11,9 @@ def delete_directory(directory):
 
 
 @pytest.mark.parametrize("title", [
-    (None),
-    (20),
-    (False)
+    None,
+    20,
+    False
 ])
 def test_invalid_title(title):
     with pytest.raises(TypeError):
@@ -24,8 +24,8 @@ def test_invalid_title(title):
 
 
 @pytest.mark.parametrize("subtitle", [
-    (20),
-    (False)
+    20,
+    False
 ])
 def test_invalid_subtitle(subtitle):
     with pytest.raises(TypeError):
@@ -56,8 +56,8 @@ def test_none_output_directory():
 
 
 @pytest.mark.parametrize("report_folder_name", [
-    (3),
-    (False)
+    3,
+    False
 ])
 def test_invalid_report_folder_name(report_folder_name):
     with pytest.raises(TypeError):
@@ -68,8 +68,8 @@ def test_invalid_report_folder_name(report_folder_name):
 
 
 @pytest.mark.parametrize("encryption_secret", [
-    (3),
-    (False)
+    3,
+    False
 ])
 def test_invalid_encryption_secret_type(encryption_secret):
     with pytest.raises(TypeError):
@@ -80,9 +80,9 @@ def test_invalid_encryption_secret_type(encryption_secret):
 
 
 @pytest.mark.parametrize("encryption_secret", [
-    ('123456789'),
-    ('iusadiudhadiahdiadhadihadihdasdsaddasdasd'),
-    ('')
+    '123456789',
+    'iusadiudhadiahdiadhadihadihdasdsaddasdasd',
+    ''
 ])
 def test_invalid_encryption_secret_value(encryption_secret):
     with pytest.raises(AttributeError):
@@ -93,8 +93,8 @@ def test_invalid_encryption_secret_value(encryption_secret):
 
 
 @pytest.mark.parametrize("generate_encryption_secret", [
-    (3),
-    ('False')
+    3,
+    'False'
 ])
 def test_invalid_generate_encryption_secret_type(generate_encryption_secret):
     with pytest.raises(TypeError):
