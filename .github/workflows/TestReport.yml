@@ -29,9 +29,9 @@ jobs:
       - name: Generate report
         id: xunit-viewer
         uses: AutoModality/action-xunit-viewer@v1.0.1
-        runs: |
-          echo "$(/github/workspace/test-reports/index.html)"
       - name: Attach the report
         uses: actions/upload-artifact@v2
+        runs: |
+          echo "$(/github/workspace/test-reports/index.html)"
         with:
           path: /github/workspace/test-reports/*
