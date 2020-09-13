@@ -18,9 +18,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
+        pip install --user poetry
         pip install pytest
         pip install -r ./tests/requirements.txt
     - name: Test OlliePy
       run: |
-        pytest tests
+        poetry run pytest --junit-xml=./tests/tests-report/reprot.xml tests
 

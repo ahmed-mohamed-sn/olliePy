@@ -21,7 +21,7 @@ def validate_attributes(title, output_directory, subtitle, report_folder_name, e
     if encryption_secret is not None and type(encryption_secret) is not str:
         raise TypeError(f'provided encryption_secret is not valid. encryption_secret has to be a str')
     if encryption_secret is not None and len(encryption_secret) != 16:
-        raise TypeError(f'provided encryption_secret is not valid. encryption_secret has to be 16 characters')
+        raise AttributeError(f'provided encryption_secret is not valid. encryption_secret has to be 16 characters')
     if type(generate_encryption_secret) is not bool:
         raise TypeError(f'provided generate_encryption_secret is not valid. encryption_secret has to be a bool')
 

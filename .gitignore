@@ -10,3 +10,7 @@ dask-worker-space
 generateDocs.sh
 generateSphinxDocs.sh
 runTests.sh
+.pytest_cache
+out
+tests/output/TestReport
+tests/output/TestReport.zip
