@@ -33,4 +33,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: test-report
-          path: /github/workspace/test-reports/index.html
+          path: /github/workspace/test-reports
