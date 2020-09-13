@@ -25,16 +25,12 @@ jobs:
           poetry install
       - name: Test OlliePy
         run: |
-          poetry run pytest --junit-xml=./tests/tests-report/reprot.xml tests
-      - name: Generate Report
+          poetry run pytest --junit-xml=./test-reports/reprot.xml tests
+      - name: Generate report
         id: xunit-viewer
-        uses: AutoModality/action-xunit-viewer@v1
-        with:
-          results: ${{ env.TEST_RESULTS_PATH }}
-      - name: The generated report
-        run: echo "The report is ${{ steps.xunit-viewer.outputs.report-file }}"
+        uses: AutoModality/action-xunit-viewer@v1.0.1
       - name: Attach the report
         uses: actions/upload-artifact@v1
         with:
-          name: alternate-results-path-reports
-          path: ${{ env.TEST_RESULTS_PATH }}
+          name: ${{ steps.xunit-viewer.outputs.report-name }}
+          path: ${{ steps.xunit-viewer.outputs.report-dir }}
