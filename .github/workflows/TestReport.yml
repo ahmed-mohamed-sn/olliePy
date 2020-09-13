@@ -2,15 +2,20 @@ name: TestReport
 on: push
 jobs:
   test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: [ 3.6, 3.7, 3.8 ]
-        poetry-version: [ 1.0, 1.0.10 ]
+        poetry-version: [ 1.0.10 ]
     name: Generate Test Reports
     env:
       RESULTS_PATH: alternate-location
     steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
       - name: Setup poetry
         uses: abatilo/actions-poetry@v2.0.0
         with:
