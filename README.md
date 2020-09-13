@@ -1,6 +1,7 @@
 
 ![OlliePy logo](./sphinxSource/source/_static/imgs/logo.png)
 ![TestReport](https://github.com/ahmed-mohamed-sn/olliePy/workflows/TestReport/badge.svg?branch=master)
+![Pytest](https://github.com/ahmed-mohamed-sn/olliePy/workflows/Pytest/badge.svg)
 # OlliePy - An alternative approach for evaluating ML models
 > **OlliePy** is a python package which can help the data scientists in
 > evaluating and analysing their machine learning experiments by
