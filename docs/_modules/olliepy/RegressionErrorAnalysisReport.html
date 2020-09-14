@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>olliepy.RegressionErrorAnalysisReport &mdash; Olliepy 0.1.17 documentation</title>
+  <title>olliepy.RegressionErrorAnalysisReport &mdash; Olliepy 0.1.21 documentation</title>
   
 
   
@@ -167,33 +167,95 @@
 <span class="kn">import</span> <span class="nn">time</span>
 
 
-<span class="k">def</span> <span class="nf">validate_create_report_attributes</span><span class="p">(</span><span class="n">enable_parallel_coordinates_plot</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">validate_create_report_attributes</span><span class="p">(</span><span class="n">enable_patterns_report</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+                                      <span class="n">patterns_report_group_by_categorical_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+                                      <span class="n">patterns_report_group_by_numerical_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+                                      <span class="n">patterns_report_number_of_bins</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]],</span>
+                                      <span class="n">enable_parallel_coordinates_plot</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
                                       <span class="n">cosine_similarity_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                                       <span class="n">parallel_coordinates_q1_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                                       <span class="n">parallel_coordinates_q2_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
                                       <span class="n">parallel_coordinates_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+                                      <span class="n">categorical_features</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+                                      <span class="n">numerical_features</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                                       <span class="n">all_features</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">enable_patterns_report</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided enable_patterns_report is not valid. enable_patterns_report has to be a bool&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_group_by_categorical_features</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_categorical_features is not valid.</span>
+<span class="s1">            patterns_report_group_by_categorical_features has to be a str == &quot;all&quot; or a list of categorical features&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_numerical_features is not valid.</span>
+<span class="s1">        patterns_report_group_by_numerical_features has to be a str == &quot;all&quot; or a list of numerical features&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">patterns_report_group_by_categorical_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span> \
+            <span class="ow">and</span> <span class="n">patterns_report_group_by_categorical_features</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_categorical_features is not valid.</span>
+<span class="s1">            patterns_report_group_by_categorical_features has to be &quot;all&quot; if the provided value is a string&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span> \
+            <span class="ow">and</span> <span class="n">patterns_report_group_by_numerical_features</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_numerical_features is not valid.</span>
+<span class="s1">            patterns_report_group_by_numerical_features has to be &quot;all&quot; if the provided value is a string&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_group_by_categorical_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="n">unknown_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature</span> <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">patterns_report_group_by_categorical_features</span> <span class="k">if</span>
+                            <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">categorical_features</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unknown_features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_categorical_features is not valid.</span>
+<span class="s1">            these features </span><span class="si">{</span><span class="n">unknown_features</span><span class="si">}</span><span class="s1"> do not exist in the categorical features&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="n">unknown_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature</span> <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">patterns_report_group_by_numerical_features</span> <span class="k">if</span>
+                            <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">numerical_features</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unknown_features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_numerical_features is not valid.</span>
+<span class="s1">            these features </span><span class="si">{</span><span class="n">unknown_features</span><span class="si">}</span><span class="s1"> do not exist in the numerical features&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_number_of_bins</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_number_of_bins is not valid.</span>
+<span class="s1">        patterns_report_number_of_bins has to be an int or a list of ints (one for each numerical feature provided in patterns_report_group_by_numerical_features)&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_number_of_bins</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> \
+            <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_number_of_bins is not valid.</span>
+<span class="s1">        patterns_report_number_of_bins can be a list of ints if a list of numerical features were provided in patterns_report_group_by_numerical_features&#39;&#39;&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_number_of_bins</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> \
+            <span class="ow">and</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">patterns_report_number_of_bins</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_number_of_bins is not valid.</span>
+<span class="s1">            patterns_report_number_of_bins list length has to be equal to the number of features provided in patterns_report_group_by_numerical_features&#39;&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">enable_parallel_coordinates_plot</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided enable_parallel_coordinates_plot is not valid. enable_parallel_coordinates_plot has to be a bool&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s1">&#39;provided enable_parallel_coordinates_plot is not valid. enable_parallel_coordinates_plot has to be a bool&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">cosine_similarity_threshold</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be a float&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s1">&#39;provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be a float&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">cosine_similarity_threshold</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">cosine_similarity_threshold</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be between 0.0 and 1.0&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+            <span class="s1">&#39;provided cosine_similarity_threshold is not valid. cosine_similarity_threshold has to be between 0.0 and 1.0&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">parallel_coordinates_q1_threshold</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be a float&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s1">&#39;provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be a float&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">parallel_coordinates_q2_threshold</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">float</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be a float&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="s1">&#39;provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be a float&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">parallel_coordinates_q1_threshold</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">parallel_coordinates_q1_threshold</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be between 0.0 and 1.0&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+            <span class="s1">&#39;provided parallel_coordinates_q1_threshold is not valid. parallel_coordinates_q1_threshold has to be between 0.0 and 1.0&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">parallel_coordinates_q2_threshold</span> <span class="o">&lt;=</span> <span class="mf">0.0</span> <span class="ow">or</span> <span class="n">parallel_coordinates_q2_threshold</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be between 0.0 and 1.0&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span>
+            <span class="s1">&#39;provided parallel_coordinates_q2_threshold is not valid. parallel_coordinates_q2_threshold has to be between 0.0 and 1.0&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">parallel_coordinates_q2_threshold</span> <span class="o">&lt;=</span> <span class="n">parallel_coordinates_q1_threshold</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold are not valid.</span>
@@ -218,7 +280,6 @@
 <span class="s1">            parallel_coordinates_features has to contain at least two features to plot&#39;&#39;&#39;</span><span class="p">)</span>
 
 
-
 <span class="k">def</span> <span class="nf">validate_attributes</span><span class="p">(</span><span class="n">train_df</span><span class="p">,</span> <span class="n">test_df</span><span class="p">,</span> <span class="n">target_feature_name</span><span class="p">,</span> <span class="n">error_column_name</span><span class="p">,</span>
                         <span class="n">error_classes</span><span class="p">,</span> <span class="n">acceptable_error_class</span><span class="p">,</span> <span class="n">numerical_features</span><span class="p">,</span> <span class="n">categorical_features</span><span class="p">):</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">train_df</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -235,20 +296,20 @@
 <span class="s1">                            </span><span class="se">\n</span><span class="s1">target_feature_name (</span><span class="si">{</span><span class="n">target_feature_name</span><span class="si">}</span><span class="s1">) has to be a str&#39;&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">target_feature_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">train_columns</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided target_feature_name (</span><span class="si">{</span><span class="n">target_feature_name</span><span class="si">}</span><span class="s1">) is not train_df&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided target_feature_name (</span><span class="si">{</span><span class="n">target_feature_name</span><span class="si">}</span><span class="s1">) is not train_df&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">target_feature_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">test_columns</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided target_feature_name (</span><span class="si">{</span><span class="n">target_feature_name</span><span class="si">}</span><span class="s1">) is not test_df&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided target_feature_name (</span><span class="si">{</span><span class="n">target_feature_name</span><span class="si">}</span><span class="s1">) is not test_df&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">error_column_name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided error_column_name is not valid.</span>
 <span class="s1">                            </span><span class="se">\n</span><span class="s1">test_error_column_name (</span><span class="si">{</span><span class="n">error_column_name</span><span class="si">}</span><span class="s1">) has to be a str&#39;&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">error_column_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">train_columns</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided error_column_name (</span><span class="si">{</span><span class="n">error_column_name</span><span class="si">}</span><span class="s1">) is not train_df&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided error_column_name (</span><span class="si">{</span><span class="n">error_column_name</span><span class="si">}</span><span class="s1">) is not train_df&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">error_column_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">test_columns</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided error_column_name (</span><span class="si">{</span><span class="n">error_column_name</span><span class="si">}</span><span class="s1">) is not test_df&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided error_column_name (</span><span class="si">{</span><span class="n">error_column_name</span><span class="si">}</span><span class="s1">) is not test_df&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">error_classes</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]):</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided error_classes is not valid. error_classes has to be a Dict[str, Tuple[float, float]]&#39;</span><span class="p">)</span>
@@ -258,7 +319,7 @@
 <span class="s1">                            </span><span class="se">\n</span><span class="s1">acceptable_error_class (</span><span class="si">{</span><span class="n">acceptable_error_class</span><span class="si">}</span><span class="s1">) has to be a str or None&#39;&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">acceptable_error_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">acceptable_error_class</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">error_classes</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided acceptable_error_class is not valid.</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided acceptable_error_class is not valid.</span>
 <span class="s1">                            </span><span class="se">\n</span><span class="si">{</span><span class="n">acceptable_error_class</span><span class="si">}</span><span class="s1"> has to be defined in error_classes&#39;&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">numerical_features</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">categorical_features</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -372,10 +433,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">test_df</span> <span class="o">=</span> <span class="n">test_df</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target_feature_name</span> <span class="o">=</span> <span class="n">target_feature_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">error_column_name</span> <span class="o">=</span> <span class="n">error_column_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">error_classes</span> <span class="o">=</span> <span class="n">error_classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">error_classes</span> <span class="o">=</span> <span class="n">error_classes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">acceptable_error_class</span> <span class="o">=</span> <span class="n">acceptable_error_class</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">numerical_features</span> <span class="o">=</span> <span class="n">numerical_features</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="n">categorical_features</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">numerical_features</span> <span class="o">=</span> <span class="n">numerical_features</span><span class="p">[:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span> <span class="o">=</span> <span class="n">categorical_features</span><span class="p">[:]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_training_data_name</span> <span class="o">=</span> <span class="s1">&#39;Training data&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_testing_data_name</span> <span class="o">=</span> <span class="s1">&#39;Testing data&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_error_class_col_name</span> <span class="o">=</span> <span class="s1">&#39;ERROR_CLASS&#39;</span>
@@ -415,14 +476,21 @@
 <span class="sd">                - parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold which are two quantile values.</span>
 <span class="sd">                    if primary_quantile_1 &gt;= secondary_quantile_2 or secondary_quantile_1 &gt;= primary_quantile_2</span>
 <span class="sd">                        then the numerical feature is selected and will be added to the plot.</span>
-<span class="sd">        :return:</span>
+<span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="n">validate_create_report_attributes</span><span class="p">(</span><span class="n">enable_parallel_coordinates_plot</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;report&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">validate_create_report_attributes</span><span class="p">(</span><span class="n">enable_patterns_report</span><span class="p">,</span>
+                                          <span class="n">patterns_report_group_by_categorical_features</span><span class="p">,</span>
+                                          <span class="n">patterns_report_group_by_numerical_features</span><span class="p">,</span>
+                                          <span class="n">patterns_report_number_of_bins</span><span class="p">,</span>
+                                          <span class="n">enable_parallel_coordinates_plot</span><span class="p">,</span>
                                           <span class="n">cosine_similarity_threshold</span><span class="p">,</span>
                                           <span class="n">parallel_coordinates_q1_threshold</span><span class="p">,</span>
                                           <span class="n">parallel_coordinates_q2_threshold</span><span class="p">,</span>
                                           <span class="n">parallel_coordinates_features</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">numerical_features</span><span class="p">,</span>
                                           <span class="bp">self</span><span class="o">.</span><span class="n">train_df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
         <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
 
@@ -440,7 +508,11 @@
                                                 <span class="n">parallel_coordinates_q2_threshold</span><span class="p">,</span>
                                                 <span class="n">parallel_coordinates_features</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_find_and_add_all_secondary_datasets_patterns</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">enable_patterns_report</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_find_and_add_all_secondary_datasets_patterns</span><span class="p">(</span><span class="n">patterns_report_group_by_categorical_features</span><span class="p">,</span>
+                                                               <span class="n">patterns_report_group_by_numerical_features</span><span class="p">,</span>
+                                                               <span class="n">patterns_report_number_of_bins</span><span class="p">)</span>
+
         <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
 
         <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The report was created in </span><span class="si">{</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="si">:</span><span class="s2">0.4f</span><span class="si">}</span><span class="s2"> seconds&quot;</span><span class="p">)</span>
@@ -877,11 +949,18 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_save_the_report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span><span class="p">,</span> <span class="n">zip_report</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_find_and_add_all_secondary_datasets_patterns</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_find_and_add_all_secondary_datasets_patterns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                      <span class="n">patterns_report_group_by_categorical_features</span><span class="p">,</span>
+                                                      <span class="n">patterns_report_group_by_numerical_features</span><span class="p">,</span>
+                                                      <span class="n">patterns_report_number_of_bins</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Find all groups in secondary datasets and check if they exist in the primary datasets.</span>
-<span class="sd">        Output the groups, error and target distributions and the distance between the distributions.</span>
+<span class="sd">        Outputs the groups, error and target distributions and the distance between the distributions.</span>
 
+<span class="sd">        :param patterns_report_group_by_categorical_features: categorical features to use in the patterns report. default: &#39;all&#39;</span>
+<span class="sd">        :param patterns_report_group_by_numerical_features: numerical features to use in the patterns report. default: &#39;all&#39;</span>
+<span class="sd">        :param patterns_report_number_of_bins: number of bins to use for each provided numerical feature</span>
+<span class="sd">         or one number of bins to use for all provided numerical features. default: 10</span>
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -961,17 +1040,28 @@
             <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">primary_dataset</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">secondary_dataset</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="n">patterns_dictionary</span> <span class="o">=</span> <span class="p">{}</span>
 
-            <span class="n">group_by_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">[:]</span>
+            <span class="k">if</span> <span class="n">patterns_report_group_by_categorical_features</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="n">group_by_features</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">categorical_features</span><span class="p">[:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">group_by_features</span> <span class="o">=</span> <span class="n">patterns_report_group_by_categorical_features</span><span class="p">[:]</span>
 
-            <span class="n">numerical_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">f_name</span><span class="p">:</span> <span class="n">f_name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_feature_name</span><span class="p">,</span>
-                                             <span class="bp">self</span><span class="o">.</span><span class="n">numerical_features</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">patterns_report_group_by_numerical_features</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                <span class="n">numerical_features</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">f_name</span><span class="p">:</span> <span class="n">f_name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_feature_name</span><span class="p">,</span>
+                                                 <span class="bp">self</span><span class="o">.</span><span class="n">numerical_features</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">numerical_features</span> <span class="o">=</span> <span class="n">patterns_report_group_by_numerical_features</span><span class="p">[:]</span>
 
-            <span class="k">for</span> <span class="n">numerical_feature</span> <span class="ow">in</span> <span class="n">numerical_features</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">numerical_feature_index</span><span class="p">,</span> <span class="n">numerical_feature</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">numerical_features</span><span class="p">):</span>
                 <span class="n">binning_features_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">numerical_feature</span><span class="si">}</span><span class="s1">_BIN&#39;</span>
+
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">patterns_report_number_of_bins</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">int</span><span class="p">:</span>
+                    <span class="n">number_of_bins</span> <span class="o">=</span> <span class="n">patterns_report_number_of_bins</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">number_of_bins</span> <span class="o">=</span> <span class="n">patterns_report_number_of_bins</span><span class="p">[</span><span class="n">numerical_feature_index</span><span class="p">]</span>
 
                 <span class="n">secondary_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">binning_features_name</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">secondary_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">numerical_feature</span><span class="p">],</span>
                                                                           <span class="n">retbins</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">include_lowest</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                                                          <span class="n">bins</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_numerical_bins_for_grouping</span><span class="p">)</span>
+                                                                          <span class="n">bins</span><span class="o">=</span><span class="n">number_of_bins</span><span class="p">)</span>
                 <span class="n">primary_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">binning_features_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">primary_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">numerical_feature</span><span class="p">],</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
 
                 <span class="n">primary_df</span> <span class="o">=</span> <span class="n">primary_df</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
@@ -986,13 +1076,18 @@
             <span class="n">secondary_all_groups</span> <span class="o">=</span> <span class="n">secondary_groupby_all_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 
             <span class="n">patterns_list</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">groupby_features_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">group_by_features</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">secondary_all_groups</span><span class="p">):</span>
                 <span class="n">group_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;Group </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;features&#39;</span><span class="p">:</span> <span class="p">{}}</span>
 
                 <span class="n">features_values</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">for</span> <span class="n">feature_index</span><span class="p">,</span> <span class="n">feature</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">group_by_features</span><span class="p">):</span>
-                    <span class="n">group_dict</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">][</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="n">feature_index</span><span class="p">]</span>
-                    <span class="n">features_values</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">feature</span><span class="p">,</span> <span class="n">group</span><span class="p">[</span><span class="n">feature_index</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="n">groupby_features_length</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="n">group_dict</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">][</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span><span class="p">[</span><span class="n">feature_index</span><span class="p">]</span>
+                        <span class="n">features_values</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">feature</span><span class="p">,</span> <span class="n">group</span><span class="p">[</span><span class="n">feature_index</span><span class="p">]))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">group_dict</span><span class="p">[</span><span class="s1">&#39;features&#39;</span><span class="p">][</span><span class="n">feature</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
+                        <span class="n">features_values</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">feature</span><span class="p">,</span> <span class="n">group</span><span class="p">))</span>
 
                 <span class="n">count_error_target_dict</span> <span class="o">=</span> <span class="n">query_datasets_for_count_error_target</span><span class="p">(</span><span class="n">primary_df</span><span class="p">,</span>
                                                                                 <span class="n">secondary_df</span><span class="p">,</span>

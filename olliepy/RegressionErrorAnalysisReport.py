@@ -32,13 +32,13 @@ def validate_create_report_attributes(enable_patterns_report: bool,
         raise TypeError('''provided patterns_report_group_by_numerical_features is not valid.
         patterns_report_group_by_numerical_features has to be a str == "all" or a list of numerical features''')
 
-    if type(
-            patterns_report_group_by_categorical_features) is str and patterns_report_group_by_categorical_features != 'all':
+    if type(patterns_report_group_by_categorical_features) is str \
+            and patterns_report_group_by_categorical_features != 'all':
         raise AttributeError('''provided patterns_report_group_by_categorical_features is not valid.
             patterns_report_group_by_categorical_features has to be "all" if the provided value is a string''')
 
-    if type(
-            patterns_report_group_by_numerical_features) is str and patterns_report_group_by_numerical_features != 'all':
+    if type(patterns_report_group_by_numerical_features) is str \
+            and patterns_report_group_by_numerical_features != 'all':
         raise AttributeError('''provided patterns_report_group_by_numerical_features is not valid.
             patterns_report_group_by_numerical_features has to be "all" if the provided value is a string''')
 
@@ -60,13 +60,13 @@ def validate_create_report_attributes(enable_patterns_report: bool,
         raise TypeError('''provided patterns_report_number_of_bins is not valid.
         patterns_report_number_of_bins has to be an int or a list of ints (one for each numerical feature provided in patterns_report_group_by_numerical_features)''')
 
-    if is_instance(patterns_report_number_of_bins, List[int]) and type(
-            patterns_report_group_by_numerical_features) is str:
+    if is_instance(patterns_report_number_of_bins, List[int]) \
+            and type(patterns_report_group_by_numerical_features) is str:
         raise AttributeError('''provided patterns_report_number_of_bins is not valid.
         patterns_report_number_of_bins can be a list of ints if a list of numerical features were provided in patterns_report_group_by_numerical_features''')
 
-    if is_instance(patterns_report_number_of_bins, List[int]) and is_instance(
-            patterns_report_group_by_numerical_features, List[str]):
+    if is_instance(patterns_report_number_of_bins, List[int]) \
+            and is_instance(patterns_report_group_by_numerical_features, List[str]):
         if len(patterns_report_number_of_bins) != len(patterns_report_group_by_numerical_features):
             raise AttributeError('''provided patterns_report_number_of_bins is not valid.
             patterns_report_number_of_bins list length has to be equal to the number of features provided in patterns_report_group_by_numerical_features''')

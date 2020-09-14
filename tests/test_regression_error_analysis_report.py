@@ -399,6 +399,7 @@ def test_both_numerical_and_categorical_features_are_none():
                                       categorical_features=None,
                                       subtitle='Test report subtitle')
 
+
 @pytest.mark.parametrize("numerical_features", [
     3,
     False,
@@ -439,3 +440,257 @@ def test_invalid_categorical_features(categorical_features):
                                       numerical_features=[],
                                       categorical_features=categorical_features,
                                       subtitle='Test report subtitle')
+
+
+@pytest.fixture(scope="module")
+def empty_report():
+    return RegressionErrorAnalysisReport(title='Test report title',
+                                         output_directory=valid_output_directory,
+                                         train_df=pd.DataFrame({'target': [], 'error': []}),
+                                         test_df=pd.DataFrame({'target': [], 'error': []}),
+                                         target_feature_name='target',
+                                         error_column_name='error',
+                                         error_classes={'ACCEPTABLE': (0.0, 1.0)},
+                                         acceptable_error_class='ACCEPTABLE',
+                                         numerical_features=[],
+                                         categorical_features=[],
+                                         subtitle='Test report subtitle')
+
+
+@pytest.mark.parametrize("enable_patterns_report", [
+    3,
+    'test',
+    {},
+    [1, 2, 3]
+])
+def test_invalid_enable_patterns_report(enable_patterns_report, empty_report):
+    with pytest.raises(TypeError):
+        empty_report.create_report(enable_patterns_report=enable_patterns_report)
+
+
+@pytest.mark.parametrize("patterns_report_group_by_categorical_features", [
+    3,
+    {},
+    [1, 2, 3],
+    False
+])
+def test_invalid_patterns_report_group_by_categorical_features(patterns_report_group_by_categorical_features,
+                                                               empty_report):
+    with pytest.raises(TypeError):
+        empty_report.create_report(
+            patterns_report_group_by_categorical_features=patterns_report_group_by_categorical_features)
+
+
+@pytest.mark.parametrize("patterns_report_group_by_numerical_features", [
+    3,
+    {},
+    [1, 2, 3],
+    False
+])
+def test_invalid_patterns_report_group_by_numerical_features(patterns_report_group_by_numerical_features,
+                                                             empty_report):
+    with pytest.raises(TypeError):
+        empty_report.create_report(
+            patterns_report_group_by_numerical_features=patterns_report_group_by_numerical_features)
+
+
+@pytest.mark.parametrize("patterns_report_group_by_categorical_features", [
+    'ALL',
+    'All',
+    'somethingElse'
+])
+def test_invalid_patterns_report_group_by_categorical_features_string(patterns_report_group_by_categorical_features,
+                                                                      empty_report):
+    with pytest.raises(AttributeError):
+        empty_report.create_report(
+            patterns_report_group_by_categorical_features=patterns_report_group_by_categorical_features)
+
+
+@pytest.mark.parametrize("patterns_report_group_by_numerical_features", [
+    'ALL',
+    'All',
+    'somethingElse'
+])
+def test_invalid_patterns_report_group_by_numerical_features_string(patterns_report_group_by_numerical_features,
+                                                                    empty_report):
+    with pytest.raises(AttributeError):
+        empty_report.create_report(
+            patterns_report_group_by_numerical_features=patterns_report_group_by_numerical_features)
+
+
+@pytest.mark.parametrize("patterns_report_group_by_categorical_features", [
+    ['a', 'b'],
+    'a'
+])
+def test_invalid_patterns_report_group_by_categorical_features_list(patterns_report_group_by_categorical_features,
+                                                                    empty_report):
+    with pytest.raises(AttributeError):
+        empty_report.create_report(
+            patterns_report_group_by_categorical_features=patterns_report_group_by_categorical_features)
+
+
+@pytest.mark.parametrize("patterns_report_group_by_numerical_features", [
+    ['a', 'b'],
+    'a'
+])
+def test_invalid_patterns_report_group_by_numerical_features_list(patterns_report_group_by_numerical_features,
+                                                                  empty_report):
+    with pytest.raises(AttributeError):
+        empty_report.create_report(
+            patterns_report_group_by_numerical_features=patterns_report_group_by_numerical_features)
+
+
+@pytest.mark.parametrize("patterns_report_number_of_bins", [
+    13.0,
+    'test',
+    3.3,
+    [2.0, 3.0]
+])
+def test_invalid_patterns_report_number_of_bins(patterns_report_number_of_bins, empty_report):
+    with pytest.raises(TypeError):
+        empty_report.create_report(
+            patterns_report_number_of_bins=patterns_report_number_of_bins)
+
+
+@pytest.mark.parametrize("patterns_report_number_of_bins,patterns_report_group_by_numerical_features", [
+    ([1, 2, 3], 'all'),
+    ([1, 2, 3, 10], 'all'),
+    ([1, 2, 3, 10], ['a', 'b', 'c']),
+    ([1, 2], ['a', 'b', 'c'])
+])
+def test_invalid_patterns_report_number_of_bins_with_patterns_report_group_by_numerical_features(
+        patterns_report_number_of_bins, patterns_report_group_by_numerical_features, empty_report):
+    with pytest.raises(AttributeError):
+        empty_report.create_report(
+            patterns_report_group_by_numerical_features=patterns_report_group_by_numerical_features,
+            patterns_report_number_of_bins=patterns_report_number_of_bins)
+
+
+@pytest.mark.parametrize("enable_parallel_coordinates_plot", [
+    3,
+    'test',
+    {},
+    [1, 2, 3]
+])
+def test_invalid_enable_parallel_coordinates_plot(enable_parallel_coordinates_plot, empty_report):
+    with pytest.raises(TypeError):
+        empty_report.create_report(enable_parallel_coordinates_plot=enable_parallel_coordinates_plot)
+
+
+@pytest.mark.parametrize("cosine_similarity_threshold", [
+    3,
+    'test',
+    {},
+    [1, 2, 3]
+])
+def test_invalid_cosine_similarity_threshold(cosine_similarity_threshold, empty_report):
+    with pytest.raises(TypeError):
+        empty_report.create_report(cosine_similarity_threshold=cosine_similarity_threshold)
+
+
+@pytest.mark.parametrize("cosine_similarity_threshold", [
+    3.0,
+    -1.0,
+    -0.01,
+    1.01
+])
+def test_invalid_cosine_similarity_threshold_value(cosine_similarity_threshold, empty_report):
+    with pytest.raises(AttributeError):
+        empty_report.create_report(cosine_similarity_threshold=cosine_similarity_threshold)
+
+
+@pytest.mark.parametrize("parallel_coordinates_q1_threshold", [
+    3,
+    'test',
+    {},
+    [1, 2, 3]
+])
+def test_invalid_parallel_coordinates_q1_threshold(parallel_coordinates_q1_threshold, empty_report):
+    with pytest.raises(TypeError):
+        empty_report.create_report(parallel_coordinates_q1_threshold=parallel_coordinates_q1_threshold)
+
+
+@pytest.mark.parametrize("parallel_coordinates_q2_threshold", [
+    3,
+    'test',
+    {},
+    [1, 2, 3]
+])
+def test_invalid_parallel_coordinates_q2_threshold(parallel_coordinates_q2_threshold, empty_report):
+    with pytest.raises(TypeError):
+        empty_report.create_report(parallel_coordinates_q2_threshold=parallel_coordinates_q2_threshold)
+
+
+@pytest.mark.parametrize("parallel_coordinates_q1_threshold", [
+    3.0,
+    -1.0,
+    -0.01,
+    1.01
+])
+def test_invalid_parallel_coordinates_q1_threshold_value(parallel_coordinates_q1_threshold, empty_report):
+    with pytest.raises(AttributeError):
+        empty_report.create_report(parallel_coordinates_q1_threshold=parallel_coordinates_q1_threshold)
+
+
+@pytest.mark.parametrize("parallel_coordinates_q2_threshold", [
+    3.0,
+    -1.0,
+    -0.01,
+    1.01
+])
+def test_invalid_parallel_coordinates_q2_threshold_value(parallel_coordinates_q2_threshold, empty_report):
+    with pytest.raises(AttributeError):
+        empty_report.create_report(parallel_coordinates_q2_threshold=parallel_coordinates_q2_threshold)
+
+
+@pytest.mark.parametrize("parallel_coordinates_q1_threshold,parallel_coordinates_q2_threshold", [
+    (0.7, 0.3),
+    (0.51, 0.49),
+    (0.9, 0.1)
+])
+def test_invalid_parallel_coordinates_q1_threshold_and_parallel_coordinates_q2_threshold(
+        parallel_coordinates_q1_threshold,
+        parallel_coordinates_q2_threshold, empty_report):
+    with pytest.raises(AttributeError):
+        empty_report.create_report(parallel_coordinates_q1_threshold=parallel_coordinates_q1_threshold,
+                                   parallel_coordinates_q2_threshold=parallel_coordinates_q2_threshold)
+
+
+@pytest.mark.parametrize("parallel_coordinates_features", [
+    3,
+    {},
+    [1, 2, 3]
+])
+def test_invalid_parallel_coordinates_features(parallel_coordinates_features, empty_report):
+    with pytest.raises(TypeError):
+        empty_report.create_report(parallel_coordinates_features=parallel_coordinates_features)
+
+
+@pytest.mark.parametrize("parallel_coordinates_features", [
+    'AUTO',
+    'Auto',
+    '',
+    ['a', 'b', 'c']
+])
+def test_invalid_parallel_coordinates_features_value(parallel_coordinates_features, empty_report):
+    with pytest.raises(AttributeError):
+        empty_report.create_report(parallel_coordinates_features=parallel_coordinates_features)
+
+
+@pytest.mark.parametrize("parallel_coordinates_features", [
+    ['a'],
+])
+def test_invalid_parallel_coordinates_features_number_of_features(parallel_coordinates_features, empty_report):
+    report = RegressionErrorAnalysisReport(title='Test report title',
+                                           output_directory=valid_output_directory,
+                                           train_df=pd.DataFrame({'target': [], 'error': [], 'a': []}),
+                                           test_df=pd.DataFrame({'target': [], 'error': [], 'a': []}),
+                                           target_feature_name='target',
+                                           error_column_name='error',
+                                           error_classes={'ACCEPTABLE': (0.0, 1.0)},
+                                           acceptable_error_class='ACCEPTABLE',
+                                           numerical_features=[],
+                                           categorical_features=[],
+                                           subtitle='Test report subtitle')
+    with pytest.raises(AttributeError):
+        report.create_report(parallel_coordinates_features=parallel_coordinates_features)

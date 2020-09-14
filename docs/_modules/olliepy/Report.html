@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>olliepy.Report &mdash; Olliepy 0.1.17 documentation</title>
+  <title>olliepy.Report &mdash; Olliepy 0.1.21 documentation</title>
   
 
   
@@ -179,7 +179,7 @@
     <span class="k">if</span> <span class="n">encryption_secret</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">encryption_secret</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided encryption_secret is not valid. encryption_secret has to be a str&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">encryption_secret</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">encryption_secret</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">16</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided encryption_secret is not valid. encryption_secret has to be 16 characters&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided encryption_secret is not valid. encryption_secret has to be 16 characters&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">generate_encryption_secret</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided generate_encryption_secret is not valid. encryption_secret has to be a bool&#39;</span><span class="p">)</span>
 
@@ -200,12 +200,6 @@
     <span class="n">copy_tree</span><span class="p">(</span><span class="n">source_path</span><span class="p">,</span> <span class="n">destination_path</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_zip_directory</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">zip_handler</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="n">zip_handler</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
-
-
 <span class="k">def</span> <span class="nf">_start_server_and_view_report</span><span class="p">(</span><span class="n">report_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Serve the report to the user using a web server.</span>
@@ -219,7 +213,7 @@
 <span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span><span class="se">\n\n</span><span class="s1"> ### </span><span class="se">\n</span><span class="s1">Serving the report this way, might not work on all machines.</span>
-<span class="s1">Try different server mode (&#39;server&#39;, &#39;js&#39; or &#39;jupyter&#39;) or save and download the report and open index.html </span><span class="se">\n</span><span class="s1">###</span><span class="se">\n\n</span><span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
+<span class="s1">Try different server modes (&#39;server&#39;, &#39;js&#39; or &#39;jupyter&#39;) or save and download the report and open index.html </span><span class="se">\n</span><span class="s1">###</span><span class="se">\n\n</span><span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Clear your browser</span><span class="se">\&#39;</span><span class="s1">s cache if your report was not updated</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
     <span class="kn">import</span> <span class="nn">time</span>
