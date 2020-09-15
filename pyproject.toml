@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "olliePy"
-version = "0.1.21"
+version = "0.1.22"
 description = "OlliePy is a python package which can help the data scientists in evaluating and analysing their machine learning experiments by utilising the power and structure of modern web applications. The data scientist only needs to provide the data and any required information and OlliePy will generate the rest."
 license = "MIT"
 readme = "PyPi.md"
@@ -34,6 +34,7 @@ ipython = ">= 7.0.0"
 [tool.poetry.dev-dependencies]
 pytest = "^6.0.2"
 pytest-cov = "^2.10.1"
+pytest-mock = "^3.3.1"
 
 [build-system]
 requires = ["poetry>=0.12"]

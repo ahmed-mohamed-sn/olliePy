@@ -196,3 +196,51 @@ def test_encrypted_save_report():
     assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}/report_data.json')
     assert os.path.exists(f'{valid_output_directory}/{report.report_folder_name}.zip')
 
+
+def test_serve_report(mocker):
+    report = Report(title='Test report title',
+                    output_directory=valid_output_directory,
+                    subtitle='Test report subtitle',
+                    report_folder_name='EncryptedTestReport',
+                    generate_encryption_secret=True)
+
+    mocked_create_report_directory = mocker.patch('olliepy.Report.Report._create_report_directory')
+    mocked_save_report_data = mocker.patch('olliepy.Report.Report._save_report_data')
+    mocked_copy_application_template = mocker.patch('olliepy.Report._copy_application_template')
+    mocked_start_server_and_view_report = mocker.patch('olliepy.Report._start_server_and_view_report')
+
+    report._serve_report_using_flask('regression-error-analysis-report', mode='serve', port=8080)
+    mocked_create_report_directory.assert_called_once()
+    mocked_copy_application_template.assert_called_once()
+    mocked_save_report_data.assert_called_once()
+    mocked_start_server_and_view_report.assert_called_once()
+
+def test_serve_report_using_different_modes(mocker):
+    report = Report(title='Test report title',
+                    output_directory=valid_output_directory,
+                    subtitle='Test report subtitle',
+                    report_folder_name='EncryptedTestReport',
+                    generate_encryption_secret=True)
+
+    mocked_create_report_directory = mocker.patch('olliepy.Report.Report._create_report_directory')
+    mocked_save_report_data = mocker.patch('olliepy.Report.Report._save_report_data')
+    mocked_copy_application_template = mocker.patch('olliepy.Report._copy_application_template')
+    mocked_spec_from_file_location = mocker.patch('importlib.util.spec_from_file_location')
+    mocked_module_from_spec = mocker.patch('importlib.util.module_from_spec')
+    mocked_webbrowser_open = mocker.patch('webbrowser.open')
+    mocked_ipython_display = mocker.patch('IPython.core.display.display')
+    mocked_ipython_IFrame = mocker.patch('IPython.display.IFrame')
+
+    report._serve_report_using_flask('regression-error-analysis-report', mode='server', port=8080)
+    mocked_create_report_directory.assert_called_once()
+    mocked_copy_application_template.assert_called_once()
+    mocked_save_report_data.assert_called_once()
+    mocked_spec_from_file_location.assert_called_once()
+    mocked_module_from_spec.assert_called_once()
+    mocked_webbrowser_open.assert_called_once()
+
+    report._serve_report_using_flask('regression-error-analysis-report', mode='js', port=8080)
+    mocked_ipython_display.assert_called_once()
+
+    report._serve_report_using_flask('regression-error-analysis-report', mode='jupyter', port=8080)
+    mocked_ipython_IFrame.assert_called_once()

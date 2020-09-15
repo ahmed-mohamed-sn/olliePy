@@ -25,7 +25,7 @@ jobs:
           poetry install
       - name: Test OlliePy
         run: |
-          poetry run pytest --junit-xml=./test-reports/report.xml --cov-report xml:./test-reports/coverage.xml --cov=olliepy tests/
+          poetry run pytest --cov-config=.coveragerc --junit-xml=./test-reports/report.xml --cov-report xml:./test-reports/coverage.xml --cov=olliepy tests/
       - name: Generate report
         id: xunit-viewer
         uses: AutoModality/action-xunit-viewer@v1.0.1

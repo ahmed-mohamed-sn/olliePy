@@ -1,0 +1,667 @@
+{
+  'title': 'BMI Regression Report',
+  'subtitle': 'BMI distribution shift',
+  'report': {
+    'primaryDatasets': [
+      'Training data',
+      'ACCEPTABLE'
+    ],
+    'secondaryDatasets': [
+      'Testing data',
+      'ACCEPTABLE',
+      'OVER_ESTIMATING'
+    ],
+    'numericalFeatures': [
+      'weight',
+      'height',
+      'BMI'
+    ],
+    'categoricalFeatures': [
+      'gender'
+    ],
+    'targetFeature': 'BMI',
+    'datasets': {
+      'Training data': {
+        'info': {
+          'name': 'Training data',
+          'numberOfRows': 10,
+          'minError': -5.575733463244902,
+          'meanError': 1.102658475463179,
+          'stdError': 3.941365381389868,
+          'medianError': 2.622266744659159,
+          'maxError': 5.02980912521628,
+          'errors': [
+            4.35965045351168,
+            4.2512455184537075,
+            -2.308950637211275,
+            -1.2665772229146128,
+            1.2316660337917327,
+            5.02980912521628,
+            -3.422442273158559,
+            4.715049764661153,
+            -5.575733463244902,
+            4.012867455526585
+          ],
+          'stats': {
+            'weight': {
+              'min': 30.505818004592548,
+              'mean': 67.49829000130634,
+              'std': 21.59766336766331,
+              'median': 74.99992864832466,
+              'max': 101.36793814909961,
+              'count': 10,
+              'missingCount': 0
+            },
+            'height': {
+              'min': 1.2141654096900105,
+              'mean': 1.5637855598311947,
+              'std': 0.28926913773626567,
+              'median': 1.547551456622681,
+              'max': 2.1092287694563883,
+              'count': 10,
+              'missingCount': 0
+            },
+            'BMI': {
+              'min': 6.8570182001235835,
+              'mean': 32.746095622548765,
+              'std': 15.186679926045725,
+              'median': 35.61544503924176,
+              'max': 51.22173452143229,
+              'count': 10,
+              'missingCount': 0
+            },
+            'gender': {
+              'uniqueCount': 2,
+              'missingCount': 0
+            }
+          }
+        },
+        'data': {
+          'weight': [
+            74.48889704151111,
+            83.23062945633602,
+            58.404847212649685,
+            78.15622647206627,
+            79.32958733202109,
+            30.505818004592548,
+            75.5109602551382,
+            38.48389654950436,
+            101.36793814909961,
+            55.50409954014475
+          ],
+          'height': [
+            1.691766915191099,
+            1.9491826474035565,
+            1.2852713830834017,
+            1.3070265980930795,
+            1.4082847624165382,
+            2.1092287694563883,
+            1.2141654096900105,
+            1.5432515253201904,
+            1.5778261997325116,
+            1.5518513879251712
+          ],
+          'BMI': [
+            31.231420289851012,
+            21.90675777726569,
+            42.42681812245051,
+            45.75038272162881,
+            39.99946978863252,
+            6.8570182001235835,
+            51.22173452143229,
+            16.158669891418683,
+            48.86113291803425,
+            23.047551994650284
+          ]
+        }
+      },
+      'Testing data': {
+        'info': {
+          'name': 'Testing data',
+          'numberOfRows': 10,
+          'minError': 0.64125099459838,
+          'meanError': 4.449461415490077,
+          'stdError': 2.4771220201885265,
+          'medianError': 4.696045098091044,
+          'maxError': 7.822131201189546,
+          'errors': [
+            7.395859499144738,
+            6.6498794687474,
+            2.1178110852914998,
+            1.352281099323676,
+            4.626225079884751,
+            0.64125099459838,
+            4.765865116297338,
+            7.822131201189546,
+            3.996376015557967,
+            5.1269345948654745
+          ],
+          'stats': {
+            'weight': {
+              'min': 44.30962234747368,
+              'mean': 55.96028863887274,
+              'std': 8.28098920044576,
+              'median': 53.477864194316744,
+              'max': 71.18986475553054,
+              'count': 10,
+              'missingCount': 0
+            },
+            'height': {
+              'min': 1.4803520957617644,
+              'mean': 1.6664104122776042,
+              'std': 0.132314518932591,
+              'median': 1.670450482465215,
+              'max': 1.8625683686536378,
+              'count': 10,
+              'missingCount': 0
+            },
+            'BMI': {
+              'min': 17.270954674667788,
+              'mean': 24.21415646179821,
+              'std': 5.584236868127869,
+              'median': 22.80595918699664,
+              'max': 34.45348672331068,
+              'count': 10,
+              'missingCount': 0
+            },
+            'gender': {
+              'uniqueCount': 2,
+              'missingCount': 0
+            }
+          }
+        },
+        'data': {
+          'weight': [
+            52.25806772623051,
+            54.69766066240298,
+            52.06483988871636,
+            62.91902427740109,
+            47.7799463904831,
+            44.30962234747368,
+            63.99950158640414,
+            59.54355306685157,
+            50.84080568723348,
+            71.18986475553054
+          ],
+          'height': [
+            1.739476242029242,
+            1.7550120224198116,
+            1.5241736180721417,
+            1.4803520957617644,
+            1.656645901891169,
+            1.493587129704761,
+            1.6663233819769372,
+            1.8113877793130846,
+            1.8625683686536378,
+            1.6745775829534932
+          ],
+          'BMI': [
+            17.270954674667788,
+            21.310311937234523,
+            26.894093036181275,
+            34.45348672331068,
+            20.891398977668707,
+            23.835165364395273,
+            27.65917747850496,
+            21.776753009598,
+            17.586087267923713,
+            30.46413614849721
+          ]
+        }
+      },
+      'ACCEPTABLE': {
+        'info': {
+          'name': 'ACCEPTABLE',
+          'numberOfRows': 2,
+          'minError': 0.64125099459838,
+          'meanError': 0.996766046961028,
+          'stdError': 0.5027742086790379,
+          'medianError': 0.996766046961028,
+          'maxError': 1.352281099323676,
+          'errors': [
+            1.352281099323676,
+            0.64125099459838
+          ],
+          'stats': {
+            'weight': {
+              'min': 44.30962234747368,
+              'mean': 53.614323312437385,
+              'std': 13.1588342984777,
+              'median': 53.614323312437385,
+              'max': 62.91902427740109,
+              'count': 2,
+              'missingCount': 0
+            },
+            'height': {
+              'min': 1.4803520957617644,
+              'mean': 1.4869696127332626,
+              'std': 0.00935858225032697,
+              'median': 1.4869696127332626,
+              'max': 1.493587129704761,
+              'count': 2,
+              'missingCount': 0
+            },
+            'BMI': {
+              'min': 23.835165364395273,
+              'mean': 29.144326043852978,
+              'std': 7.508287037707042,
+              'median': 29.144326043852978,
+              'max': 34.45348672331068,
+              'count': 2,
+              'missingCount': 0
+            },
+            'gender': {
+              'uniqueCount': 1,
+              'missingCount': 0
+            }
+          }
+        },
+        'data': {
+          'weight': [
+            62.91902427740109,
+            44.30962234747368
+          ],
+          'height': [
+            1.4803520957617644,
+            1.493587129704761
+          ],
+          'BMI': [
+            34.45348672331068,
+            23.835165364395273
+          ]
+        }
+      },
+      'OVER_ESTIMATING': {
+        'info': {
+          'name': 'OVER_ESTIMATING',
+          'numberOfRows': 8,
+          'minError': 2.1178110852914998,
+          'meanError': 5.31263525762234,
+          'stdError': 1.8962239300989097,
+          'medianError': 4.946399855581406,
+          'maxError': 7.822131201189546,
+          'errors': [
+            7.395859499144738,
+            6.6498794687474,
+            2.1178110852914998,
+            4.626225079884751,
+            4.765865116297338,
+            7.822131201189546,
+            3.996376015557967,
+            5.1269345948654745
+          ],
+          'stats': {
+            'weight': {
+              'min': 47.7799463904831,
+              'mean': 56.54677997048158,
+              'std': 7.840000326751161,
+              'median': 53.477864194316744,
+              'max': 71.18986475553054,
+              'count': 8,
+              'missingCount': 0
+            },
+            'height': {
+              'min': 1.5241736180721417,
+              'mean': 1.7112706121636896,
+              'std': 0.10486665197066036,
+              'median': 1.7070269124913677,
+              'max': 1.8625683686536378,
+              'count': 8,
+              'missingCount': 0
+            },
+            'BMI': {
+              'min': 17.270954674667788,
+              'mean': 22.98161406628452,
+              'std': 4.833107667567263,
+              'median': 21.543532473416263,
+              'max': 30.46413614849721,
+              'count': 8,
+              'missingCount': 0
+            },
+            'gender': {
+              'uniqueCount': 2,
+              'missingCount': 0
+            }
+          }
+        },
+        'data': {
+          'weight': [
+            52.25806772623051,
+            54.69766066240298,
+            52.06483988871636,
+            47.7799463904831,
+            63.99950158640414,
+            59.54355306685157,
+            50.84080568723348,
+            71.18986475553054
+          ],
+          'height': [
+            1.739476242029242,
+            1.7550120224198116,
+            1.5241736180721417,
+            1.656645901891169,
+            1.6663233819769372,
+            1.8113877793130846,
+            1.8625683686536378,
+            1.6745775829534932
+          ],
+          'BMI': [
+            17.270954674667788,
+            21.310311937234523,
+            26.894093036181275,
+            20.891398977668707,
+            27.65917747850496,
+            21.776753009598,
+            17.586087267923713,
+            30.46413614849721
+          ]
+        }
+      }
+    },
+    'statistical_tests': {
+      'Training data_Testing data': {
+        'weight': {
+          'ks_2samp': {
+            'p_value': 0.05244755244755244,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 16.157972199205595
+        },
+        'height': {
+          'ks_2samp': {
+            'p_value': 0.41752365281777043,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 0.17951590622505403
+        },
+        'BMI': {
+          'ks_2samp': {
+            'p_value': 0.16782134274394334,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 10.900209930960395
+        },
+        'gender': {
+          'cosine_similarity': {
+            'cosine_similarity': 0.49301257198088044,
+            'cosine_similarity_threshold': 0.8
+          }
+        }
+      },
+      'Training data_ACCEPTABLE': {
+        'weight': {
+          'ks_2samp': {
+            'p_value': 0.4545454545454545,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 17.80987271703907
+        },
+        'height': {
+          'ks_2samp': {
+            'p_value': 0.4545454545454545,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 0.21814799305073757
+        },
+        'BMI': {
+          'ks_2samp': {
+            'p_value': 0.7575757575757576,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 9.075902297520356
+        },
+        'gender': {
+          'cosine_similarity': {
+            'cosine_similarity': 0.39391929857916774,
+            'cosine_similarity_threshold': 0.8
+          }
+        }
+      },
+      'Training data_OVER_ESTIMATING': {
+        'weight': {
+          'ks_2samp': {
+            'p_value': 0.04986516751222636,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 16.724674570711194
+        },
+        'height': {
+          'ks_2samp': {
+            'p_value': 0.07043283513871756,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 0.22181707664411177
+        },
+        'BMI': {
+          'ks_2samp': {
+            'p_value': 0.04986516751222636,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 12.116995696811292
+        },
+        'gender': {
+          'cosine_similarity': {
+            'cosine_similarity': 0.5199469468957452,
+            'cosine_similarity_threshold': 0.8
+          }
+        }
+      },
+      'ACCEPTABLE_Testing data': {
+        'weight': {
+          'ks_2samp': {
+            'p_value': 0.9393939393939394,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 4.665332291544885
+        },
+        'height': {
+          'ks_2samp': {
+            'p_value': 0.18181818181818177,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 0.17944079954434158
+        },
+        'BMI': {
+          'ks_2samp': {
+            'p_value': 0.7575757575757576,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 4.930169582054765
+        },
+        'gender': {
+          'cosine_similarity': {
+            'cosine_similarity': 0.9938837346736189,
+            'cosine_similarity_threshold': 0.8
+          }
+        }
+      },
+      'ACCEPTABLE_ACCEPTABLE': {
+        'weight': {
+          'ks_2samp': {
+            'p_value': 1.0,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 0.0
+        },
+        'height': {
+          'ks_2samp': {
+            'p_value': 1.0,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 0.0
+        },
+        'BMI': {
+          'ks_2samp': {
+            'p_value': 1.0,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 0.0
+        },
+        'gender': {
+          'cosine_similarity': {
+            'cosine_similarity': 1.0,
+            'cosine_similarity_threshold': 0.8
+          }
+        }
+      },
+      'ACCEPTABLE_OVER_ESTIMATING': {
+        'weight': {
+          'ks_2samp': {
+            'p_value': 0.8,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 5.831665364431107
+        },
+        'height': {
+          'ks_2samp': {
+            'p_value': 0.04444444444444451,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 0.22430099943042697
+        },
+        'BMI': {
+          'ks_2samp': {
+            'p_value': 0.4444444444444444,
+            'p_value_threshold': 0.01
+          },
+          'wasserstein_distance': 6.162711977568455
+        },
+        'gender': {
+          'cosine_similarity': {
+            'cosine_similarity': 0.9899494936611665,
+            'cosine_similarity_threshold': 0.8
+          }
+        }
+      }
+    },
+    'categorical_count_plots': {
+      'gender': {
+        'Training data_Testing data': {
+          'title': 'Training data vs Testing data',
+          'categories': [
+            'female',
+            'male'
+          ],
+          'series': [
+            {
+              'name': 'Training data',
+              'color': '#8180FF',
+              'data': [
+                7,
+                3
+              ]
+            },
+            {
+              'name': 'Testing data',
+              'color': '#FF938D',
+              'data': [
+                1,
+                9
+              ]
+            }
+          ]
+        },
+        'Training data_ACCEPTABLE': {
+          'title': 'Training data vs ACCEPTABLE',
+          'categories': [
+            'female',
+            'male'
+          ],
+          'series': [
+            {
+              'name': 'Training data',
+              'color': '#8180FF',
+              'data': [
+                7,
+                3
+              ]
+            },
+            {
+              'name': 'ACCEPTABLE',
+              'color': '#FF938D',
+              'data': [
+                0.0,
+                2.0
+              ]
+            }
+          ]
+        },
+        'Training data_OVER_ESTIMATING': {
+          'title': 'Training data vs OVER_ESTIMATING',
+          'categories': [
+            'female',
+            'male'
+          ],
+          'series': [
+            {
+              'name': 'Training data',
+              'color': '#8180FF',
+              'data': [
+                7,
+                3
+              ]
+            },
+            {
+              'name': 'OVER_ESTIMATING',
+              'color': '#FF938D',
+              'data': [
+                1,
+                7
+              ]
+            }
+          ]
+        },
+        'ACCEPTABLE_Testing data': {
+          'title': 'ACCEPTABLE vs Testing data',
+          'categories': [
+            'male',
+            'female'
+          ],
+          'series': [
+            {
+              'name': 'ACCEPTABLE',
+              'color': '#8180FF',
+              'data': [
+                2.0,
+                0.0
+              ]
+            },
+            {
+              'name': 'Testing data',
+              'color': '#FF938D',
+              'data': [
+                9,
+                1
+              ]
+            }
+          ]
+        },
+        'ACCEPTABLE_OVER_ESTIMATING': {
+          'title': 'ACCEPTABLE vs OVER_ESTIMATING',
+          'categories': [
+            'male',
+            'female'
+          ],
+          'series': [
+            {
+              'name': 'ACCEPTABLE',
+              'color': '#8180FF',
+              'data': [
+                2.0,
+                0.0
+              ]
+            },
+            {
+              'name': 'OVER_ESTIMATING',
+              'color': '#FF938D',
+              'data': [
+                7,
+                1
+              ]
+            }
+          ]
+        }
+      }
+    }
+  }
+}
