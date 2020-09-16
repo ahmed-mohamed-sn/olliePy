@@ -15,8 +15,12 @@
 <br/>
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/olliepy.svg)](https://pypi.python.org/pypi/olliepy/)
 <br/>
+<br/>
+
+<h3>
 <a href="../../issues/new">:speech_balloon: Ask a question</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="../../issues?q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc">:book: Read questions</a>
-</h2>
+</h3>
+
 # OlliePy - An alternative approach for evaluating ML models
 > **OlliePy** is a python package which can help the data scientists in
 > evaluating and analysing their machine learning experiments by
