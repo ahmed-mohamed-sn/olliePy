@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "olliePy"
-version = "0.1.22"
+version = "0.1.23"
 description = "OlliePy is a python package which can help the data scientists in evaluating and analysing their machine learning experiments by utilising the power and structure of modern web applications. The data scientist only needs to provide the data and any required information and OlliePy will generate the rest."
 license = "MIT"
 readme = "PyPi.md"
