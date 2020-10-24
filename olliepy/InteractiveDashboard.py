@@ -23,6 +23,18 @@ def validate_attributes(dataframes: List[pd.DataFrame],
         raise TypeError('''one or more of the provided data_frames_names is not valid.
         Please make sure that you are passing a list of strings for the data frames' names''')
 
+    if not is_instance(numerical_columns, List[str]) and len(numerical_columns) > 0:
+        raise TypeError('''one or more of the provided numerical_columns is not valid.
+        Please make sure that you are passing a list of strings of the numerical columns''')
+
+    if not is_instance(categorical_columns, List[str]) and len(categorical_columns) > 0:
+        raise TypeError('''one or more of the provided categorical_columns is not valid.
+        Please make sure that you are passing a list of strings of the categorical columns''')
+
+    if date_columns is not None and not is_instance(date_columns, List[str]) and len(date_columns) > 0:
+        raise TypeError('''one or more of the provided date_columns is not valid.
+        Please make sure that you are passing a list of strings of the date columns''')
+
     if len(dataframes) != len(dataframes_names):
         raise AttributeError('You need to have a dataframe name for each dataframe you have in dataframes')
 
