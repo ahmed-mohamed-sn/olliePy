@@ -5,7 +5,7 @@ from typing import List
 import time
 import json
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
-
+import numpy as np
 
 def validate_attributes(dataframes: List[pd.DataFrame],
                         dataframes_names: List[str],
@@ -137,6 +137,9 @@ class InteractiveDashboard(Report):
             for date_column in self.date_columns:
                 df[date_column] = pd.to_datetime(df[date_column], infer_datetime_format=True)
 
+            for col in self.categorical_columns:
+                df[col] = df[col].astype(str)
+
         self.numerical_columns = [self._generated_id_column] + self.numerical_columns
         self.report_data['datasets'] = self.dataframes_names
         self.report_data['numericalColumns'] = self.numerical_columns if self.numerical_columns else []
@@ -243,6 +246,7 @@ class InteractiveDashboard(Report):
         for col in self.numerical_columns:
             if col != self._generated_id_column:
                 bin_width = (df[col].max() - df[col].min())/100
+                bin_width = 1.0 if np.isnan(bin_width) else bin_width
                 charts.append({
                     'dimension': col,
                     'title': f'{col} histogram',
@@ -269,7 +273,7 @@ class InteractiveDashboard(Report):
 
         return charts
 
-    def serve_dashboard_from_local_server(self, mode: str = 'server', port: int = None) -> None:
+    def serve_dashboard_from_local_server(self, mode: str = 'server', port: int = None, load_existing_dashboard: bool = False) -> None:
         """
         Serve the dashboard to the user using a web server.
         Available modes:
@@ -279,12 +283,13 @@ class InteractiveDashboard(Report):
 
         :param mode: the selected web server mode. default: 'server'
         :param port: the server port. default: None. a random port will be generated between (1024-49151)
+        :param load_existing_dashboard: Load existing dashboard data.
         :return: None
         """
         if not port:
             import random
             port = random.randint(1024, 49151)
-        super()._serve_report_using_flask(self._template_name, mode, port)
+        super()._serve_report_using_flask(self._template_name, mode, port, load_existing_dashboard)
 
     def save_dashboard(self, zip_dashboard: bool = False) -> None:
         """
