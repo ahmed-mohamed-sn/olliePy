@@ -5,7 +5,9 @@ from typing import List
 import time
 import json
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
+from pandas.api.types import is_numeric_dtype
 import numpy as np
+
 
 def validate_attributes(dataframes: List[pd.DataFrame],
                         dataframes_names: List[str],
@@ -50,13 +52,50 @@ def validate_attributes(dataframes: List[pd.DataFrame],
         for col in categorical_columns:
             if col not in df_columns:
                 raise AttributeError(f'Categorical column: {col} is not found in {df_name} dataframe.')
-        for col in date_columns:
-            if col not in df_columns:
-                raise AttributeError(f'Date column: {col} is not found in {df_name} dataframe.')
-            if not is_datetime(pd.to_datetime(df[col], infer_datetime_format=True, errors='ignore')):
-                raise TypeError(
-                    f'''Date column: {col} has one or more rows which are not a valid date format in {df_name} dataframe.
-                        You can replace invalid values with None''')
+
+        if date_columns is not None:
+            for col in date_columns:
+                if col not in df_columns:
+                    raise AttributeError(f'Date column: {col} is not found in {df_name} dataframe.')
+                if not is_datetime(pd.to_datetime(df[col], infer_datetime_format=True, errors='ignore')):
+                    raise TypeError(
+                        f'''Date column: {col} has one or more rows which are not a valid date format in {df_name} dataframe.
+                            You can replace invalid values with None''')
+
+
+def validate_bin_numerical_feature_attributes(dataframes: List[pd.DataFrame],
+                                              dataframes_names: List[str],
+                                              numerical_feature_name: str,
+                                              new_feature_name: str,
+                                              number_of_bins: int,
+                                              suffix: str):
+    if not is_instance(numerical_feature_name, str):
+        raise TypeError('''the provided numerical_feature_name is not valid.
+            Please make sure that you are passing numerical_feature_name as a string''')
+
+    for df, df_name in zip(dataframes, dataframes_names):
+        df_columns = df.columns.tolist()
+        if numerical_feature_name not in df_columns:
+            raise AttributeError(f'Numerical column: {numerical_feature_name} is not found in {df_name} dataframe.')
+        if not is_numeric_dtype(df[numerical_feature_name]):
+            raise TypeError('''the provided numerical_feature_name is not valid.
+            Please make sure that you are passing a numerical feature name''')
+
+    if not is_instance(new_feature_name, str):
+        raise TypeError('''the provided new_feature_name is not valid.
+            Please make sure that you are passing new_feature_name as a string''')
+
+    if len(new_feature_name) == 0:
+        raise AttributeError('''the provided new_feature_name is not valid.
+            Please make sure that you are passing new_feature_name as a string with at least one character''')
+
+    if not is_instance(number_of_bins, int):
+        raise TypeError('''the provided number_of_bins is not valid.
+            Please make sure that you are passing number_of_bins as an integer''')
+
+    if not is_instance(suffix, str) and suffix is not None:
+        raise TypeError('''the provided suffix is not valid.
+            Please make sure that you are passing suffix as a string''')
 
 
 class InteractiveDashboard(Report):
@@ -125,7 +164,7 @@ class InteractiveDashboard(Report):
         self.dataframes_names = dataframes_names[:]
         self.numerical_columns = numerical_columns[:]
         self.categorical_columns = categorical_columns[:]
-        self.date_columns = date_columns[:]
+        self.date_columns = date_columns[:] if date_columns is not None else []
         self._template_name = 'interactive-dashboard'
         self._generated_id_column = 'generated_id'
 
@@ -175,6 +214,40 @@ class InteractiveDashboard(Report):
         if self.encryption_secret:
             print(f'Your encryption secret is {self.encryption_secret}')
 
+    def bin_numerical_feature(self, numerical_feature_name: str, new_feature_name: str, number_of_bins: int,
+                              suffix: str = None) -> None:
+        """
+        This will be a selected numerical feature. OlliePy will get the bins from the first data frame
+        and apply these bins on the rest of the dataframes.
+
+        :param numerical_feature_name: the numerical feature to bin
+        :param new_feature_name: the name of the new binned feature
+        :param number_of_bins: the number of bins to apply
+        :param suffix: suffix to add the bins value
+        :return: None
+        """
+
+        validate_bin_numerical_feature_attributes(self.dataframes,
+                                                  self.dataframes_names,
+                                                  numerical_feature_name,
+                                                  new_feature_name,
+                                                  number_of_bins,
+                                                  suffix)
+
+        first_df = self.dataframes[0]
+        first_df.loc[:, new_feature_name], bins = pd.cut(first_df.loc[:, numerical_feature_name],
+                                                         retbins=True, include_lowest=True,
+                                                         bins=number_of_bins)
+        self.categorical_columns.append(new_feature_name)
+
+        if len(self.dataframes) > 1:
+            for df in self.dataframes[1:]:
+                df.loc[:, new_feature_name] = pd.cut(df.loc[:, numerical_feature_name], bins=bins)
+
+        if suffix is not None:
+            for df in self.dataframes:
+                df.loc[:, new_feature_name] = df.loc[:, new_feature_name].astype(str) + '_' + suffix
+
     def _generate_number_displays(self) -> List[dict]:
         """
         generate number displays for the auto generate functionality
@@ -194,7 +267,7 @@ class InteractiveDashboard(Report):
                 'id': 'number_of_observations_number_display',
                 'x': 0,
                 'y': 0,
-                'static':  False
+                'static': False
             }
         ]
 
@@ -231,7 +304,7 @@ class InteractiveDashboard(Report):
                     'id': f'chart_{i}',
                     'x': x,
                     'y': y,
-                    'static':  False
+                    'static': False
                 })
             else:
                 charts.append({
@@ -257,7 +330,7 @@ class InteractiveDashboard(Report):
 
         for col in self.numerical_columns:
             if col != self._generated_id_column:
-                bin_width = (df[col].max() - df[col].min())/100
+                bin_width = (df[col].max() - df[col].min()) / 100
                 bin_width = 1.0 if np.isnan(bin_width) else bin_width
                 charts.append({
                     'dimension': col,
@@ -274,7 +347,7 @@ class InteractiveDashboard(Report):
                     'id': f'chart_{i}',
                     'x': x,
                     'y': y,
-                    'static':  False
+                    'static': False
                 })
 
                 i += 1
@@ -285,7 +358,8 @@ class InteractiveDashboard(Report):
 
         return charts
 
-    def serve_dashboard_from_local_server(self, mode: str = 'server', port: int = None, load_existing_dashboard: bool = False) -> None:
+    def serve_dashboard_from_local_server(self, mode: str = 'server', port: int = None,
+                                          load_existing_dashboard: bool = False) -> None:
         """
         Serve the dashboard to the user using a web server.
         Available modes:

@@ -30,5 +30,15 @@
 
 ### <br/>Get started by following the [**OlliePy** guide](https://ahmed-mohamed-sn.github.io/olliePy/)
 
+### <br/> Interactive dashboard
+|                                                                                                   |                                                                                                |
+|:-------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------:|
+|            **Bar chart** ![bar-chart](./sphinxSource/source/_static/gifs/bar-chart.gif)           |            **Box plot** ![box-plot](./sphinxSource/source/_static/gifs/box-plot.gif)           |
+|          **Data table** ![data-table](./sphinxSource/source/_static/gifs/data-table.gif)          |            **Heat map** ![heat-map](./sphinxSource/source/_static/gifs/heatmap.gif)            |
+|            **Histogram** ![histogram](./sphinxSource/source/_static/gifs/histogram.gif)           |       **Leaflet map** ![leaflet-map](./sphinxSource/source/_static/gifs/leaflet-map.gif)       |
+| **Number display** <br/> ![number-display](./sphinxSource/source/_static/gifs/number-display.gif) |          **Pie chart** ![pie-chart](./sphinxSource/source/_static/gifs/pie-chart.gif)          |
+|            **Row chart** ![row-chart](./sphinxSource/source/_static/gifs/row-chart.gif)           |      **Scatter plot** ![scatter-plot](./sphinxSource/source/_static/gifs/scatter-plot.gif)     |
+|            **Sun burst** ![sun-burst](./sphinxSource/source/_static/gifs/sun-burst.gif)           |   **Time bar chart** ![time-bar-chart](./sphinxSource/source/_static/gifs/time-bar-chart.gif)  |
+|      **Time box plot** ![time-box-plot](./sphinxSource/source/_static/gifs/time-box-plot.gif)     | **Time line chart** ![time-line-chart](./sphinxSource/source/_static/gifs/time-line-chart.gif) |
 ### <br/>Error analysis report for regression demo
 ![OlliePy demo](./sphinxSource/source/_static/imgs/error-analysis-regression-demo.gif)
