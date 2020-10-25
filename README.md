@@ -78,3 +78,10 @@ The performance of the dashboard depend on the size of the data, number of chart
 |            **Sun burst** ![sun-burst](./sphinxSource/source/_static/gifs/sun-burst.gif)           |   **Time bar chart** ![time-bar-chart](./sphinxSource/source/_static/gifs/time-bar-chart.gif)  |
 |      **Time box plot** ![time-box-plot](./sphinxSource/source/_static/gifs/time-box-plot.gif)     | **Time line chart** ![time-line-chart](./sphinxSource/source/_static/gifs/time-line-chart.gif) |
 
+
+## OlliePy Roadmap
+- [x] Error analysis report for regression
+- [x] Interactive dashboard
+- [ ] Embedded interactive dashboard
+- [ ] ML models evaluation and comparison report which includes model interpretation and bias checking
+- [ ] Error analysis report for classification
