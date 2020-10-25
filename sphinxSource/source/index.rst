@@ -4,10 +4,10 @@
 Welcome to OlliePy
 ===================
 
-    **OlliePy** is a python package which can help the data scientists in
-    evaluating and analysing their machine learning experiments by
-    utilising the power and structure of modern web applications. The
-    data scientist only needs to provide the data and any required
+    **OlliePy** is a python package which can help data scientists in
+    exploring their data and evaluating and analysing their machine learning experiments by
+    utilising the power and structure of modern web applications.
+    dThe data scientist only needs to provide the data and any required
     information and OlliePy will generate the rest.
 
 To install **OlliePy**, visit the `installation
@@ -28,6 +28,7 @@ visiting the `getting started guide <./pages/getting_started.html>`__
    :hidden:
 
    pages/reports/regression_error_analysis
+   pages/reports/interactive_dashboard
 
 
 .. toctree::

@@ -1,0 +1,338 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>InteractiveDashboard &mdash; Olliepy 0.2 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="prev" title="RegressionErrorAnalysisReport" href="regression_error_analysis_report.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Olliepy
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">OlliePy</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting started</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reports</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../reports/regression_error_analysis.html">Error analysis report for regression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/interactive_dashboard.html">Interactive dashboard</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="report.html">Report</a></li>
+<li class="toctree-l2"><a class="reference internal" href="regression_error_analysis_report.html">RegressionErrorAnalysisReport</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">InteractiveDashboard</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Olliepy</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">API</a> &raquo;</li>
+        
+      <li>InteractiveDashboard</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/pages/API/interactive_dashboard.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="interactivedashboard">
+<h1>InteractiveDashboard<a class="headerlink" href="#interactivedashboard" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="olliepy.InteractiveDashboard.InteractiveDashboard">
+<em class="property">class </em><code class="sig-prename descclassname">olliepy.InteractiveDashboard.</code><code class="sig-name descname">InteractiveDashboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">title</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">output_directory</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">dataframes</span><span class="p">:</span> <span class="n">List<span class="p">[</span>pandas.core.frame.DataFrame<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">dataframes_names</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">numerical_columns</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">categorical_columns</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">date_columns</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">dashboard_folder_name</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">encryption_secret</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">generate_encryption_secret</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/olliepy/InteractiveDashboard.html#InteractiveDashboard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.InteractiveDashboard.InteractiveDashboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>InteractiveDashboard creates an interactive dashboard that can be used for EDA or error analysis.</p>
+<dl class="simple">
+<dt>title<span class="classifier">str</span></dt><dd><p>the title of the report</p>
+</dd>
+<dt>output_directory<span class="classifier">str</span></dt><dd><p>the directory where the dashboard folder will be created</p>
+</dd>
+<dt>dataframes<span class="classifier">List[pd.DataFrame]</span></dt><dd><p>a list dataframes to be used in the dashboard</p>
+</dd>
+<dt>dataframes_names<span class="classifier">List[str]</span></dt><dd><p>a list of the dataframes names</p>
+</dd>
+<dt>numerical_columns<span class="classifier">List[str] default=None</span></dt><dd><p>a list of the numerical columns to be included in the dashboard</p>
+</dd>
+<dt>categorical_columns<span class="classifier">List[str] default=None</span></dt><dd><p>a list of the categorical columns to be included in the dashboard</p>
+</dd>
+<dt>date_columns<span class="classifier">List[str] default=None</span></dt><dd><p>a list of the date columns to be included in the dashboard</p>
+</dd>
+<dt>report_folder_name<span class="classifier">str default=None</span></dt><dd><p>the name of the folder that will contain all the generated report files.
+If not set, the title of the report will be used.</p>
+</dd>
+<dt>encryption_secret<span class="classifier">str default=None</span></dt><dd><p>the 16 characters secret that will be used to encrypt the generated report data.
+If it is not set, the generated data won’t be encrypted.</p>
+</dd>
+<dt>generate_encryption_secret<span class="classifier">bool default=False</span></dt><dd><p>the encryption_secret will be generated and its value returned as output.
+you can also view encryption_secret to get the generated secret.</p>
+</dd>
+</dl>
+<dl class="simple">
+<dt>create_dashboard()</dt><dd><p>creates the dashboard</p>
+</dd>
+<dt>serve_dashboard_from_local_server()</dt><dd><p>serves the dashboard using a flask server</p>
+</dd>
+<dt>save_dashboard()</dt><dd><p>saves the dashboard to be used without a flask server.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="olliepy.InteractiveDashboard.InteractiveDashboard.bin_numerical_feature">
+<code class="sig-name descname">bin_numerical_feature</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">numerical_feature_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">new_feature_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">number_of_bins</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">suffix</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/InteractiveDashboard.html#InteractiveDashboard.bin_numerical_feature"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.InteractiveDashboard.InteractiveDashboard.bin_numerical_feature" title="Permalink to this definition">¶</a></dt>
+<dd><p>This will be a selected numerical feature. OlliePy will get the bins from the first data frame
+and apply these bins on the rest of the dataframes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numerical_feature_name</strong> – the numerical feature to bin</p></li>
+<li><p><strong>new_feature_name</strong> – the name of the new binned feature</p></li>
+<li><p><strong>number_of_bins</strong> – the number of bins to apply</p></li>
+<li><p><strong>suffix</strong> – suffix to add the bins value</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.InteractiveDashboard.InteractiveDashboard.create_dashboard">
+<code class="sig-name descname">create_dashboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">auto_generate_distribution_plots</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/InteractiveDashboard.html#InteractiveDashboard.create_dashboard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.InteractiveDashboard.InteractiveDashboard.create_dashboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a dashboard using the user defined data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>auto_generate_distribution_plots</strong> – generate distribution plots and add them to the dashboard. default: False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.InteractiveDashboard.InteractiveDashboard.save_dashboard">
+<code class="sig-name descname">save_dashboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">zip_dashboard</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/InteractiveDashboard.html#InteractiveDashboard.save_dashboard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.InteractiveDashboard.InteractiveDashboard.save_dashboard" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the dashboard directory, copies the web application based on the template name,
+saves the dashboard data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>zip_dashboard</strong> – enable it in order to zip the directory for downloading. default: False</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.InteractiveDashboard.InteractiveDashboard.serve_dashboard_from_local_server">
+<code class="sig-name descname">serve_dashboard_from_local_server</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">mode</span><span class="p">:</span> <span class="n">str</span> <span class="o">=</span> <span class="default_value">'server'</span></em>, <em class="sig-param"><span class="n">port</span><span class="p">:</span> <span class="n">int</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">load_existing_dashboard</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/InteractiveDashboard.html#InteractiveDashboard.serve_dashboard_from_local_server"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.InteractiveDashboard.InteractiveDashboard.serve_dashboard_from_local_server" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serve the dashboard to the user using a web server.
+Available modes:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>‘server’: will open a new tab in the default browser using webbrowser package</p></li>
+<li><p>‘js’: will open a new tab in the default browser using IPython</p></li>
+<li><p>‘jupyter’: will open the dashboard in a jupyter notebook</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mode</strong> – the selected web server mode. default: ‘server’</p></li>
+<li><p><strong>port</strong> – the server port. default: None. a random port will be generated between (1024-49151)</p></li>
+<li><p><strong>load_existing_dashboard</strong> – Load existing dashboard data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+      
+        <a href="regression_error_analysis_report.html" class="btn btn-neutral float-left" title="RegressionErrorAnalysisReport" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Ahmed Mohamed
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Report &mdash; Olliepy 0.1.22 documentation</title>
+  <title>Report &mdash; Olliepy 0.2 documentation</title>
   
 
   
@@ -90,12 +90,14 @@
 <p class="caption"><span class="caption-text">Reports</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../reports/regression_error_analysis.html">Error analysis report for regression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reports/interactive_dashboard.html">Interactive dashboard</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Report</a></li>
 <li class="toctree-l2"><a class="reference internal" href="regression_error_analysis_report.html">RegressionErrorAnalysisReport</a></li>
+<li class="toctree-l2"><a class="reference internal" href="interactive_dashboard.html">InteractiveDashboard</a></li>
 </ul>
 </li>
 </ul>
@@ -246,7 +248,7 @@ saves the report data.</p>
 
 <dl class="py method">
 <dt id="olliepy.Report.Report._serve_report_using_flask">
-<code class="sig-name descname">_serve_report_using_flask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">template_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">mode</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">port</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/Report.html#Report._serve_report_using_flask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.Report.Report._serve_report_using_flask" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">_serve_report_using_flask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">template_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">mode</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">port</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">load_existing_data</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/Report.html#Report._serve_report_using_flask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.Report.Report._serve_report_using_flask" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates the report directory, copies the web application based on the template name,
 saves the report data and starts the flask server.</p>
 <dl class="field-list simple">
@@ -255,6 +257,7 @@ saves the report data and starts the flask server.</p>
 <li><p><strong>template_name</strong> – the name of the report’s template</p></li>
 <li><p><strong>mode</strong> – the server mode</p></li>
 <li><p><strong>port</strong> – the server port</p></li>
+<li><p><strong>load_existing_data</strong> – load existing json data</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>

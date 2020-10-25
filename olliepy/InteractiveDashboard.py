@@ -109,7 +109,9 @@ class InteractiveDashboard(Report):
     output_directory : str
         the directory where the dashboard folder will be created
     dataframes : List[pd.DataFrame]
+        a list dataframes to be used in the dashboard
     dataframes_names : List[str]
+        a list of the dataframes names
     numerical_columns : List[str] default=None
         a list of the numerical columns to be included in the dashboard
     categorical_columns : List[str] default=None
