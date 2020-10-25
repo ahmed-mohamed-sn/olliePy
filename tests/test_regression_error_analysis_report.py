@@ -2,13 +2,9 @@ import pytest
 
 from olliepy.RegressionErrorAnalysisReport import RegressionErrorAnalysisReport
 import pandas as pd
+from .utils import delete_directory
 
 valid_output_directory = './tests/output'
-
-
-def delete_directory(directory):
-    import shutil
-    shutil.rmtree(directory)
 
 
 @pytest.mark.parametrize("title", [
@@ -1172,91 +1168,91 @@ def test_create_report_with_parallel_coordinates_plot(simple_report):
                                        'wasserstein_distance': 10.900209930960395}, 'gender': {
                                    'cosine_similarity': {'cosine_similarity': 0.49301257198088044,
                                                          'cosine_similarity_threshold': 0.8}}},
-                                                                                         'Training data_ACCEPTABLE': {
-                                                                                             'weight': {'ks_2samp': {
-                                                                                                 'p_value': 0.4545454545454545,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                        'wasserstein_distance': 17.80987271703907},
-                                                                                             'height': {'ks_2samp': {
-                                                                                                 'p_value': 0.4545454545454545,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                        'wasserstein_distance': 0.21814799305073757},
-                                                                                             'BMI': {'ks_2samp': {
-                                                                                                 'p_value': 0.7575757575757576,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                     'wasserstein_distance': 9.075902297520356},
-                                                                                             'gender': {
-                                                                                                 'cosine_similarity': {
-                                                                                                     'cosine_similarity': 0.39391929857916774,
-                                                                                                     'cosine_similarity_threshold': 0.8}}},
-                                                                                         'Training data_OVER_ESTIMATING': {
-                                                                                             'weight': {'ks_2samp': {
-                                                                                                 'p_value': 0.1878121878121879,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                        'wasserstein_distance': 19.14105225847095},
-                                                                                             'height': {'ks_2samp': {
-                                                                                                 'p_value': 0.49950049950049946,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                        'wasserstein_distance': 0.18284154704922675},
-                                                                                             'BMI': {'ks_2samp': {
-                                                                                                 'p_value': 0.1878121878121879,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                     'wasserstein_distance': 11.91970372134013},
-                                                                                             'gender': {
-                                                                                                 'cosine_similarity': {
-                                                                                                     'cosine_similarity': 0.39391929857916774,
-                                                                                                     'cosine_similarity_threshold': 0.8}}},
-                                                                                         'ACCEPTABLE_Testing data': {
-                                                                                             'weight': {'ks_2samp': {
-                                                                                                 'p_value': 0.9393939393939394,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                        'wasserstein_distance': 4.665332291544885},
-                                                                                             'height': {'ks_2samp': {
-                                                                                                 'p_value': 0.18181818181818177,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                        'wasserstein_distance': 0.17944079954434158},
-                                                                                             'BMI': {'ks_2samp': {
-                                                                                                 'p_value': 0.7575757575757576,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                     'wasserstein_distance': 4.930169582054765},
-                                                                                             'gender': {
-                                                                                                 'cosine_similarity': {
-                                                                                                     'cosine_similarity': 0.9938837346736189,
-                                                                                                     'cosine_similarity_threshold': 0.8}}},
-                                                                                         'ACCEPTABLE_ACCEPTABLE': {
-                                                                                             'weight': {'ks_2samp': {
-                                                                                                 'p_value': 1.0,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                        'wasserstein_distance': 0.0},
-                                                                                             'height': {'ks_2samp': {
-                                                                                                 'p_value': 1.0,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                        'wasserstein_distance': 0.0},
-                                                                                             'BMI': {'ks_2samp': {
-                                                                                                 'p_value': 1.0,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                     'wasserstein_distance': 0.0},
-                                                                                             'gender': {
-                                                                                                 'cosine_similarity': {
-                                                                                                     'cosine_similarity': 1.0,
-                                                                                                     'cosine_similarity_threshold': 0.8}}},
-                                                                                         'ACCEPTABLE_OVER_ESTIMATING': {
-                                                                                             'weight': {'ks_2samp': {
-                                                                                                 'p_value': 0.9333333333333333,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                        'wasserstein_distance': 5.4840422701142515},
-                                                                                             'height': {'ks_2samp': {
-                                                                                                 'p_value': 0.1333333333333333,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                        'wasserstein_distance': 0.19045820491520876},
-                                                                                             'BMI': {'ks_2samp': {
-                                                                                                 'p_value': 0.9333333333333333,
-                                                                                                 'p_value_threshold': 0.01},
-                                                                                                     'wasserstein_distance': 5.886636853783314},
-                                                                                             'gender': {
-                                                                                                 'cosine_similarity': {
-                                                                                                     'cosine_similarity': 1.0,
-                                                                                                     'cosine_similarity_threshold': 0.8}}}},
+                               'Training data_ACCEPTABLE': {
+                                   'weight': {'ks_2samp': {
+                                       'p_value': 0.4545454545454545,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 17.80987271703907},
+                                   'height': {'ks_2samp': {
+                                       'p_value': 0.4545454545454545,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 0.21814799305073757},
+                                   'BMI': {'ks_2samp': {
+                                       'p_value': 0.7575757575757576,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 9.075902297520356},
+                                   'gender': {
+                                       'cosine_similarity': {
+                                           'cosine_similarity': 0.39391929857916774,
+                                           'cosine_similarity_threshold': 0.8}}},
+                               'Training data_OVER_ESTIMATING': {
+                                   'weight': {'ks_2samp': {
+                                       'p_value': 0.1878121878121879,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 19.14105225847095},
+                                   'height': {'ks_2samp': {
+                                       'p_value': 0.49950049950049946,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 0.18284154704922675},
+                                   'BMI': {'ks_2samp': {
+                                       'p_value': 0.1878121878121879,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 11.91970372134013},
+                                   'gender': {
+                                       'cosine_similarity': {
+                                           'cosine_similarity': 0.39391929857916774,
+                                           'cosine_similarity_threshold': 0.8}}},
+                               'ACCEPTABLE_Testing data': {
+                                   'weight': {'ks_2samp': {
+                                       'p_value': 0.9393939393939394,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 4.665332291544885},
+                                   'height': {'ks_2samp': {
+                                       'p_value': 0.18181818181818177,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 0.17944079954434158},
+                                   'BMI': {'ks_2samp': {
+                                       'p_value': 0.7575757575757576,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 4.930169582054765},
+                                   'gender': {
+                                       'cosine_similarity': {
+                                           'cosine_similarity': 0.9938837346736189,
+                                           'cosine_similarity_threshold': 0.8}}},
+                               'ACCEPTABLE_ACCEPTABLE': {
+                                   'weight': {'ks_2samp': {
+                                       'p_value': 1.0,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 0.0},
+                                   'height': {'ks_2samp': {
+                                       'p_value': 1.0,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 0.0},
+                                   'BMI': {'ks_2samp': {
+                                       'p_value': 1.0,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 0.0},
+                                   'gender': {
+                                       'cosine_similarity': {
+                                           'cosine_similarity': 1.0,
+                                           'cosine_similarity_threshold': 0.8}}},
+                               'ACCEPTABLE_OVER_ESTIMATING': {
+                                   'weight': {'ks_2samp': {
+                                       'p_value': 0.9333333333333333,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 5.4840422701142515},
+                                   'height': {'ks_2samp': {
+                                       'p_value': 0.1333333333333333,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 0.19045820491520876},
+                                   'BMI': {'ks_2samp': {
+                                       'p_value': 0.9333333333333333,
+                                       'p_value_threshold': 0.01},
+                                       'wasserstein_distance': 5.886636853783314},
+                                   'gender': {
+                                       'cosine_similarity': {
+                                           'cosine_similarity': 1.0,
+                                           'cosine_similarity_threshold': 0.8}}}},
                                   'categorical_count_plots': {'gender': {
                                       'Training data_Testing data': {'title': 'Training data vs Testing data',
                                                                      'categories': ['female', 'male'], 'series': [
@@ -1449,5 +1445,3 @@ def test_serve_report(simple_report, mocker):
 
     simple_report.serve_report_from_local_server()
     mocked_serve.assert_called_with(simple_report._template_name, 'server', 33)
-
-

@@ -80,7 +80,7 @@ report.create_report()
 report.serve_report_from_local_server(mode='server')
 ```
 
-- Save then view the report locally
+- Save then view the report locally using the index.html file in the report folder
 
 ```
 report.save_report(zip_report=True)
