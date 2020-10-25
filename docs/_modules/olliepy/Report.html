@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>olliepy.Report &mdash; Olliepy 0.1.22 documentation</title>
+  <title>olliepy.Report &mdash; Olliepy 0.2 documentation</title>
   
 
   
@@ -88,6 +88,7 @@
 <p class="caption"><span class="caption-text">Reports</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../pages/reports/regression_error_analysis.html">Error analysis report for regression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../pages/reports/interactive_dashboard.html">Interactive dashboard</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Reference</span></p>
 <ul>
@@ -212,9 +213,6 @@
 <span class="sd">    :param port: the server port. default: random between (1024-49151)</span>
 <span class="sd">    :return: None</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span><span class="se">\n\n</span><span class="s1"> ### </span><span class="se">\n</span><span class="s1">Serving the report this way, might not work on all machines.</span>
-<span class="s1">Try different server modes (&#39;server&#39;, &#39;js&#39; or &#39;jupyter&#39;) or save and download the report and open index.html </span><span class="se">\n</span><span class="s1">###</span><span class="se">\n\n</span><span class="s1">&#39;&#39;&#39;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Clear your browser</span><span class="se">\&#39;</span><span class="s1">s cache if your report was not updated</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
     <span class="kn">import</span> <span class="nn">time</span>
     <span class="kn">import</span> <span class="nn">importlib.util</span>
@@ -314,7 +312,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;report&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Report._serve_report_using_flask"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report._serve_report_using_flask">[docs]</a>    <span class="k">def</span> <span class="nf">_serve_report_using_flask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="Report._serve_report_using_flask"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report._serve_report_using_flask">[docs]</a>    <span class="k">def</span> <span class="nf">_serve_report_using_flask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">port</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">load_existing_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates the report directory, copies the web application based on the template name,</span>
 <span class="sd">        saves the report data and starts the flask server.</span>
@@ -322,11 +320,13 @@
 <span class="sd">        :param template_name: the name of the report&#39;s template</span>
 <span class="sd">        :param mode: the server mode</span>
 <span class="sd">        :param port: the server port</span>
+<span class="sd">        :param load_existing_data: load existing json data</span>
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">report_directory</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_report_directory</span><span class="p">()</span>
         <span class="n">_copy_application_template</span><span class="p">(</span><span class="n">template_name</span><span class="p">,</span> <span class="n">report_directory</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_save_report_data</span><span class="p">(</span><span class="n">report_directory</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">load_existing_data</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_save_report_data</span><span class="p">(</span><span class="n">report_directory</span><span class="p">)</span>
         <span class="n">_start_server_and_view_report</span><span class="p">(</span><span class="n">report_directory</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Report._save_the_report"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report._save_the_report">[docs]</a>    <span class="k">def</span> <span class="nf">_save_the_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">zip_report</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>

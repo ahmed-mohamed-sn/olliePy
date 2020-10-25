@@ -54,9 +54,6 @@ def _start_server_and_view_report(report_directory: str, mode: str, port: int) -
     :param port: the server port. default: random between (1024-49151)
     :return: None
     """
-    print('''\n\n ### \nServing the report this way, might not work on all machines.
-Try different server modes ('server', 'js' or 'jupyter') or save and download the report and open index.html \n###\n\n''')
-    print('Clear your browser\'s cache if your report was not updated\n\n')
     import multiprocessing as mp
     import time
     import importlib.util
@@ -156,7 +153,7 @@ class Report:
         """
         self.report_data['report'].update(data)
 
-    def _serve_report_using_flask(self, template_name: str, mode: str, port: int) -> None:
+    def _serve_report_using_flask(self, template_name: str, mode: str, port: int, load_existing_data: bool = False) -> None:
         """
         Creates the report directory, copies the web application based on the template name,
         saves the report data and starts the flask server.
@@ -164,11 +161,13 @@ class Report:
         :param template_name: the name of the report's template
         :param mode: the server mode
         :param port: the server port
+        :param load_existing_data: load existing json data
         :return: None
         """
         report_directory = self._create_report_directory()
         _copy_application_template(template_name, report_directory)
-        self._save_report_data(report_directory)
+        if not load_existing_data:
+            self._save_report_data(report_directory)
         _start_server_and_view_report(report_directory, mode, port)
 
     def _save_the_report(self, template_name: str, zip_report: bool) -> None:
