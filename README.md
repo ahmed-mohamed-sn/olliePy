@@ -21,7 +21,7 @@
 <a href="../../issues/new">:speech_balloon: Ask a question</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="../../issues?q=is%3Aissue+is%3Aclosed+sort%3Aupdated-desc">:book: Read questions</a>
 </h3>
 
-# OlliePy - An alternative approach for data science
+# OlliePy
 > **OlliePy** is a python package which can help data scientists in
 > exploring their data and evaluating and analysing their machine learning experiments by
 > utilising the power and structure of modern web applications. 
