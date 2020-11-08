@@ -30,8 +30,12 @@
 
 ## <br/>Documentation
 Get started by following the [guide](https://ahmed-mohamed-sn.github.io/olliePy/)
+
 ### Installation
 `pip install -U olliepy`
+
+### Examples
+Get started using the provided [examples](https://github.com/ahmed-mohamed-sn/olliePy/tree/master/examples)
 
 ## Error analysis report for regression
 **OlliePy** can support you in doing error analysis for regression problems.
