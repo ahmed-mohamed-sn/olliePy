@@ -54,32 +54,54 @@ def _start_server_and_view_report(report_directory: str, mode: str, port: int) -
     :param port: the server port. default: random between (1024-49151)
     :return: None
     """
-    import multiprocessing as mp
-    import time
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("app", f'{report_directory}/app.py')
-    app = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(app)
-    try:
-        p = mp.Process(target=app.run_application, args=(port, report_directory))
-        p.start()
-        time.sleep(1.0)
-        url = f'http://127.0.0.1:{port}/'
-        if mode == 'server':
-            import webbrowser
-            webbrowser.open(url)
-        elif mode == 'js':
-            from IPython.core.display import display
-            from IPython.display import Javascript
-            display(Javascript(f'window.open("{url}");'))
-        else:
-            from IPython.display import IFrame
-            from IPython.core.display import display
-            display(IFrame(f'{url}', '100%', '800px'))
-        p.join()
-    except (KeyboardInterrupt, SystemExit):
-        print('\n! Received keyboard interrupt, stopping server.\n')
-    pass
+    import psutil
+
+    if psutil.WINDOWS:
+        print('Only server mode is supported for Windows')
+
+        import subprocess
+        app_command = 'python ' + path.abspath(path.join(report_directory, 'app.py'))
+        venv_command = ''
+        if 'CONDA_DEFAULT_ENV' in os.environ:
+            venv_command = 'conda activate ' + os.environ['CONDA_DEFAULT_ENV']
+        elif 'VIRTUAL_ENV' in os.environ:
+            venv_command = path.abspath(path.join(os.environ['VIRTUAL_ENV'], 'Scripts', 'activate.bat'))
+
+        full_command = venv_command if len(venv_command) > 0 else ''
+        full_command += ' & ' + app_command if len(full_command) > 0 else app_command
+
+        process = subprocess.Popen(full_command.split(), stdout=subprocess.PIPE)
+        process.communicate()
+    else:
+        import multiprocessing as mp
+        import time
+        import importlib.util
+        try:
+            url = f'http://127.0.0.1:{port}/'
+            spec = importlib.util.spec_from_file_location("app", f'{report_directory}/app.py')
+            app = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(app)
+            p = mp.Process(target=app.run_application, args=(port, report_directory))
+            p.start()
+            time.sleep(1.0)
+            _display_report(mode, url)
+            p.join()
+        except (KeyboardInterrupt, SystemExit):
+            print('\n! Received keyboard interrupt, stopping server.\n')
+
+
+def _display_report(mode, url):
+    if mode == 'server':
+        import webbrowser
+        webbrowser.open(url)
+    elif mode == 'js':
+        from IPython.core.display import display
+        from IPython.display import Javascript
+        display(Javascript(f'window.open("{url}");'))
+    else:
+        from IPython.display import IFrame
+        from IPython.core.display import display
+        display(IFrame(f'{url}', '100%', '800px'))
 
 
 class Report:
