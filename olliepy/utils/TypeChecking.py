@@ -1,5 +1,6 @@
 import inspect
 import typing
+import sys
 # Credit: https://stackoverflow.com/users/1222951/aran-fey
 # https://stackoverflow.com/questions/55503673/how-do-i-check-if-a-value-matches-a-type-in-python
 
@@ -345,40 +346,47 @@ _SPECIAL_INSTANCE_CHECKERS = {
 }
 
 
+def python_version_lower_than_38():
+    return float(sys.version[:3]) < 3.8
+
+
 def is_instance(obj, type_):
-    if type_.__module__ == 'typing':
+    if python_version_lower_than_38():
+        if type_.__module__ == 'typing':
+            if is_qualified_generic(type_):
+                base_generic = get_base_generic(type_)
+            else:
+                base_generic = type_
+            name = _get_name(base_generic)
+
+            try:
+                validator = _SPECIAL_INSTANCE_CHECKERS[name]
+            except KeyError:
+                pass
+            else:
+                return validator(obj, type_)
+
+        if is_base_generic(type_):
+            python_type = _get_python_type(type_)
+            return isinstance(obj, python_type)
+
         if is_qualified_generic(type_):
-            base_generic = get_base_generic(type_)
-        else:
-            base_generic = type_
-        name = _get_name(base_generic)
+            python_type = _get_python_type(type_)
+            if not isinstance(obj, python_type):
+                return False
 
-        try:
-            validator = _SPECIAL_INSTANCE_CHECKERS[name]
-        except KeyError:
-            pass
-        else:
-            return validator(obj, type_)
+            base = get_base_generic(type_)
+            try:
+                validator = _ORIGIN_TYPE_CHECKERS[base]
+            except KeyError:
+                raise NotImplementedError("Cannot perform isinstance check for type {}".format(type_))
 
-    if is_base_generic(type_):
-        python_type = _get_python_type(type_)
-        return isinstance(obj, python_type)
+            type_args = get_subtypes(type_)
+            return validator(obj, type_args)
 
-    if is_qualified_generic(type_):
-        python_type = _get_python_type(type_)
-        if not isinstance(obj, python_type):
-            return False
-
-        base = get_base_generic(type_)
-        try:
-            validator = _ORIGIN_TYPE_CHECKERS[base]
-        except KeyError:
-            raise NotImplementedError("Cannot perform isinstance check for type {}".format(type_))
-
-        type_args = get_subtypes(type_)
-        return validator(obj, type_args)
-
-    return isinstance(obj, type_)
+        return isinstance(obj, type_)
+    else:
+        return True
 
 
 def is_subtype(sub_type, super_type):
