@@ -1,6 +1,8 @@
 import flask
 import logging
 from flask import send_file, abort, safe_join
+import random
+import webbrowser
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -31,3 +33,12 @@ def report_data():
         return send_file(safe_path, as_attachment=True)
     except FileNotFoundError:
         abort(404)
+
+
+if __name__ == '__main__':
+    app.static_folder = '.'
+    app.template_folder = '.'
+    application_folder = '.'
+    port = random.randint(1024, 49151)
+    webbrowser.open(f'http://127.0.0.1:{port}')
+    app.run(port=port)
