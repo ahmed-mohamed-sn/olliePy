@@ -60,7 +60,7 @@ def _start_server_and_view_report(report_directory: str, mode: str, port: int) -
         print('Only server mode is supported for Windows')
 
         import subprocess
-        app_command = 'python ' + path.abspath(path.join(report_directory, 'app.py'))
+        app_command = 'python ' + path.abspath(path.join(report_directory, 'app.py') + f' {mode}')
         venv_command = ''
         if 'CONDA_DEFAULT_ENV' in os.environ:
             venv_command = 'conda activate ' + os.environ['CONDA_DEFAULT_ENV']
