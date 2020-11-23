@@ -57,10 +57,10 @@ def _start_server_and_view_report(report_directory: str, mode: str, port: int) -
     import psutil
 
     if psutil.WINDOWS:
-        print('Only server mode is supported for Windows')
+        print('Only server mode is supported on Windows')
 
         import subprocess
-        app_command = 'python ' + path.abspath(path.join(report_directory, 'app.py') + f' {mode}')
+        app_command = 'python ' + path.abspath(path.join(report_directory, 'app.py'))
         venv_command = ''
         if 'CONDA_DEFAULT_ENV' in os.environ:
             venv_command = 'conda activate ' + os.environ['CONDA_DEFAULT_ENV']
@@ -70,7 +70,7 @@ def _start_server_and_view_report(report_directory: str, mode: str, port: int) -
         full_command = venv_command if len(venv_command) > 0 else ''
         full_command += ' & ' + app_command if len(full_command) > 0 else app_command
 
-        process = subprocess.Popen(full_command.split(), stdout=subprocess.PIPE)
+        process = subprocess.Popen(full_command.split(), stdout=subprocess.PIPE, shell=True)
         process.communicate()
     else:
         import multiprocessing as mp

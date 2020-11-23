@@ -3,7 +3,7 @@ import logging
 from flask import send_file, abort, safe_join, jsonify, request
 import json
 import random
-import sys
+import webbrowser
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -47,28 +47,10 @@ def auto_save():
     return jsonify(success=True)
 
 
-def display_report(mode, url):
-    if mode == 'server':
-        import webbrowser
-        webbrowser.open(url)
-    elif mode == 'js':
-        from IPython.core.display import display
-        from IPython.display import Javascript
-        display(Javascript(f'window.open("{url}");'))
-    elif mode == 'jupyter':
-        from IPython.display import IFrame
-        from IPython.core.display import display
-        display(IFrame(f'{url}', '100%', '800px'))
-    else:
-        print(f'{mode} is not available')
-
-
 if __name__ == '__main__':
-    mode = sys.argv[1]
     app.static_folder = '.'
     app.template_folder = '.'
     application_folder = '.'
     port = random.randint(1024, 49151)
-    url = f'http://127.0.0.1:{port}'
-    display_report(mode, url)
+    webbrowser.open(f'http://127.0.0.1:{port}')
     app.run(port=port)
