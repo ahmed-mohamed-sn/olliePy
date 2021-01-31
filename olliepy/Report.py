@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from distutils.dir_util import copy_tree
 import json
+from rich import print
 
 
 def validate_attributes(title, output_directory, subtitle, report_folder_name, encryption_secret,
@@ -78,6 +79,8 @@ def _start_server_and_view_report(report_directory: str, mode: str, port: int) -
         import importlib.util
         try:
             url = f'http://127.0.0.1:{port}/'
+            print(f'Serving application on [link={url}]{url}[/link]')
+
             spec = importlib.util.spec_from_file_location("app", f'{report_directory}/app.py')
             app = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(app)
