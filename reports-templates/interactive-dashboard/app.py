@@ -4,6 +4,7 @@ from flask import send_file, abort, safe_join, jsonify, request
 import json
 import random
 import webbrowser
+from rich import print
 
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.ERROR)
@@ -52,5 +53,7 @@ if __name__ == '__main__':
     app.template_folder = '.'
     application_folder = '.'
     port = random.randint(1024, 49151)
+
+    print(f'Serving dashboard on [link=http://127.0.0.1:{port}]http://127.0.0.1:{port}[/link]')
     webbrowser.open(f'http://127.0.0.1:{port}')
     app.run(port=port)
