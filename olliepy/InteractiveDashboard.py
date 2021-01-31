@@ -167,6 +167,7 @@ class InteractiveDashboard(Report):
         self.numerical_columns = numerical_columns[:]
         self.categorical_columns = categorical_columns[:]
         self.date_columns = date_columns[:] if date_columns is not None else []
+        self.binned_features_info: List[dict] = []
         self._template_name = 'interactive-dashboard'
         self._generated_id_column = 'generated_id'
 
@@ -216,6 +217,35 @@ class InteractiveDashboard(Report):
         if self.encryption_secret:
             print(f'Your encryption secret is {self.encryption_secret}')
 
+    def add_new_dataframe(self, dataframe: pd.DataFrame, dataframe_name: str) -> None:
+        """
+        Add a new dataframe to the dashboard
+        :param dataframe: pandas dataframe
+        :param dataframe_name: dataframe name to access from the dashboard
+        :return: None
+        """
+        dataframes = self.dataframes + [dataframe]
+        dataframes_names = self.dataframes_names + [dataframe_name]
+
+        # remove categorical features which are binned
+        categorical_columns = self.categorical_columns.copy()
+        for binned_feature_info in self.binned_features_info:
+            categorical_columns.remove(binned_feature_info['new_feature_name'])
+
+        validate_attributes(dataframes,
+                            dataframes_names,
+                            self.numerical_columns,
+                            categorical_columns,
+                            self.date_columns)
+
+        self.dataframes.append(dataframe)
+        self.dataframes_names.append(dataframe_name)
+
+        binned_features_info = self.binned_features_info.copy()
+        self.binned_features_info = []
+        for binned_feature_info in binned_features_info:
+            self.bin_numerical_feature(**binned_feature_info)
+
     def bin_numerical_feature(self, numerical_feature_name: str, new_feature_name: str, number_of_bins: int,
                               suffix: str = None) -> None:
         """
@@ -249,6 +279,13 @@ class InteractiveDashboard(Report):
         if suffix is not None:
             for df in self.dataframes:
                 df.loc[:, new_feature_name] = df.loc[:, new_feature_name].astype(str) + '_' + suffix
+
+        self.binned_features_info.append({
+            'numerical_feature_name': numerical_feature_name,
+            'new_feature_name': new_feature_name,
+            'number_of_bins': number_of_bins,
+            'suffix': suffix
+        })
 
     def _generate_number_displays(self) -> List[dict]:
         """
