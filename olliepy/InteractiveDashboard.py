@@ -227,7 +227,7 @@ class InteractiveDashboard(Report):
         dataframes = self.dataframes + [dataframe]
         dataframes_names = self.dataframes_names + [dataframe_name]
 
-        # remove categorical features which are binned
+        # remove categorical features which are binned for validation
         categorical_columns = self.categorical_columns.copy()
         for binned_feature_info in self.binned_features_info:
             categorical_columns.remove(binned_feature_info['new_feature_name'])
@@ -238,13 +238,33 @@ class InteractiveDashboard(Report):
                             categorical_columns,
                             self.date_columns)
 
-        self.dataframes.append(dataframe)
+        self.dataframes.append(dataframe.copy())
         self.dataframes_names.append(dataframe_name)
 
+        self._rebinning_features_after_adding_new_dataframe()
+
+    def _rebinning_features_after_adding_new_dataframe(self):
         binned_features_info = self.binned_features_info.copy()
         self.binned_features_info = []
+
+        # remove categorical features which are binned for recreation
+        for binned_feature_info in binned_features_info:
+            self.categorical_columns.remove(binned_feature_info['new_feature_name'])
+
         for binned_feature_info in binned_features_info:
             self.bin_numerical_feature(**binned_feature_info)
+
+    def delete_dataframe(self, dataframe_name: str) -> None:
+        """
+        Delete dataframe by name
+        :param dataframe_name: dataframe name to be removed
+        :return: None
+        """
+
+        if dataframe_name in self.dataframes_names:
+            dataframe_index = self.dataframes_names.index(dataframe_name)
+            del self.dataframes[dataframe_index]
+            del self.dataframes_names[dataframe_index]
 
     def bin_numerical_feature(self, numerical_feature_name: str, new_feature_name: str, number_of_bins: int,
                               suffix: str = None) -> None:
