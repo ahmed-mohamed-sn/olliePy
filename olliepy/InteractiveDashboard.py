@@ -496,34 +496,4 @@ class InteractiveDashboard(Report):
 
         super()._save_the_report(self._template_name, zip_dashboard)
 
-    def __str__(self) -> str:
-        dashboard_list = []
-        dashboard_list.append(f'Title: {self.title}')
-        dashboard_list.append(f'output_directory: {self.output_directory}')
-        dashboard_list.append(f'report_folder_name: {self.report_folder_name}')
-        dashboard_list.append(f'dataframes_names: {self.dataframes_names}')
-        dashboard_list.append(f'Number of dataframes: {len(self.dataframes)}')
-        dashboard_list.append(f'numerical_columns: {self.numerical_columns}')
-        dashboard_list.append(f'categorical_columns: {self.categorical_columns}')
-        dashboard_list.append(f'date_columns: {self.date_columns}')
-        dashboard_list.append(f'Number of number_displays: {len(self.number_displays)}')
-        dashboard_list.append(f'Number of charts: {len(self.charts)}')
-
-        return '\n'.join(dashboard_list)
-
-    def __repr__(self) -> str:
-        dashboard_list = []
-        dashboard_list.append(f'Title: {self.title}')
-        dashboard_list.append(f'output_directory: {self.output_directory}')
-        dashboard_list.append(f'report_folder_name: {self.report_folder_name}')
-        dashboard_list.append(f'dataframes_names: {self.dataframes_names}')
-        dashboard_list.append(f'Number of dataframes: {len(self.dataframes)}')
-        dashboard_list.append(f'numerical_columns: {self.numerical_columns}')
-        dashboard_list.append(f'categorical_columns: {self.categorical_columns}')
-        dashboard_list.append(f'date_columns: {self.date_columns}')
-        dashboard_list.append(f'Number of number_displays: {len(self.number_displays)}')
-        dashboard_list.append(f'Number of charts: {len(self.charts)}')
-
-        return '\n'.join(dashboard_list)
-
 
