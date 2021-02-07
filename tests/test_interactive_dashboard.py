@@ -2,6 +2,7 @@ import pytest
 from olliepy.InteractiveDashboard import InteractiveDashboard
 import pandas as pd
 from .utils import delete_directory
+import olliepy
 
 valid_output_directory = './tests/output'
 
@@ -300,14 +301,14 @@ def test_create_dashboard(simple_dashboard):
 def test_invalid_bin_numerical_feature_attributes(numerical_feature_name, new_feature_name, number_of_bins, suffix):
     with pytest.raises(TypeError):
         dashboard = InteractiveDashboard(title='Test dashboard title',
-                             output_directory=valid_output_directory,
-                             dataframes=[pd.DataFrame({'X': [1], 'X2': ['A']})],
-                             dataframes_names=['TestDF'],
-                             numerical_columns=['X'],
-                             categorical_columns=[],
-                             date_columns=None,
-                             dashboard_folder_name=None,
-                             generate_encryption_secret=False)
+                                         output_directory=valid_output_directory,
+                                         dataframes=[pd.DataFrame({'X': [1], 'X2': ['A']})],
+                                         dataframes_names=['TestDF'],
+                                         numerical_columns=['X'],
+                                         categorical_columns=[],
+                                         date_columns=None,
+                                         dashboard_folder_name=None,
+                                         generate_encryption_secret=False)
         dashboard.bin_numerical_feature(numerical_feature_name, new_feature_name, number_of_bins, suffix)
 
 
@@ -327,6 +328,7 @@ def test_invalid_bin_numerical_feature_attributes_values(numerical_feature_name,
                                          dashboard_folder_name=None,
                                          generate_encryption_secret=False)
         dashboard.bin_numerical_feature(numerical_feature_name, new_feature_name, 5)
+
 
 @pytest.fixture()
 def complex_dashboard_for_binned_features():
@@ -515,6 +517,7 @@ def test_create_dashboard_with_binned_feature(complex_dashboard_for_binned_featu
     complex_dashboard_for_binned_features.create_dashboard(auto_generate_distribution_plots=False)
 
     assert expected_output == complex_dashboard_for_binned_features.report_data
+
 
 @pytest.fixture()
 def complex_dashboard():
@@ -787,3 +790,40 @@ def test_serve_dashboard(simple_dashboard, mocker):
 
     simple_dashboard.serve_dashboard_from_local_server()
     mocked_serve.assert_called_with(simple_dashboard._template_name, 'server', 33, False)
+
+
+def test_load_non_existing_dashboard():
+    with pytest.raises(NotADirectoryError):
+        olliepy.load_interactive_dashboard(dashboard_path='./non_existing_dashboard')
+
+
+def test_load_existing_dashboard(simple_dashboard):
+    simple_dashboard.create_dashboard()
+
+    dashboard_path = f'{valid_output_directory}/{simple_dashboard.report_folder_name}/'
+
+    loaded_dashboard = olliepy.load_interactive_dashboard(dashboard_path=dashboard_path)
+    assert simple_dashboard.report_data == loaded_dashboard.report_data
+
+
+def test_get_charts_and_number_displays(simple_dashboard):
+    simple_dashboard.create_dashboard(auto_generate_distribution_plots=True)
+    assert simple_dashboard.get_charts() == simple_dashboard.charts
+    assert simple_dashboard.get_number_displays() == simple_dashboard.number_displays
+
+
+def test_update_charts_and_number_displays(simple_dashboard):
+    existing_charts = [{'x': 3}, {'y': 5}]
+    new_charts = [{'z': 2}]
+    simple_dashboard.charts = existing_charts.copy()
+    simple_dashboard.number_displays = existing_charts.copy()
+
+    simple_dashboard.update_charts(new_charts)
+    simple_dashboard.update_number_displays(new_charts)
+    assert simple_dashboard.get_charts() == existing_charts + new_charts
+    assert simple_dashboard.get_number_displays() == existing_charts + new_charts
+
+    simple_dashboard.update_charts(new_charts, keep_existing=False)
+    simple_dashboard.update_number_displays(new_charts, keep_existing=False)
+    assert simple_dashboard.get_charts() == new_charts
+    assert simple_dashboard.get_number_displays() == new_charts
