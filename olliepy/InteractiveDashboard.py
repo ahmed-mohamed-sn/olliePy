@@ -1,3 +1,5 @@
+from json import JSONDecodeError
+
 import pandas as pd
 from .Report import Report
 from .utils.TypeChecking import is_instance
@@ -7,6 +9,7 @@ import json
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_numeric_dtype
 import numpy as np
+import copy
 
 
 def validate_attributes(dataframes: List[pd.DataFrame],
@@ -98,6 +101,63 @@ def validate_bin_numerical_feature_attributes(dataframes: List[pd.DataFrame],
             Please make sure that you are passing suffix as a string''')
 
 
+def load_interactive_dashboard(dashboard_path: str) -> Report:
+    """
+    Load existing dashboard given the dashboard path
+    :param dashboard_path: file system path
+    :return: Interactive dashboard
+    """
+    import os
+    import json
+    if os.path.exists(path=dashboard_path):
+        if dashboard_path[-1] in ('/', '\\'):
+            dashboard_path = dashboard_path[:-1]
+
+        report_file_path = f'{dashboard_path}/report_data.json'
+
+        if os.path.exists(path=report_file_path):
+            output_directory, dashboard_folder_name = os.path.split(dashboard_path)
+            with open(report_file_path) as report_data_file:
+                try:
+                    report_data = json.load(report_data_file)
+                    title = report_data['title']
+                    dataframes_names = report_data['datasets']
+                    numerical_columns = report_data['numericalColumns'].copy()
+                    if 'generated_id' in numerical_columns:
+                        numerical_columns.remove('generated_id')
+
+                    categorical_columns = report_data['categoricalColumns']
+                    date_columns = report_data['dateColumns']
+                    number_displays = report_data['numberDisplays']
+                    charts = report_data['charts']
+
+                    dataframes = []
+                    for dataframe_name in dataframes_names:
+                        dataframes.append(pd.read_json(json.dumps(report_data[dataframe_name])))
+
+                    dashboard = InteractiveDashboard(title=title,
+                                                     output_directory=output_directory,
+                                                     dataframes=dataframes,
+                                                     dataframes_names=dataframes_names,
+                                                     numerical_columns=numerical_columns,
+                                                     categorical_columns=categorical_columns,
+                                                     date_columns=date_columns,
+                                                     dashboard_folder_name=dashboard_folder_name)
+
+                    dashboard.number_displays = number_displays
+                    dashboard.charts = charts
+                    dashboard.report_data = report_data
+
+                    return dashboard
+                except JSONDecodeError:
+                    raise ValueError('The provided dashboard JSON file has been encrypted and can not be parsed.')
+        else:
+            raise FileNotFoundError(f'report_data.json was not found in {dashboard_path}')
+
+    else:
+        raise NotADirectoryError(f'provided dashboard_path is not valid. dashboard_path does not exist')
+
+
 class InteractiveDashboard(Report):
     """
     InteractiveDashboard creates an interactive dashboard that can be used for EDA or error analysis.
@@ -118,7 +178,7 @@ class InteractiveDashboard(Report):
         a list of the categorical columns to be included in the dashboard
     date_columns : List[str] default=None
         a list of the date columns to be included in the dashboard
-    report_folder_name : str default=None
+    dashboard_folder_name : str default=None
         the name of the folder that will contain all the generated report files.
         If not set, the title of the report will be used.
     encryption_secret : str default=None
@@ -167,7 +227,8 @@ class InteractiveDashboard(Report):
         self.numerical_columns = numerical_columns[:]
         self.categorical_columns = categorical_columns[:]
         self.date_columns = date_columns[:] if date_columns is not None else []
-        self.binned_features_info: List[dict] = []
+        self.number_displays: List[dict] = []
+        self.charts: List[dict] = []
         self._template_name = 'interactive-dashboard'
         self._generated_id_column = 'generated_id'
 
@@ -177,8 +238,6 @@ class InteractiveDashboard(Report):
 
         :param auto_generate_distribution_plots: generate distribution plots and add them to the dashboard. default: False
         """
-
-        # validate_create_dashboard_attributes(auto_generate_distribution_plots)
 
         # delete default report location created by parent class
         if 'report' in self.report_data:
@@ -203,12 +262,12 @@ class InteractiveDashboard(Report):
         for df, df_name in zip(self.dataframes, self.dataframes_names):
             self.report_data[df_name] = json.loads(df.to_json(orient='records'))
 
-        if not auto_generate_distribution_plots:
-            self.report_data['numberDisplays'] = []
-            self.report_data['charts'] = []
-        else:
-            self.report_data['numberDisplays'] = self._generate_number_displays()
-            self.report_data['charts'] = self._generate_charts()
+        if auto_generate_distribution_plots:
+            self.number_displays = self.number_displays + self._generate_number_displays()
+            self.charts = self.charts + self._generate_charts()
+
+        self.report_data['numberDisplays'] = self.number_displays
+        self.report_data['charts'] = self.charts
 
         toc = time.perf_counter()
 
@@ -217,54 +276,51 @@ class InteractiveDashboard(Report):
         if self.encryption_secret:
             print(f'Your encryption secret is {self.encryption_secret}')
 
-    def add_new_dataframe(self, dataframe: pd.DataFrame, dataframe_name: str) -> None:
+    def get_charts(self) -> List[dict]:
         """
-        Add a new dataframe to the dashboard
-        :param dataframe: pandas dataframe
-        :param dataframe_name: dataframe name to access from the dashboard
-        :return: None
+        Get a copy of the dashboard's charts
+
+        :return: List[dict] the charts
         """
-        dataframes = self.dataframes + [dataframe]
-        dataframes_names = self.dataframes_names + [dataframe_name]
+        return copy.deepcopy(self.charts)
 
-        # remove categorical features which are binned for validation
-        categorical_columns = self.categorical_columns.copy()
-        for binned_feature_info in self.binned_features_info:
-            categorical_columns.remove(binned_feature_info['new_feature_name'])
-
-        validate_attributes(dataframes,
-                            dataframes_names,
-                            self.numerical_columns,
-                            categorical_columns,
-                            self.date_columns)
-
-        self.dataframes.append(dataframe.copy())
-        self.dataframes_names.append(dataframe_name)
-
-        self._rebinning_features_after_adding_new_dataframe()
-
-    def _rebinning_features_after_adding_new_dataframe(self):
-        binned_features_info = self.binned_features_info.copy()
-        self.binned_features_info = []
-
-        # remove categorical features which are binned for recreation
-        for binned_feature_info in binned_features_info:
-            self.categorical_columns.remove(binned_feature_info['new_feature_name'])
-
-        for binned_feature_info in binned_features_info:
-            self.bin_numerical_feature(**binned_feature_info)
-
-    def delete_dataframe(self, dataframe_name: str) -> None:
+    def get_number_displays(self) -> List[dict]:
         """
-        Delete dataframe by name
-        :param dataframe_name: dataframe name to be removed
+        Get a copy of the dashboard's number displays
+
+        :return: List[dict] the number displays
+        """
+        return copy.deepcopy(self.number_displays)
+
+    def update_charts(self, new_charts: List[dict], keep_existing=True) -> None:
+        """
+        Update the dashboard charts.
+        If keep_existing is True, the dashboard's charts will be extended otherwise it will be replaced.
+
+        :param new_charts: List of dict representing the new charts
+        :param keep_existing: boolean to flag whether existing charts should be extended.
         :return: None
         """
 
-        if dataframe_name in self.dataframes_names:
-            dataframe_index = self.dataframes_names.index(dataframe_name)
-            del self.dataframes[dataframe_index]
-            del self.dataframes_names[dataframe_index]
+        if keep_existing:
+            self.charts.extend(copy.deepcopy(new_charts))
+        else:
+            self.charts = copy.deepcopy(new_charts)
+
+    def update_number_displays(self, new_number_displays: List[dict], keep_existing=True) -> None:
+        """
+        Update the dashboard number displays.
+        If keep_existing is True, the dashboard's number displays will be extended otherwise it will be replaced.
+
+        :param new_number_displays: List of dict representing the new number displays
+        :param keep_existing: boolean to flag whether existing charts should be extended.
+        :return: None
+        """
+
+        if keep_existing:
+            self.number_displays.extend(copy.deepcopy(new_number_displays))
+        else:
+            self.number_displays = copy.deepcopy(new_number_displays)
 
     def bin_numerical_feature(self, numerical_feature_name: str, new_feature_name: str, number_of_bins: int,
                               suffix: str = None) -> None:
@@ -299,13 +355,6 @@ class InteractiveDashboard(Report):
         if suffix is not None:
             for df in self.dataframes:
                 df.loc[:, new_feature_name] = df.loc[:, new_feature_name].astype(str) + '_' + suffix
-
-        self.binned_features_info.append({
-            'numerical_feature_name': numerical_feature_name,
-            'new_feature_name': new_feature_name,
-            'number_of_bins': number_of_bins,
-            'suffix': suffix
-        })
 
     def _generate_number_displays(self) -> List[dict]:
         """
@@ -446,3 +495,35 @@ class InteractiveDashboard(Report):
         """
 
         super()._save_the_report(self._template_name, zip_dashboard)
+
+    def __str__(self) -> str:
+        dashboard_list = []
+        dashboard_list.append(f'Title: {self.title}')
+        dashboard_list.append(f'output_directory: {self.output_directory}')
+        dashboard_list.append(f'report_folder_name: {self.report_folder_name}')
+        dashboard_list.append(f'dataframes_names: {self.dataframes_names}')
+        dashboard_list.append(f'Number of dataframes: {len(self.dataframes)}')
+        dashboard_list.append(f'numerical_columns: {self.numerical_columns}')
+        dashboard_list.append(f'categorical_columns: {self.categorical_columns}')
+        dashboard_list.append(f'date_columns: {self.date_columns}')
+        dashboard_list.append(f'Number of number_displays: {len(self.number_displays)}')
+        dashboard_list.append(f'Number of charts: {len(self.charts)}')
+
+        return '\n'.join(dashboard_list)
+
+    def __repr__(self) -> str:
+        dashboard_list = []
+        dashboard_list.append(f'Title: {self.title}')
+        dashboard_list.append(f'output_directory: {self.output_directory}')
+        dashboard_list.append(f'report_folder_name: {self.report_folder_name}')
+        dashboard_list.append(f'dataframes_names: {self.dataframes_names}')
+        dashboard_list.append(f'Number of dataframes: {len(self.dataframes)}')
+        dashboard_list.append(f'numerical_columns: {self.numerical_columns}')
+        dashboard_list.append(f'categorical_columns: {self.categorical_columns}')
+        dashboard_list.append(f'date_columns: {self.date_columns}')
+        dashboard_list.append(f'Number of number_displays: {len(self.number_displays)}')
+        dashboard_list.append(f'Number of charts: {len(self.charts)}')
+
+        return '\n'.join(dashboard_list)
+
+

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>olliepy.InteractiveDashboard &mdash; Olliepy 0.2.6 documentation</title>
+  <title>olliepy.InteractiveDashboard &mdash; Olliepy 0.2.7 documentation</title>
   
 
   
@@ -157,7 +157,9 @@
            <div itemprop="articleBody">
             
   <h1>Source code for olliepy.InteractiveDashboard</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span></span><span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">JSONDecodeError</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">.Report</span> <span class="kn">import</span> <span class="n">Report</span>
 <span class="kn">from</span> <span class="nn">.utils.TypeChecking</span> <span class="kn">import</span> <span class="n">is_instance</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
@@ -166,6 +168,7 @@
 <span class="kn">from</span> <span class="nn">pandas.api.types</span> <span class="kn">import</span> <span class="n">is_datetime64_any_dtype</span> <span class="k">as</span> <span class="n">is_datetime</span>
 <span class="kn">from</span> <span class="nn">pandas.api.types</span> <span class="kn">import</span> <span class="n">is_numeric_dtype</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
 
 
 <span class="k">def</span> <span class="nf">validate_attributes</span><span class="p">(</span><span class="n">dataframes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
@@ -257,6 +260,63 @@
 <span class="s1">            Please make sure that you are passing suffix as a string&#39;&#39;&#39;</span><span class="p">)</span>
 
 
+<span class="k">def</span> <span class="nf">load_interactive_dashboard</span><span class="p">(</span><span class="n">dashboard_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Report</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load existing dashboard given the dashboard path</span>
+<span class="sd">    :param dashboard_path: file system path</span>
+<span class="sd">    :return: Interactive dashboard</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">json</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">dashboard_path</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dashboard_path</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">):</span>
+            <span class="n">dashboard_path</span> <span class="o">=</span> <span class="n">dashboard_path</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">report_file_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dashboard_path</span><span class="si">}</span><span class="s1">/report_data.json&#39;</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">report_file_path</span><span class="p">):</span>
+            <span class="n">output_directory</span><span class="p">,</span> <span class="n">dashboard_folder_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">dashboard_path</span><span class="p">)</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">report_file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">report_data_file</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">report_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">report_data_file</span><span class="p">)</span>
+                    <span class="n">title</span> <span class="o">=</span> <span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">]</span>
+                    <span class="n">dataframes_names</span> <span class="o">=</span> <span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;datasets&#39;</span><span class="p">]</span>
+                    <span class="n">numerical_columns</span> <span class="o">=</span> <span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;numericalColumns&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="s1">&#39;generated_id&#39;</span> <span class="ow">in</span> <span class="n">numerical_columns</span><span class="p">:</span>
+                        <span class="n">numerical_columns</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;generated_id&#39;</span><span class="p">)</span>
+
+                    <span class="n">categorical_columns</span> <span class="o">=</span> <span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;categoricalColumns&#39;</span><span class="p">]</span>
+                    <span class="n">date_columns</span> <span class="o">=</span> <span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;dateColumns&#39;</span><span class="p">]</span>
+                    <span class="n">number_displays</span> <span class="o">=</span> <span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;numberDisplays&#39;</span><span class="p">]</span>
+                    <span class="n">charts</span> <span class="o">=</span> <span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;charts&#39;</span><span class="p">]</span>
+
+                    <span class="n">dataframes</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">dataframe_name</span> <span class="ow">in</span> <span class="n">dataframes_names</span><span class="p">:</span>
+                        <span class="n">dataframes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">report_data</span><span class="p">[</span><span class="n">dataframe_name</span><span class="p">])))</span>
+
+                    <span class="n">dashboard</span> <span class="o">=</span> <span class="n">InteractiveDashboard</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+                                                     <span class="n">output_directory</span><span class="o">=</span><span class="n">output_directory</span><span class="p">,</span>
+                                                     <span class="n">dataframes</span><span class="o">=</span><span class="n">dataframes</span><span class="p">,</span>
+                                                     <span class="n">dataframes_names</span><span class="o">=</span><span class="n">dataframes_names</span><span class="p">,</span>
+                                                     <span class="n">numerical_columns</span><span class="o">=</span><span class="n">numerical_columns</span><span class="p">,</span>
+                                                     <span class="n">categorical_columns</span><span class="o">=</span><span class="n">categorical_columns</span><span class="p">,</span>
+                                                     <span class="n">date_columns</span><span class="o">=</span><span class="n">date_columns</span><span class="p">,</span>
+                                                     <span class="n">dashboard_folder_name</span><span class="o">=</span><span class="n">dashboard_folder_name</span><span class="p">)</span>
+
+                    <span class="n">dashboard</span><span class="o">.</span><span class="n">number_displays</span> <span class="o">=</span> <span class="n">number_displays</span>
+                    <span class="n">dashboard</span><span class="o">.</span><span class="n">charts</span> <span class="o">=</span> <span class="n">charts</span>
+                    <span class="n">dashboard</span><span class="o">.</span><span class="n">report_data</span> <span class="o">=</span> <span class="n">report_data</span>
+
+                    <span class="k">return</span> <span class="n">dashboard</span>
+                <span class="k">except</span> <span class="n">JSONDecodeError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;The provided dashboard JSON file has been encrypted and can not be parsed.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;report_data.json was not found in </span><span class="si">{</span><span class="n">dashboard_path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotADirectoryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided dashboard_path is not valid. dashboard_path does not exist&#39;</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="InteractiveDashboard"><a class="viewcode-back" href="../../pages/API/interactive_dashboard.html#olliepy.InteractiveDashboard.InteractiveDashboard">[docs]</a><span class="k">class</span> <span class="nc">InteractiveDashboard</span><span class="p">(</span><span class="n">Report</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    InteractiveDashboard creates an interactive dashboard that can be used for EDA or error analysis.</span>
@@ -277,7 +337,7 @@
 <span class="sd">        a list of the categorical columns to be included in the dashboard</span>
 <span class="sd">    date_columns : List[str] default=None</span>
 <span class="sd">        a list of the date columns to be included in the dashboard</span>
-<span class="sd">    report_folder_name : str default=None</span>
+<span class="sd">    dashboard_folder_name : str default=None</span>
 <span class="sd">        the name of the folder that will contain all the generated report files.</span>
 <span class="sd">        If not set, the title of the report will be used.</span>
 <span class="sd">    encryption_secret : str default=None</span>
@@ -326,6 +386,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">numerical_columns</span> <span class="o">=</span> <span class="n">numerical_columns</span><span class="p">[:]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">categorical_columns</span> <span class="o">=</span> <span class="n">categorical_columns</span><span class="p">[:]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">date_columns</span> <span class="o">=</span> <span class="n">date_columns</span><span class="p">[:]</span> <span class="k">if</span> <span class="n">date_columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">number_displays</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">charts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span> <span class="o">=</span> <span class="s1">&#39;interactive-dashboard&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_generated_id_column</span> <span class="o">=</span> <span class="s1">&#39;generated_id&#39;</span>
 
@@ -335,8 +397,6 @@
 
 <span class="sd">        :param auto_generate_distribution_plots: generate distribution plots and add them to the dashboard. default: False</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="c1"># validate_create_dashboard_attributes(auto_generate_distribution_plots)</span>
 
         <span class="c1"># delete default report location created by parent class</span>
         <span class="k">if</span> <span class="s1">&#39;report&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">:</span>
@@ -361,12 +421,12 @@
         <span class="k">for</span> <span class="n">df</span><span class="p">,</span> <span class="n">df_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataframes_names</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="n">df_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;records&#39;</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">auto_generate_distribution_plots</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;numberDisplays&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;charts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;numberDisplays&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_number_displays</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;charts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_charts</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">auto_generate_distribution_plots</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_displays</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_displays</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_number_displays</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">charts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">charts</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_charts</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;numberDisplays&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">number_displays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">report_data</span><span class="p">[</span><span class="s1">&#39;charts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">charts</span>
 
         <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
 
@@ -374,6 +434,52 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encryption_secret</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Your encryption secret is </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">encryption_secret</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InteractiveDashboard.get_charts"><a class="viewcode-back" href="../../pages/API/interactive_dashboard.html#olliepy.InteractiveDashboard.InteractiveDashboard.get_charts">[docs]</a>    <span class="k">def</span> <span class="nf">get_charts</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a copy of the dashboard&#39;s charts</span>
+
+<span class="sd">        :return: List[dict] the charts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charts</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InteractiveDashboard.get_number_displays"><a class="viewcode-back" href="../../pages/API/interactive_dashboard.html#olliepy.InteractiveDashboard.InteractiveDashboard.get_number_displays">[docs]</a>    <span class="k">def</span> <span class="nf">get_number_displays</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a copy of the dashboard&#39;s number displays</span>
+
+<span class="sd">        :return: List[dict] the number displays</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_displays</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InteractiveDashboard.update_charts"><a class="viewcode-back" href="../../pages/API/interactive_dashboard.html#olliepy.InteractiveDashboard.InteractiveDashboard.update_charts">[docs]</a>    <span class="k">def</span> <span class="nf">update_charts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_charts</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">keep_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the dashboard charts.</span>
+<span class="sd">        If keep_existing is True, the dashboard&#39;s charts will be extended otherwise it will be replaced.</span>
+
+<span class="sd">        :param new_charts: List of dict representing the new charts</span>
+<span class="sd">        :param keep_existing: boolean to flag whether existing charts should be extended.</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">keep_existing</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">charts</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">new_charts</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">charts</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">new_charts</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="InteractiveDashboard.update_number_displays"><a class="viewcode-back" href="../../pages/API/interactive_dashboard.html#olliepy.InteractiveDashboard.InteractiveDashboard.update_number_displays">[docs]</a>    <span class="k">def</span> <span class="nf">update_number_displays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_number_displays</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">],</span> <span class="n">keep_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update the dashboard number displays.</span>
+<span class="sd">        If keep_existing is True, the dashboard&#39;s number displays will be extended otherwise it will be replaced.</span>
+
+<span class="sd">        :param new_number_displays: List of dict representing the new number displays</span>
+<span class="sd">        :param keep_existing: boolean to flag whether existing charts should be extended.</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">keep_existing</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_displays</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">new_number_displays</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">number_displays</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">new_number_displays</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="InteractiveDashboard.bin_numerical_feature"><a class="viewcode-back" href="../../pages/API/interactive_dashboard.html#olliepy.InteractiveDashboard.InteractiveDashboard.bin_numerical_feature">[docs]</a>    <span class="k">def</span> <span class="nf">bin_numerical_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numerical_feature_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_feature_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                               <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -547,7 +653,39 @@
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_save_the_report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span><span class="p">,</span> <span class="n">zip_dashboard</span><span class="p">)</span></div></div>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_save_the_report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span><span class="p">,</span> <span class="n">zip_dashboard</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">dashboard_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Title: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;output_directory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;report_folder_name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">report_folder_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;dataframes_names: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes_names</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of dataframes: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;numerical_columns: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical_columns</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;categorical_columns: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">categorical_columns</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;date_columns: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">date_columns</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of number_displays: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_displays</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of charts: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charts</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dashboard_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">dashboard_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Title: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">title</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;output_directory: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">output_directory</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;report_folder_name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">report_folder_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;dataframes_names: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes_names</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of dataframes: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;numerical_columns: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">numerical_columns</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;categorical_columns: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">categorical_columns</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;date_columns: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">date_columns</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of number_displays: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">number_displays</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">dashboard_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of charts: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charts</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dashboard_list</span><span class="p">)</span></div>
+
+
 </pre></div>
 
            </div>

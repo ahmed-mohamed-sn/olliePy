@@ -172,7 +172,8 @@ class Report:
 
     def _update_report(self, data: Dict) -> None:
         """
-        Updates the report dictionary in report_data
+        Updates the report dictionary in report_data.
+
         :param data: Dict, the data dictionary that will be added to the report dictionary in report_data
         :return: None
         """

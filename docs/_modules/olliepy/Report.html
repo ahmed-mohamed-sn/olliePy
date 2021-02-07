@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>olliepy.Report &mdash; Olliepy 0.2.6 documentation</title>
+  <title>olliepy.Report &mdash; Olliepy 0.2.7 documentation</title>
   
 
   
@@ -163,6 +163,7 @@
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">distutils.dir_util</span> <span class="kn">import</span> <span class="n">copy_tree</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">rich</span> <span class="kn">import</span> <span class="nb">print</span>
 
 
 <span class="k">def</span> <span class="nf">validate_attributes</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">output_directory</span><span class="p">,</span> <span class="n">subtitle</span><span class="p">,</span> <span class="n">report_folder_name</span><span class="p">,</span> <span class="n">encryption_secret</span><span class="p">,</span>
@@ -216,7 +217,7 @@
     <span class="kn">import</span> <span class="nn">psutil</span>
 
     <span class="k">if</span> <span class="n">psutil</span><span class="o">.</span><span class="n">WINDOWS</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Only server mode is supported for Windows&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Only server mode is supported on Windows&#39;</span><span class="p">)</span>
 
         <span class="kn">import</span> <span class="nn">subprocess</span>
         <span class="n">app_command</span> <span class="o">=</span> <span class="s1">&#39;python &#39;</span> <span class="o">+</span> <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">report_directory</span><span class="p">,</span> <span class="s1">&#39;app.py&#39;</span><span class="p">))</span>
@@ -229,7 +230,7 @@
         <span class="n">full_command</span> <span class="o">=</span> <span class="n">venv_command</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">venv_command</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
         <span class="n">full_command</span> <span class="o">+=</span> <span class="s1">&#39; &amp; &#39;</span> <span class="o">+</span> <span class="n">app_command</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">full_command</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">app_command</span>
 
-        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">full_command</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">full_command</span><span class="o">.</span><span class="n">split</span><span class="p">(),</span> <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">process</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">multiprocessing</span> <span class="k">as</span> <span class="nn">mp</span>
@@ -237,6 +238,8 @@
         <span class="kn">import</span> <span class="nn">importlib.util</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;http://127.0.0.1:</span><span class="si">{</span><span class="n">port</span><span class="si">}</span><span class="s1">/&#39;</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Serving application on [link=</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">]</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s1">[/link]&#39;</span><span class="p">)</span>
+
             <span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">spec_from_file_location</span><span class="p">(</span><span class="s2">&quot;app&quot;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">report_directory</span><span class="si">}</span><span class="s1">/app.py&#39;</span><span class="p">)</span>
             <span class="n">app</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">module_from_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
             <span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">exec_module</span><span class="p">(</span><span class="n">app</span><span class="p">)</span>
@@ -328,7 +331,8 @@
 
 <div class="viewcode-block" id="Report._update_report"><a class="viewcode-back" href="../../pages/API/report.html#olliepy.Report.Report._update_report">[docs]</a>    <span class="k">def</span> <span class="nf">_update_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Updates the report dictionary in report_data</span>
+<span class="sd">        Updates the report dictionary in report_data.</span>
+
 <span class="sd">        :param data: Dict, the data dictionary that will be added to the report dictionary in report_data</span>
 <span class="sd">        :return: None</span>
 <span class="sd">        &quot;&quot;&quot;</span>

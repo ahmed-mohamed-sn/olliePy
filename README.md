@@ -34,6 +34,11 @@ Get started by following the [guide](https://ahmed-mohamed-sn.github.io/olliePy/
 ### Installation
 `pip install -U olliepy`
 
+### OS Support
+- Linux
+- MacOs
+- Windows (starting from olliepy v0.2.6+)
+
 ### Examples
 Get started using the provided [examples](https://github.com/ahmed-mohamed-sn/olliePy/tree/master/examples)
 

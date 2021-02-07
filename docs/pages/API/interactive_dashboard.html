@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>InteractiveDashboard &mdash; Olliepy 0.2.6 documentation</title>
+  <title>InteractiveDashboard &mdash; Olliepy 0.2.7 documentation</title>
   
 
   
@@ -187,7 +187,7 @@
 </dd>
 <dt>date_columns<span class="classifier">List[str] default=None</span></dt><dd><p>a list of the date columns to be included in the dashboard</p>
 </dd>
-<dt>report_folder_name<span class="classifier">str default=None</span></dt><dd><p>the name of the folder that will contain all the generated report files.
+<dt>dashboard_folder_name<span class="classifier">str default=None</span></dt><dd><p>the name of the folder that will contain all the generated report files.
 If not set, the title of the report will be used.</p>
 </dd>
 <dt>encryption_secret<span class="classifier">str default=None</span></dt><dd><p>the 16 characters secret that will be used to encrypt the generated report data.
@@ -237,6 +237,28 @@ and apply these bins on the rest of the dataframes.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt id="olliepy.InteractiveDashboard.InteractiveDashboard.get_charts">
+<code class="sig-name descname">get_charts</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>dict<span class="p">]</span><a class="reference internal" href="../../_modules/olliepy/InteractiveDashboard.html#InteractiveDashboard.get_charts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.InteractiveDashboard.InteractiveDashboard.get_charts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a copy of the dashboard’s charts</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List[dict] the charts</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.InteractiveDashboard.InteractiveDashboard.get_number_displays">
+<code class="sig-name descname">get_number_displays</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; List<span class="p">[</span>dict<span class="p">]</span><a class="reference internal" href="../../_modules/olliepy/InteractiveDashboard.html#InteractiveDashboard.get_number_displays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.InteractiveDashboard.InteractiveDashboard.get_number_displays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a copy of the dashboard’s number displays</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List[dict] the number displays</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="olliepy.InteractiveDashboard.InteractiveDashboard.save_dashboard">
 <code class="sig-name descname">save_dashboard</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">zip_dashboard</span><span class="p">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="default_value">False</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/InteractiveDashboard.html#InteractiveDashboard.save_dashboard"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.InteractiveDashboard.InteractiveDashboard.save_dashboard" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates the dashboard directory, copies the web application based on the template name,
@@ -269,6 +291,42 @@ Available modes:</p>
 <li><p><strong>mode</strong> – the selected web server mode. default: ‘server’</p></li>
 <li><p><strong>port</strong> – the server port. default: None. a random port will be generated between (1024-49151)</p></li>
 <li><p><strong>load_existing_dashboard</strong> – Load existing dashboard data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.InteractiveDashboard.InteractiveDashboard.update_charts">
+<code class="sig-name descname">update_charts</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_charts</span><span class="p">:</span> <span class="n">List<span class="p">[</span>dict<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">keep_existing</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/InteractiveDashboard.html#InteractiveDashboard.update_charts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.InteractiveDashboard.InteractiveDashboard.update_charts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the dashboard charts.
+If keep_existing is True, the dashboard’s charts will be extended otherwise it will be replaced.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_charts</strong> – List of dict representing the new charts</p></li>
+<li><p><strong>keep_existing</strong> – boolean to flag whether existing charts should be extended.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="olliepy.InteractiveDashboard.InteractiveDashboard.update_number_displays">
+<code class="sig-name descname">update_number_displays</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">new_number_displays</span><span class="p">:</span> <span class="n">List<span class="p">[</span>dict<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">keep_existing</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span> &#x2192; None<a class="reference internal" href="../../_modules/olliepy/InteractiveDashboard.html#InteractiveDashboard.update_number_displays"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#olliepy.InteractiveDashboard.InteractiveDashboard.update_number_displays" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the dashboard number displays.
+If keep_existing is True, the dashboard’s number displays will be extended otherwise it will be replaced.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>new_number_displays</strong> – List of dict representing the new number displays</p></li>
+<li><p><strong>keep_existing</strong> – boolean to flag whether existing charts should be extended.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
