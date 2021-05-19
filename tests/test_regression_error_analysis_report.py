@@ -322,9 +322,9 @@ def test_error_column_name_not_in_test_df():
 @pytest.mark.parametrize("error_classes", [
     3,
     False,
-    ({'ACCEPTABLE': (0, 1)}),
-    ({'ACCEPTABLE': (False, True)}),
-    ({3: (0.0, 1.0)})
+    [{'ACCEPTABLE': (0, 1)}],
+    [{'ACCEPTABLE': (False, True)}],
+    {3: (0.0, 1.0)}
 ])
 def test_invalid_error_classes(error_classes):
     with pytest.raises(TypeError):

@@ -1,12 +1,14 @@
+import time
+from itertools import product
 from typing import List, Dict, Tuple, Union
-from .Report import Report
+
 import pandas as pd
-from .utils.TypeChecking import is_instance
 from scipy.spatial.distance import cosine
 from scipy.stats import ks_2samp, wasserstein_distance
-from itertools import product
 from sklearn.preprocessing import LabelEncoder
-import time
+from typeguard import typechecked
+
+from .Report import Report
 
 
 def validate_create_report_attributes(enable_patterns_report: bool,
@@ -24,14 +26,6 @@ def validate_create_report_attributes(enable_patterns_report: bool,
     if type(enable_patterns_report) is not bool:
         raise TypeError('provided enable_patterns_report is not valid. enable_patterns_report has to be a bool')
 
-    if not is_instance(patterns_report_group_by_categorical_features, Union[str, List[str]]):
-        raise TypeError('''provided patterns_report_group_by_categorical_features is not valid.
-            patterns_report_group_by_categorical_features has to be a str == "all" or a list of categorical features''')
-
-    if not is_instance(patterns_report_group_by_numerical_features, Union[str, List[str]]):
-        raise TypeError('''provided patterns_report_group_by_numerical_features is not valid.
-        patterns_report_group_by_numerical_features has to be a str == "all" or a list of numerical features''')
-
     if type(patterns_report_group_by_categorical_features) is str \
             and patterns_report_group_by_categorical_features != 'all':
         raise AttributeError('''provided patterns_report_group_by_categorical_features is not valid.
@@ -42,31 +36,29 @@ def validate_create_report_attributes(enable_patterns_report: bool,
         raise AttributeError('''provided patterns_report_group_by_numerical_features is not valid.
             patterns_report_group_by_numerical_features has to be "all" if the provided value is a string''')
 
-    if is_instance(patterns_report_group_by_categorical_features, List[str]):
+    if type(patterns_report_group_by_categorical_features) is list \
+            and len(patterns_report_group_by_categorical_features) > 0:
         unknown_features = [feature for feature in patterns_report_group_by_categorical_features if
                             feature not in categorical_features]
         if len(unknown_features) > 0:
             raise AttributeError(f'''provided patterns_report_group_by_categorical_features is not valid.
             these features {unknown_features} do not exist in the categorical features''')
 
-    if is_instance(patterns_report_group_by_numerical_features, List[str]):
+    if type(patterns_report_group_by_numerical_features) is list \
+            and len(patterns_report_group_by_numerical_features) > 0:
         unknown_features = [feature for feature in patterns_report_group_by_numerical_features if
                             feature not in numerical_features]
         if len(unknown_features) > 0:
             raise AttributeError(f'''provided patterns_report_group_by_numerical_features is not valid.
             these features {unknown_features} do not exist in the numerical features''')
 
-    if not is_instance(patterns_report_number_of_bins, Union[int, List[int]]):
-        raise TypeError('''provided patterns_report_number_of_bins is not valid.
-        patterns_report_number_of_bins has to be an int or a list of ints (one for each numerical feature provided in patterns_report_group_by_numerical_features)''')
-
-    if is_instance(patterns_report_number_of_bins, List[int]) \
+    if type(patterns_report_number_of_bins) is list \
             and type(patterns_report_group_by_numerical_features) is str:
         raise AttributeError('''provided patterns_report_number_of_bins is not valid.
         patterns_report_number_of_bins can be a list of ints if a list of numerical features were provided in patterns_report_group_by_numerical_features''')
 
-    if is_instance(patterns_report_number_of_bins, List[int]) \
-            and is_instance(patterns_report_group_by_numerical_features, List[str]):
+    if type(patterns_report_number_of_bins) is list \
+            and type(patterns_report_group_by_numerical_features) is list:
         if len(patterns_report_number_of_bins) != len(patterns_report_group_by_numerical_features):
             raise AttributeError('''provided patterns_report_number_of_bins is not valid.
             patterns_report_number_of_bins list length has to be equal to the number of features provided in patterns_report_group_by_numerical_features''')
@@ -103,21 +95,17 @@ def validate_create_report_attributes(enable_patterns_report: bool,
         raise AttributeError('''provided parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold are not valid.
                 parallel_coordinates_q2_threshold has to greater than parallel_coordinates_q1_threshold''')
 
-    if not is_instance(parallel_coordinates_features, Union[str, List[str]]):
-        raise TypeError('''provided parallel_coordinates_features is not valid.
-                parallel_coordinates_features has to be a str == "auto" or a list of features''')
-
     if type(parallel_coordinates_features) is str and parallel_coordinates_features != 'auto':
         raise AttributeError('''provided parallel_coordinates_features is not valid.
                 parallel_coordinates_features has to be "auto" if the provided value is a string''')
 
-    if is_instance(parallel_coordinates_features, List[str]):
+    if type(parallel_coordinates_features) is list and len(parallel_coordinates_features) > 0:
         unknown_features = [feature for feature in parallel_coordinates_features if feature not in all_features]
         if len(unknown_features) > 0:
             raise AttributeError(f'''provided parallel_coordinates_features is not valid.
             these features {unknown_features} do not exist in the dataframe''')
 
-    if is_instance(parallel_coordinates_features, List[str]) and len(parallel_coordinates_features) < 2:
+    if type(parallel_coordinates_features) is list and len(parallel_coordinates_features) < 2:
         raise AttributeError(f'''provided parallel_coordinates_features is not valid.
             parallel_coordinates_features has to contain at least two features to plot''')
 
@@ -153,9 +141,6 @@ def validate_attributes(train_df, test_df, target_feature_name, error_column_nam
     if error_column_name not in test_columns:
         raise AttributeError(f'provided error_column_name ({error_column_name}) is not test_df')
 
-    if not is_instance(error_classes, Dict[str, Tuple[float, float]]):
-        raise TypeError('provided error_classes is not valid. error_classes has to be a Dict[str, Tuple[float, float]]')
-
     if acceptable_error_class is not None and type(acceptable_error_class) is not str:
         raise TypeError(f'''provided acceptable_error_class is not valid.
                             \nacceptable_error_class ({acceptable_error_class}) has to be a str or None''')
@@ -168,17 +153,12 @@ def validate_attributes(train_df, test_df, target_feature_name, error_column_nam
         raise AttributeError('''both numerical_features and categorical_features are not defined.
                                 \nyou need to provide one of them or both in order to proceed.''')
 
-    if numerical_features is not None and not is_instance(numerical_features, List[str]):
-        raise TypeError('provided numerical_features is not valid. numerical_features has to be a List[str]')
-
-    if categorical_features is not None and not is_instance(categorical_features, List[str]):
-        raise TypeError('provided categorical_features is not valid. categorical_features has to be a List[str]')
-
 
 def _cosine_similarity(vector_a, vector_b):
     return 1.0 - cosine(vector_a, vector_b)
 
 
+@typechecked
 class RegressionErrorAnalysisReport(Report):
     """
     RegressionErrorAnalysisReport creates a report that analyzes the error in regression problems.
@@ -287,6 +267,7 @@ class RegressionErrorAnalysisReport(Report):
         self._secondary_datasets.extend(list(self.error_classes.keys()))
         self._template_name = 'regression-error-analysis-report'
 
+    @typechecked
     def create_report(self,
                       enable_patterns_report: bool = True,
                       patterns_report_group_by_categorical_features: Union[str, List[str]] = 'all',
