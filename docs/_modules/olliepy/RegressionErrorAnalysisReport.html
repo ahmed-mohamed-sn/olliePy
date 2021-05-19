@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>olliepy.RegressionErrorAnalysisReport &mdash; Olliepy 0.2.7 documentation</title>
+  <title>olliepy.RegressionErrorAnalysisReport &mdash; Olliepy 0.2.8 documentation</title>
   
 
   
@@ -157,15 +157,17 @@
            <div itemprop="articleBody">
             
   <h1>Source code for olliepy.RegressionErrorAnalysisReport</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
-<span class="kn">from</span> <span class="nn">.Report</span> <span class="kn">import</span> <span class="n">Report</span>
+<span></span><span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">.utils.TypeChecking</span> <span class="kn">import</span> <span class="n">is_instance</span>
 <span class="kn">from</span> <span class="nn">scipy.spatial.distance</span> <span class="kn">import</span> <span class="n">cosine</span>
 <span class="kn">from</span> <span class="nn">scipy.stats</span> <span class="kn">import</span> <span class="n">ks_2samp</span><span class="p">,</span> <span class="n">wasserstein_distance</span>
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">LabelEncoder</span>
-<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">typeguard</span> <span class="kn">import</span> <span class="n">typechecked</span>
+
+<span class="kn">from</span> <span class="nn">.Report</span> <span class="kn">import</span> <span class="n">Report</span>
 
 
 <span class="k">def</span> <span class="nf">validate_create_report_attributes</span><span class="p">(</span><span class="n">enable_patterns_report</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
@@ -183,14 +185,6 @@
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">enable_patterns_report</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided enable_patterns_report is not valid. enable_patterns_report has to be a bool&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_group_by_categorical_features</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_categorical_features is not valid.</span>
-<span class="s1">            patterns_report_group_by_categorical_features has to be a str == &quot;all&quot; or a list of categorical features&#39;&#39;&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_numerical_features is not valid.</span>
-<span class="s1">        patterns_report_group_by_numerical_features has to be a str == &quot;all&quot; or a list of numerical features&#39;&#39;&#39;</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">patterns_report_group_by_categorical_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span> \
             <span class="ow">and</span> <span class="n">patterns_report_group_by_categorical_features</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_categorical_features is not valid.</span>
@@ -201,31 +195,29 @@
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_numerical_features is not valid.</span>
 <span class="s1">            patterns_report_group_by_numerical_features has to be &quot;all&quot; if the provided value is a string&#39;&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_group_by_categorical_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">patterns_report_group_by_categorical_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> \
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">patterns_report_group_by_categorical_features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">unknown_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature</span> <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">patterns_report_group_by_categorical_features</span> <span class="k">if</span>
                             <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">categorical_features</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unknown_features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_categorical_features is not valid.</span>
 <span class="s1">            these features </span><span class="si">{</span><span class="n">unknown_features</span><span class="si">}</span><span class="s1"> do not exist in the categorical features&#39;&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> \
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">unknown_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature</span> <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">patterns_report_group_by_numerical_features</span> <span class="k">if</span>
                             <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">numerical_features</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unknown_features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided patterns_report_group_by_numerical_features is not valid.</span>
 <span class="s1">            these features </span><span class="si">{</span><span class="n">unknown_features</span><span class="si">}</span><span class="s1"> do not exist in the numerical features&#39;&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_number_of_bins</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_number_of_bins is not valid.</span>
-<span class="s1">        patterns_report_number_of_bins has to be an int or a list of ints (one for each numerical feature provided in patterns_report_group_by_numerical_features)&#39;&#39;&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_number_of_bins</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> \
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">patterns_report_number_of_bins</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> \
             <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_number_of_bins is not valid.</span>
 <span class="s1">        patterns_report_number_of_bins can be a list of ints if a list of numerical features were provided in patterns_report_group_by_numerical_features&#39;&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_number_of_bins</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">])</span> \
-            <span class="ow">and</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">patterns_report_number_of_bins</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> \
+            <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">patterns_report_number_of_bins</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">patterns_report_group_by_numerical_features</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided patterns_report_number_of_bins is not valid.</span>
 <span class="s1">            patterns_report_number_of_bins list length has to be equal to the number of features provided in patterns_report_group_by_numerical_features&#39;&#39;&#39;</span><span class="p">)</span>
@@ -262,21 +254,17 @@
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided parallel_coordinates_q1_threshold and parallel_coordinates_q2_threshold are not valid.</span>
 <span class="s1">                parallel_coordinates_q2_threshold has to greater than parallel_coordinates_q1_threshold&#39;&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided parallel_coordinates_features is not valid.</span>
-<span class="s1">                parallel_coordinates_features has to be a str == &quot;auto&quot; or a list of features&#39;&#39;&#39;</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span> <span class="ow">and</span> <span class="n">parallel_coordinates_features</span> <span class="o">!=</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;provided parallel_coordinates_features is not valid.</span>
 <span class="s1">                parallel_coordinates_features has to be &quot;auto&quot; if the provided value is a string&#39;&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">unknown_features</span> <span class="o">=</span> <span class="p">[</span><span class="n">feature</span> <span class="k">for</span> <span class="n">feature</span> <span class="ow">in</span> <span class="n">parallel_coordinates_features</span> <span class="k">if</span> <span class="n">feature</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_features</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unknown_features</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided parallel_coordinates_features is not valid.</span>
 <span class="s1">            these features </span><span class="si">{</span><span class="n">unknown_features</span><span class="si">}</span><span class="s1"> do not exist in the dataframe&#39;&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">parallel_coordinates_features</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided parallel_coordinates_features is not valid.</span>
 <span class="s1">            parallel_coordinates_features has to contain at least two features to plot&#39;&#39;&#39;</span><span class="p">)</span>
 
@@ -312,9 +300,6 @@
     <span class="k">if</span> <span class="n">error_column_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">test_columns</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided error_column_name (</span><span class="si">{</span><span class="n">error_column_name</span><span class="si">}</span><span class="s1">) is not test_df&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">error_classes</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided error_classes is not valid. error_classes has to be a Dict[str, Tuple[float, float]]&#39;</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="n">acceptable_error_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">acceptable_error_class</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;&#39;&#39;provided acceptable_error_class is not valid.</span>
 <span class="s1">                            </span><span class="se">\n</span><span class="s1">acceptable_error_class (</span><span class="si">{</span><span class="n">acceptable_error_class</span><span class="si">}</span><span class="s1">) has to be a str or None&#39;&#39;&#39;</span><span class="p">)</span>
@@ -327,18 +312,13 @@
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;both numerical_features and categorical_features are not defined.</span>
 <span class="s1">                                </span><span class="se">\n</span><span class="s1">you need to provide one of them or both in order to proceed.&#39;&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">numerical_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">numerical_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided numerical_features is not valid. numerical_features has to be a List[str]&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">categorical_features</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">categorical_features</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;provided categorical_features is not valid. categorical_features has to be a List[str]&#39;</span><span class="p">)</span>
-
 
 <span class="k">def</span> <span class="nf">_cosine_similarity</span><span class="p">(</span><span class="n">vector_a</span><span class="p">,</span> <span class="n">vector_b</span><span class="p">):</span>
     <span class="k">return</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">cosine</span><span class="p">(</span><span class="n">vector_a</span><span class="p">,</span> <span class="n">vector_b</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="RegressionErrorAnalysisReport"><a class="viewcode-back" href="../../pages/API/regression_error_analysis_report.html#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport">[docs]</a><span class="k">class</span> <span class="nc">RegressionErrorAnalysisReport</span><span class="p">(</span><span class="n">Report</span><span class="p">):</span>
+<div class="viewcode-block" id="RegressionErrorAnalysisReport"><a class="viewcode-back" href="../../pages/API/regression_error_analysis_report.html#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport">[docs]</a><span class="nd">@typechecked</span>
+<span class="k">class</span> <span class="nc">RegressionErrorAnalysisReport</span><span class="p">(</span><span class="n">Report</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    RegressionErrorAnalysisReport creates a report that analyzes the error in regression problems.</span>
 
@@ -446,7 +426,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_secondary_datasets</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error_classes</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span> <span class="o">=</span> <span class="s1">&#39;regression-error-analysis-report&#39;</span>
 
-<div class="viewcode-block" id="RegressionErrorAnalysisReport.create_report"><a class="viewcode-back" href="../../pages/API/regression_error_analysis_report.html#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.create_report">[docs]</a>    <span class="k">def</span> <span class="nf">create_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="RegressionErrorAnalysisReport.create_report"><a class="viewcode-back" href="../../pages/API/regression_error_analysis_report.html#olliepy.RegressionErrorAnalysisReport.RegressionErrorAnalysisReport.create_report">[docs]</a>    <span class="nd">@typechecked</span>
+    <span class="k">def</span> <span class="nf">create_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
                       <span class="n">enable_patterns_report</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                       <span class="n">patterns_report_group_by_categorical_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>
                       <span class="n">patterns_report_group_by_numerical_features</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span>

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>olliepy.InteractiveDashboard &mdash; Olliepy 0.2.7 documentation</title>
+  <title>olliepy.InteractiveDashboard &mdash; Olliepy 0.2.8 documentation</title>
   
 
   
@@ -157,18 +157,19 @@
            <div itemprop="articleBody">
             
   <h1>Source code for olliepy.InteractiveDashboard</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">JSONDecodeError</span>
-
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">.Report</span> <span class="kn">import</span> <span class="n">Report</span>
-<span class="kn">from</span> <span class="nn">.utils.TypeChecking</span> <span class="kn">import</span> <span class="n">is_instance</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
-<span class="kn">import</span> <span class="nn">time</span>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">JSONDecodeError</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">pandas.api.types</span> <span class="kn">import</span> <span class="n">is_datetime64_any_dtype</span> <span class="k">as</span> <span class="n">is_datetime</span>
 <span class="kn">from</span> <span class="nn">pandas.api.types</span> <span class="kn">import</span> <span class="n">is_numeric_dtype</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">typeguard</span> <span class="kn">import</span> <span class="n">typechecked</span>
+
+<span class="kn">from</span> <span class="nn">.Report</span> <span class="kn">import</span> <span class="n">Report</span>
 
 
 <span class="k">def</span> <span class="nf">validate_attributes</span><span class="p">(</span><span class="n">dataframes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
@@ -178,26 +179,6 @@
                         <span class="n">date_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;You need to pass at least one pandas dataframe to create a dashboard.&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">dataframes</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;one or more of the provided data_frames is not valid.</span>
-<span class="s1">            Please make sure that you are passing a list of pandas dataframes&#39;&#39;&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">dataframes_names</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;one or more of the provided data_frames_names is not valid.</span>
-<span class="s1">        Please make sure that you are passing a list of strings for the data frames&#39; names&#39;&#39;&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">numerical_columns</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">numerical_columns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;one or more of the provided numerical_columns is not valid.</span>
-<span class="s1">        Please make sure that you are passing a list of strings of the numerical columns&#39;&#39;&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">categorical_columns</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">categorical_columns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;one or more of the provided categorical_columns is not valid.</span>
-<span class="s1">        Please make sure that you are passing a list of strings of the categorical columns&#39;&#39;&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">date_columns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">date_columns</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">date_columns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;one or more of the provided date_columns is not valid.</span>
-<span class="s1">        Please make sure that you are passing a list of strings of the date columns&#39;&#39;&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframes</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataframes_names</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;You need to have a dataframe name for each dataframe you have in dataframes&#39;</span><span class="p">)</span>
@@ -228,13 +209,7 @@
 <span class="k">def</span> <span class="nf">validate_bin_numerical_feature_attributes</span><span class="p">(</span><span class="n">dataframes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
                                               <span class="n">dataframes_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
                                               <span class="n">numerical_feature_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                                              <span class="n">new_feature_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                                              <span class="n">number_of_bins</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                                              <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">numerical_feature_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;the provided numerical_feature_name is not valid.</span>
-<span class="s1">            Please make sure that you are passing numerical_feature_name as a string&#39;&#39;&#39;</span><span class="p">)</span>
-
+                                              <span class="n">new_feature_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">df</span><span class="p">,</span> <span class="n">df_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dataframes</span><span class="p">,</span> <span class="n">dataframes_names</span><span class="p">):</span>
         <span class="n">df_columns</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">numerical_feature_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df_columns</span><span class="p">:</span>
@@ -243,21 +218,9 @@
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;the provided numerical_feature_name is not valid.</span>
 <span class="s1">            Please make sure that you are passing a numerical feature name&#39;&#39;&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">new_feature_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;the provided new_feature_name is not valid.</span>
-<span class="s1">            Please make sure that you are passing new_feature_name as a string&#39;&#39;&#39;</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_feature_name</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;the provided new_feature_name is not valid.</span>
 <span class="s1">            Please make sure that you are passing new_feature_name as a string with at least one character&#39;&#39;&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">number_of_bins</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;the provided number_of_bins is not valid.</span>
-<span class="s1">            Please make sure that you are passing number_of_bins as an integer&#39;&#39;&#39;</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_instance</span><span class="p">(</span><span class="n">suffix</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">suffix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;the provided suffix is not valid.</span>
-<span class="s1">            Please make sure that you are passing suffix as a string&#39;&#39;&#39;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">load_interactive_dashboard</span><span class="p">(</span><span class="n">dashboard_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Report</span><span class="p">:</span>
@@ -317,7 +280,8 @@
         <span class="k">raise</span> <span class="ne">NotADirectoryError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;provided dashboard_path is not valid. dashboard_path does not exist&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="InteractiveDashboard"><a class="viewcode-back" href="../../pages/API/interactive_dashboard.html#olliepy.InteractiveDashboard.InteractiveDashboard">[docs]</a><span class="k">class</span> <span class="nc">InteractiveDashboard</span><span class="p">(</span><span class="n">Report</span><span class="p">):</span>
+<div class="viewcode-block" id="InteractiveDashboard"><a class="viewcode-back" href="../../pages/API/interactive_dashboard.html#olliepy.InteractiveDashboard.InteractiveDashboard">[docs]</a><span class="nd">@typechecked</span>
+<span class="k">class</span> <span class="nc">InteractiveDashboard</span><span class="p">(</span><span class="n">Report</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    InteractiveDashboard creates an interactive dashboard that can be used for EDA or error analysis.</span>
 
@@ -362,8 +326,8 @@
                  <span class="n">output_directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
                  <span class="n">dataframes</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
                  <span class="n">dataframes_names</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-                 <span class="n">numerical_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                 <span class="n">categorical_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">numerical_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
+                 <span class="n">categorical_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[],</span>
                  <span class="n">date_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">dashboard_folder_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">encryption_secret</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -481,7 +445,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">number_displays</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">new_number_displays</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="InteractiveDashboard.bin_numerical_feature"><a class="viewcode-back" href="../../pages/API/interactive_dashboard.html#olliepy.InteractiveDashboard.InteractiveDashboard.bin_numerical_feature">[docs]</a>    <span class="k">def</span> <span class="nf">bin_numerical_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numerical_feature_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_feature_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+<div class="viewcode-block" id="InteractiveDashboard.bin_numerical_feature"><a class="viewcode-back" href="../../pages/API/interactive_dashboard.html#olliepy.InteractiveDashboard.InteractiveDashboard.bin_numerical_feature">[docs]</a>    <span class="nd">@typechecked</span>
+    <span class="k">def</span> <span class="nf">bin_numerical_feature</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">numerical_feature_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">new_feature_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">number_of_bins</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
                               <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        This will be a selected numerical feature. OlliePy will get the bins from the first data frame</span>
@@ -497,9 +462,7 @@
         <span class="n">validate_bin_numerical_feature_attributes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">,</span>
                                                   <span class="bp">self</span><span class="o">.</span><span class="n">dataframes_names</span><span class="p">,</span>
                                                   <span class="n">numerical_feature_name</span><span class="p">,</span>
-                                                  <span class="n">new_feature_name</span><span class="p">,</span>
-                                                  <span class="n">number_of_bins</span><span class="p">,</span>
-                                                  <span class="n">suffix</span><span class="p">)</span>
+                                                  <span class="n">new_feature_name</span><span class="p">)</span>
 
         <span class="n">first_df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataframes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">first_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">new_feature_name</span><span class="p">],</span> <span class="n">bins</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">cut</span><span class="p">(</span><span class="n">first_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[:,</span> <span class="n">numerical_feature_name</span><span class="p">],</span>
@@ -654,8 +617,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_save_the_report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_template_name</span><span class="p">,</span> <span class="n">zip_dashboard</span><span class="p">)</span></div></div>
-
-
 </pre></div>
 
            </div>
