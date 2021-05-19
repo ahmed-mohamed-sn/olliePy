@@ -84,6 +84,8 @@ def _start_server_and_view_report(report_directory: str, mode: str, port: int) -
             spec = importlib.util.spec_from_file_location("app", f'{report_directory}/app.py')
             app = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(app)
+
+            mp.set_start_method('fork', force=True)
             p = mp.Process(target=app.run_application, args=(port, report_directory))
             p.start()
             time.sleep(1.0)

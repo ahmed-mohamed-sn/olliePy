@@ -1,15 +1,16 @@
-from json import JSONDecodeError
-
-import pandas as pd
-from .Report import Report
-from .utils.TypeChecking import is_instance
-from typing import List
-import time
+import copy
 import json
+import time
+from json import JSONDecodeError
+from typing import List
+
+import numpy as np
+import pandas as pd
 from pandas.api.types import is_datetime64_any_dtype as is_datetime
 from pandas.api.types import is_numeric_dtype
-import numpy as np
-import copy
+from typeguard import typechecked
+
+from .Report import Report
 
 
 def validate_attributes(dataframes: List[pd.DataFrame],
@@ -19,26 +20,6 @@ def validate_attributes(dataframes: List[pd.DataFrame],
                         date_columns: List[str]):
     if len(dataframes) == 0:
         raise AttributeError('You need to pass at least one pandas dataframe to create a dashboard.')
-
-    if not is_instance(dataframes, List[pd.DataFrame]):
-        raise TypeError('''one or more of the provided data_frames is not valid.
-            Please make sure that you are passing a list of pandas dataframes''')
-
-    if not is_instance(dataframes_names, List[str]):
-        raise TypeError('''one or more of the provided data_frames_names is not valid.
-        Please make sure that you are passing a list of strings for the data frames' names''')
-
-    if not is_instance(numerical_columns, List[str]) and len(numerical_columns) > 0:
-        raise TypeError('''one or more of the provided numerical_columns is not valid.
-        Please make sure that you are passing a list of strings of the numerical columns''')
-
-    if not is_instance(categorical_columns, List[str]) and len(categorical_columns) > 0:
-        raise TypeError('''one or more of the provided categorical_columns is not valid.
-        Please make sure that you are passing a list of strings of the categorical columns''')
-
-    if date_columns is not None and not is_instance(date_columns, List[str]) and len(date_columns) > 0:
-        raise TypeError('''one or more of the provided date_columns is not valid.
-        Please make sure that you are passing a list of strings of the date columns''')
 
     if len(dataframes) != len(dataframes_names):
         raise AttributeError('You need to have a dataframe name for each dataframe you have in dataframes')
@@ -69,13 +50,7 @@ def validate_attributes(dataframes: List[pd.DataFrame],
 def validate_bin_numerical_feature_attributes(dataframes: List[pd.DataFrame],
                                               dataframes_names: List[str],
                                               numerical_feature_name: str,
-                                              new_feature_name: str,
-                                              number_of_bins: int,
-                                              suffix: str):
-    if not is_instance(numerical_feature_name, str):
-        raise TypeError('''the provided numerical_feature_name is not valid.
-            Please make sure that you are passing numerical_feature_name as a string''')
-
+                                              new_feature_name: str):
     for df, df_name in zip(dataframes, dataframes_names):
         df_columns = df.columns.tolist()
         if numerical_feature_name not in df_columns:
@@ -84,21 +59,9 @@ def validate_bin_numerical_feature_attributes(dataframes: List[pd.DataFrame],
             raise TypeError('''the provided numerical_feature_name is not valid.
             Please make sure that you are passing a numerical feature name''')
 
-    if not is_instance(new_feature_name, str):
-        raise TypeError('''the provided new_feature_name is not valid.
-            Please make sure that you are passing new_feature_name as a string''')
-
     if len(new_feature_name) == 0:
         raise AttributeError('''the provided new_feature_name is not valid.
             Please make sure that you are passing new_feature_name as a string with at least one character''')
-
-    if not is_instance(number_of_bins, int):
-        raise TypeError('''the provided number_of_bins is not valid.
-            Please make sure that you are passing number_of_bins as an integer''')
-
-    if not is_instance(suffix, str) and suffix is not None:
-        raise TypeError('''the provided suffix is not valid.
-            Please make sure that you are passing suffix as a string''')
 
 
 def load_interactive_dashboard(dashboard_path: str) -> Report:
@@ -158,6 +121,7 @@ def load_interactive_dashboard(dashboard_path: str) -> Report:
         raise NotADirectoryError(f'provided dashboard_path is not valid. dashboard_path does not exist')
 
 
+@typechecked
 class InteractiveDashboard(Report):
     """
     InteractiveDashboard creates an interactive dashboard that can be used for EDA or error analysis.
@@ -203,8 +167,8 @@ class InteractiveDashboard(Report):
                  output_directory: str,
                  dataframes: List[pd.DataFrame],
                  dataframes_names: List[str],
-                 numerical_columns: List[str] = None,
-                 categorical_columns: List[str] = None,
+                 numerical_columns: List[str] = [],
+                 categorical_columns: List[str] = [],
                  date_columns: List[str] = None,
                  dashboard_folder_name: str = None,
                  encryption_secret: str = None,
@@ -322,6 +286,7 @@ class InteractiveDashboard(Report):
         else:
             self.number_displays = copy.deepcopy(new_number_displays)
 
+    @typechecked
     def bin_numerical_feature(self, numerical_feature_name: str, new_feature_name: str, number_of_bins: int,
                               suffix: str = None) -> None:
         """
@@ -338,9 +303,7 @@ class InteractiveDashboard(Report):
         validate_bin_numerical_feature_attributes(self.dataframes,
                                                   self.dataframes_names,
                                                   numerical_feature_name,
-                                                  new_feature_name,
-                                                  number_of_bins,
-                                                  suffix)
+                                                  new_feature_name)
 
         first_df = self.dataframes[0]
         first_df.loc[:, new_feature_name], bins = pd.cut(first_df.loc[:, numerical_feature_name],
@@ -495,5 +458,3 @@ class InteractiveDashboard(Report):
         """
 
         super()._save_the_report(self._template_name, zip_dashboard)
-
-
